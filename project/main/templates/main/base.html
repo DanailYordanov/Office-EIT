@@ -8,21 +8,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'main/styles/style.css' %}">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+        integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
 </head>
 
 <body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light fixed-top bg-light">
+        <nav class="navbar navbar-expand-sm navbar-light fixed-top bg-light border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">Navbar</a>
+                <a class="navbar-brand ms-3" href="#">TrackSpedition</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navBarCollapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navBarCollapse">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Link</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarCarsDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Автомобили
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarCarsDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-list me-1"></i>
+                                        Списък с автомобили
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Добавяне на автомобил
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                     <form class="d-flex">
@@ -34,16 +52,24 @@
         </nav>
     </header>
     <main>
-        <div class="container">
+        <div class="page-heading d-flex justify-content-center align-items-center">
+            <img src="{% static 'main/images/page-heading.jpeg' %}" alt="">
+            <h1>{{ page_heading }}</h1>
+        </div>
+        <div class="container mt-5">
             {% block content %}
             {% endblock content %}
         </div>
     </main>
-    <footer class="footer mt-auto py-3 bg-light">
+    <footer class="footer mt-auto py-3 bg-light border-top">
         <div class="container text-center">
             <span class="text-muted">Footer</span>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="{% static 'main/scripts/main.js' %}"></script>
 </body>
 
 </html>

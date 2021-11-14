@@ -1,0 +1,14 @@
+{% extends 'main/base.html' %}
+{% block content %}
+<form action="{{ url }}" class="form-flex" method="post" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="col-12 col-md-8 col-xl-6 form-floating">
+        {{ field }}
+        {{ field.label_tag }}
+        {{ field.errors }}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Изпращане</button>
+</form>
+{% endblock content %}

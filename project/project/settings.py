@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'users.apps.UsersConfig',
+    'main.apps.MainConfig',
 
     'allauth',
     'allauth.account',
