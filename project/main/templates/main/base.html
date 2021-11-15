@@ -25,17 +25,18 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarCarsDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-car me-1"></i>
                                 Автомобили
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarCarsDropdown">
                                 <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="{% url 'main:cars-list' %}">
                                         <i class="fas fa-list me-1"></i>
                                         Списък с автомобили
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="{% url 'main:add-car' %}">
                                         <i class="fas fa-plus me-1"></i>
                                         Добавяне на автомобил
                                     </a>
