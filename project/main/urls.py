@@ -6,5 +6,6 @@ urlpatterns = [
     path('', views.cars_list, name='cars-list'),
     path('add-car/', views.add_car, name='add-car'),
     path('update-car/<int:pk>/', views.update_car, name='update-car'),
-    path('delete-car/<int:pk>/', views.CarDeleteView.as_view(), name='delete-car')
+    path('delete-car/<int:pk>/', views.CarDeleteView.as_view(), name='delete-car'),
+    path('add-reminder/', views.add_reminder, name='add-reminder'),
 ]

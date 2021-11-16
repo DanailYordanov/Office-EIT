@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from main.models import Car
-from main.forms import CarModelForm
+from main.forms import CarModelForm, ReminderModelForm
 
 
 @login_required
@@ -77,3 +77,25 @@ class CarDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def add_reminder(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = ReminderModelForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('main:cars-list')
+        else:
+            form = ReminderModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-reminder'),
+        'page_heading': 'Добавяне на напомняне'
+    }
+
+    return render(request, 'main/add_update_reminder.html', context)

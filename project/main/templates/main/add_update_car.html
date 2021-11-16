@@ -3,9 +3,9 @@
 <form action="{{ url }}" class="form-flex" method="post" novalidate>
     {% csrf_token %}
     {% for field in form %}
-    <div class="col-12 col-md-8 col-xl-6 form-floating">
-        {{ field }}
+    <div class="col-12 col-md-8 col-xl-6">
         {{ field.label_tag }}
+        {{ field }}
         {{ field.errors }}
     </div>
     {% endfor %}

@@ -5,8 +5,8 @@ main
 
 .page-heading
 {
-    position: relative;
     height: 60px;
+    position: relative;
 }
 
 @media (min-width: 768px)
@@ -45,16 +45,16 @@ main
 
 .table-flex 
 {
+    gap: 2px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 2px;
 }
 
 .add-car
 {
-    display: flex;
     gap: 10px;
+    display: flex;
 }
 
 .add-car .btn
@@ -72,6 +72,42 @@ main
 
 .errorlist
 {
-    color: #dc3545;
     margin: 0;
+    color: #dc3545;
+}
+
+.nice-select
+{
+    width: 100%;
+    font-size: 1rem;
+    color: #212529;
+    font-weight: 400;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+}
+
+.nice-select:focus
+{
+    outline: 0;
+    color: #212529;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
+
+.nice-select .list
+{
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+label
+{
+    margin-bottom: 0.25rem;
+}
+
+input
+{
+    height: 42px;
 }
