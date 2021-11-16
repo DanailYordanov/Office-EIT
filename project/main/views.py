@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from main.models import Car
+from main.models import Car, Reminder
 from main.forms import CarModelForm, ReminderModelForm
 
 
@@ -80,13 +80,28 @@ class CarDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 @login_required
+def reminders_list(request):
+    if request.user.is_staff:
+        reminders = Reminder.objects.all()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'reminders': reminders,
+        'page_heading': 'Напомняния'
+    }
+
+    return render(request, 'main/reminders_list.html', context)
+
+
+@login_required
 def add_reminder(request):
     if request.user.is_staff:
         if request.method == 'POST':
             form = ReminderModelForm(request.POST)
             if form.is_valid():
                 form.save()
-                return redirect('main:cars-list')
+                return redirect('main:reminders-list')
         else:
             form = ReminderModelForm()
     else:
@@ -99,3 +114,37 @@ def add_reminder(request):
     }
 
     return render(request, 'main/add_update_reminder.html', context)
+
+
+@login_required
+def update_reminder(request, pk):
+    if request.user.is_staff:
+        reminder = get_object_or_404(Reminder, id=pk)
+
+        if request.method == 'POST':
+            form = ReminderModelForm(request.POST, instance=reminder)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:reminders-list')
+        else:
+            form = ReminderModelForm(instance=reminder)
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-reminder', args=(pk,)),
+        'page_heading': 'Редактиране на напомняне'
+    }
+
+    return render(request, 'main/add_update_reminder.html', context)
+
+
+class ReminderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = Reminder
+    success_url = reverse_lazy('main:reminders-list')
+
+    def test_func(self):
+        return self.request.user.is_staff

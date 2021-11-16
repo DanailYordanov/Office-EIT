@@ -47,8 +47,8 @@
         </div>
         <tr>
             <th>{{ forloop.counter }}</th>
-            <td class="number-plates">{{ car.number_plate }}</td>
-            <td class="brands">{{ car.brand }}</td>
+            <td class="searchable">{{ car.number_plate }}</td>
+            <td class="searchable">{{ car.brand }}</td>
             <td class="table-flex">
                 <a href="{% url 'main:update-car' pk=car.id %}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
                 <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCar{{ car.id }}">

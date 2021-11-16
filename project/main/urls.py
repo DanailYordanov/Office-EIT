@@ -8,4 +8,9 @@ urlpatterns = [
     path('update-car/<int:pk>/', views.update_car, name='update-car'),
     path('delete-car/<int:pk>/', views.CarDeleteView.as_view(), name='delete-car'),
     path('add-reminder/', views.add_reminder, name='add-reminder'),
+    path('reminders/', views.reminders_list, name='reminders-list'),
+    path('update-reminder/<int:pk>/',
+         views.update_reminder, name='update-reminder'),
+    path('delete-reminder/<int:pk>/',
+         views.ReminderDeleteView.as_view(), name='delete-reminder'),
 ]
