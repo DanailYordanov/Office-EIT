@@ -44,15 +44,27 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="dropdown-item" href="{% url 'main:reminders-list' %}">
+                                        <i class="fas fa-list me-1"></i>
+                                        Списък с напоняния
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="dropdown-item" href="{% url 'main:add-reminder' %}">
-                                        <i class="far fa-clock"></i>
+                                        <i class="fas fa-plus me-1"></i>
                                         Добавяне на напомняне
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'main:reminders-list' %}">
+                                    <a class="dropdown-item" href="{% url 'main:services-list' %}">
                                         <i class="fas fa-list me-1"></i>
-                                        Списък с напоняния
+                                        Списък с технически обслужвания
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:add-service' %}">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Добавяне на техническо обслужване
                                     </a>
                                 </li>
                             </ul>
@@ -71,7 +83,7 @@
             <img src="{% static 'main/images/page-heading.jpeg' %}" alt="">
             <h1>{{ page_heading }}</h1>
         </div>
-        <div class="container mt-5">
+        <div class="container mt-5 mb-5">
             {% block content %}
             {% endblock content %}
         </div>

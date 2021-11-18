@@ -1,0 +1,96 @@
+{% extends 'main/base.html' %}
+{% block content %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-service' %}" class="text-decoration-none">
+        Добавяне на техническо обслужване
+        <i class="fas fa-plus ms-1"></i></a>
+</div>
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по регистрационен номер, марка, вид обслужване, километраж или дата
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-3">Автомобил</th>
+                <th class="col-3">Вид обслужване</th>
+                <th class="col-2">Километраж</th>
+                <th class="col-2">Дата</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for service in services %}
+            <div class="modal fade" id="deleteService{{ service.id }}" tabindex="-1"
+                aria-labelledby="deleteService{{ service.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteService{{ service.id }}Label">
+                                Изтриване на техническо обслужване
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете {{ service.service_type }} - {{ service.car }} ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-service' pk=service.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="infoModal{{ service.id }}" tabindex="-1"
+                aria-labelledby="infoModal{{ service.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="infoModal{{ service.id }}Label">
+                                {{ service.car }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Вид обслужване:</strong> {{ service.service_type }}</p>
+                            <p><strong>Допълнителна информация:</strong> {{ service.additional_information }}</p>
+                            <p><strong>Пробег:</strong> {{ service.run }} км.</p>
+                            <p><strong>Дата:</strong> {{ service.date }}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <td class="searchable">
+                    <a href="#" class="text-decoration-none" data-bs-toggle="modal"
+                        data-bs-target="#infoModal{{ service.id }}">
+                        {{ service.car }}
+                    </a>
+                </td>
+                <td class="searchable">{{ service.service_type }}</td>
+                <td class="searchable">{{ service.run }} км.</td>
+                <td class="searchable">{{ service.date }}</td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-service' pk=service.id %}"
+                        class="btn btn-primary table-action-button"><i class="fas fa-edit"></i></a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteService{{ service.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

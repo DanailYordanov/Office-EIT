@@ -21,6 +21,16 @@ class Reminder(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     expiration_date = models.DateField()
 
-
     def __str__(self):
         return f'{self.car.number_plate} - {self.reminder_type.reminder_type}'
+
+
+class Service(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    date = models.DateField()
+    service_type = models.CharField(max_length=200)
+    additional_information = models.CharField(max_length=500)
+    run = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f'{self.car.brand} - {self.car.number_plate} - {self.service_type}'

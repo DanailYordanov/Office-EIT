@@ -3,6 +3,16 @@ main
     margin-top: 57px;
 }
 
+input
+{
+    height: 42px;
+}
+
+label
+{
+    margin-bottom: 0.25rem;
+}
+
 .page-heading
 {
     height: 60px;
@@ -41,14 +51,7 @@ main
 .page-heading h1
 {
     position: absolute;
-}
-
-.table-flex 
-{
-    gap: 2px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    text-align: center;
 }
 
 .add-car
@@ -68,12 +71,6 @@ main
     display: flex;
     align-items: center;
     flex-direction: column;
-}
-
-.errorlist
-{
-    margin: 0;
-    color: #dc3545;
 }
 
 .nice-select
@@ -102,12 +99,18 @@ main
     margin-top: 0.5rem;
 }
 
-label
+.errorlist
 {
-    margin-bottom: 0.25rem;
+    margin: 0;
+    color: #dc3545;
+}   
+
+.table-action-button
+{
+    margin: 0.1rem;
 }
 
-input
+.modal
 {
-    height: 42px;
+    word-break: break-word;
 }
