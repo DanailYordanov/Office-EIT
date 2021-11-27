@@ -15,15 +15,22 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+    <div class="offcanvas offcanvas-end" id="notificationsOffCanvas">
+        <div class="offcanvas-header">
+            <h1 class="offcanvas-title">Heading</h1>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <p>Some text lorem ipsum.</p>
+            <p>Some text lorem ipsum.</p>
+        </div>
+    </div>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light fixed-top bg-light border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand ms-3" href="#">TrackSpedition</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navBarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navBarCollapse">
+                <div class="collapse navbar-collapse ms-lg-3" id="navBarCollapse">
                     <ul class="navbar-nav me-auto">
+                        <a class="navbar-brand" href="#">TrackSpedition</a>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarCarsDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
@@ -70,11 +77,23 @@
                             </ul>
                         </li>
                     </ul>
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="text" placeholder="Search">
-                        <button class="btn btn-primary" type="button">Search</button>
-                    </form>
                 </div>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navBarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <ul class="navbar-nav flex-row ms-auto me-lg-3">
+                    <li class="nav-item me-3">
+                        <button class="notifications-button nav-link" data-bs-toggle="offcanvas"
+                            data-bs-target="#notificationsOffCanvas">
+                            <span class="fa-stack" data-count="123">
+                                <i class="fas fa-bell"></i>
+                            </span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="btn btn-outline-primary">Изход</a>
+                    </li>
+                </ul>
             </div>
         </nav>
     </header>
