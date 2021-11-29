@@ -1,5 +1,5 @@
 {% extends 'main/base.html' %}
-{% block content %}
+{% block content_main %}
 <form action="{{ url }}" class="form-flex" method="post" novalidate>
     {% csrf_token %}
     {% for field in form %}
@@ -11,4 +11,4 @@
     {% endfor %}
     <button type="submit" class="btn btn-primary">Изпращане</button>
 </form>
-{% endblock content %}
+{% endblock content_main %}

@@ -1,5 +1,5 @@
 {% extends 'main/base.html' %}
-{% block content %}
+{% block content_main %}
 <div class="col-12 text-center mb-4">
     <a href="{% url 'main:add-reminder' %}" class="text-decoration-none">
         Добавяне на напомняне
@@ -64,4 +64,4 @@
         {% endfor %}
     </tbody>
 </table>
-{% endblock content %}
+{% endblock content_main %}
