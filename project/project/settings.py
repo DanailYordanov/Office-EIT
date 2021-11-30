@@ -62,7 +62,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -137,3 +137,20 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 1
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+ACCOUNT_FORMS = {
+    # 'add_email': 'users.forms.CustomAddEmailFormForm',
+    # 'change_password': 'users.forms.CustomChangePasswordForm',
+    # 'login': 'users.forms.CustomLoginForm',
+    # 'reset_password': 'users.forms.CustomResetPasswordForm',
+    # 'reset_password_from_key': 'users.forms.CustomResetPasswordKeyForm',
+    # 'set_password': 'users.forms.CustomSetPasswordForm',
+    'signup': 'users.forms.CustomSignupForm'
+}
+
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_USERNAME_REQUIRED = False

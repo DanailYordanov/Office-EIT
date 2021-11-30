@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="page-heading d-flex justify-content-center align-items-center">
+  <img src="{% static 'main/images/page-heading.jpeg' %}" alt="">
+  <h1>Регистрация</h1>
+</div>
+<div class="container mt-5 mb-5">
+  <form class="signup form-flex" id="signup_form" method="post" action="{% url 'account_signup' %}" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="col-12 col-md-8 col-xl-6">
+      {{ field.label_tag }}
+      {{ field }}
+      {{ field.errors }}
+    </div>
+    {% endfor %}
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+    <button type="submit" class="btn btn-primary">Изпращане</button>
+  </form>
+</div>
+{% endblock content %}
