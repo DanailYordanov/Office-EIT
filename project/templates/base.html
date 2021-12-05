@@ -43,7 +43,7 @@
                             <ul class="dropdown-menu mb-3" aria-labelledby="navbarCarsDropdown">
                                 <li>
                                     <a class="dropdown-item" href="{% url 'main:cars-list' %}">
-                                        <i class="fas fa-list me-1"></i>
+                                        <i class="fas fa-car me-1"></i>
                                         Списък с автомобили
                                     </a>
                                 </li>
@@ -55,7 +55,7 @@
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="{% url 'main:reminders-list' %}">
-                                        <i class="fas fa-list me-1"></i>
+                                        <i class="fas fa-clock"></i>
                                         Списък с напоняния
                                     </a>
                                 </li>
@@ -67,7 +67,7 @@
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="{% url 'main:services-list' %}">
-                                        <i class="fas fa-list me-1"></i>
+                                        <i class="fas fa-wrench"></i>
                                         Списък с технически обслужвания
                                     </a>
                                 </li>
@@ -95,8 +95,37 @@
                             </span>
                         </button>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" class="btn btn-outline-primary">Изход</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end user-dropdown mb-3" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'account_email' %}">
+                                    <i class="fas fa-envelope"></i>
+                                    Управление на e-mail адреси
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'main:cars-list' %}">
+                                    <i class="fas fa-info-circle"></i>
+                                    Данни на шофьор
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'account_change_password' %}">
+                                    <i class="fas fa-key"></i>
+                                    Смяна на парола
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'account_logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Изход
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     {% endif %}
                 </ul>
