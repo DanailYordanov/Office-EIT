@@ -41,6 +41,52 @@ class CustomSignupForm(SignupForm):
             attrs={'class': 'form-control'})
 
 
+class CustomLoginForm(LoginForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['login'].widget = forms.EmailInput(
+            attrs={'class': 'form-control'})
+        self.fields['password'].widget = forms.PasswordInput(
+            attrs={'class': 'form-control'})
+
+
+class CustomResetPasswordForm(ResetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['email'].widget = forms.EmailInput(
+            attrs={'class': 'form-control'})
+
+
+class CustomChangePasswordForm(ChangePasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['oldpassword'].widget = forms.EmailInput(
+            attrs={'class': 'form-control'})
+        self.fields['password1'].widget = forms.EmailInput(
+            attrs={'class': 'form-control'})
+        self.fields['password2'].widget = forms.EmailInput(
+            attrs={'class': 'form-control'})
+
+
+class CustomAddEmailFormForm(AddEmailForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget = forms.EmailInput(
+            attrs={'class': 'form-control'})
+
+
+class CustomResetPasswordKeyForm(ResetPasswordKeyForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget = forms.PasswordInput(
+            attrs={'class': 'form-control'})
+        self.fields['password2'].widget = forms.PasswordInput(
+            attrs={'class': 'form-control'})
+
+
 class UserDocumentsForm(forms.ModelForm):
     class Meta:
         models = get_user_model()

@@ -1,12 +1,1 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block content %}
-<div class="page-heading d-flex justify-content-center align-items-center">
-  <img src="{% static 'main/images/page-heading.jpeg' %}" alt="">
-  <h1>{{ page_heading }}</h1>
-</div>
-<div class="container mt-5 mb-5">
-  {% block content_users %}
-  {% endblock content_users %}
-</div>
-{% endblock content %}

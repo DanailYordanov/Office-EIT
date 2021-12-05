@@ -1,74 +1,76 @@
-{% extends "account/base.html" %}
-
-{% load i18n %}
-
-{% block head_title %}{% trans "E-mail Addresses" %}{% endblock %}
-
+{% extends 'account/base.html' %}
+{% load static %}
 {% block content %}
-    <h1>{% trans "E-mail Addresses" %}</h1>
-{% if user.emailaddress_set.all %}
-<p>{% trans 'The following e-mail addresses are associated with your account:' %}</p>
+<div class="page-heading d-flex justify-content-center align-items-center">
+  <img src="{% static 'main/images/page-heading.jpeg' %}" alt="">
+  <h1>E-mail адреси</h1>
+</div>
+<div class="container mt-5 mb-5">
+  {% if user.emailaddress_set.all %}
 
-<form action="{% url 'account_email' %}" class="email_list" method="post">
-{% csrf_token %}
-<fieldset class="blockLabels">
+  <form action="{% url 'account_email' %}" class="email_list form-flex" method="post" novalidate>
+    {% csrf_token %}
+    <p class="text-center fw-light fs-4">Тези e-mail адреси са свързани с вашия профил:</p>
 
-  {% for emailaddress in user.emailaddress_set.all %}
-<div class="ctrlHolder">
-      <label for="email_radio_{{forloop.counter}}" class="{% if emailaddress.primary %}primary_email{%endif%}">
-
-      <input id="email_radio_{{forloop.counter}}" type="radio" name="email" {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"{%endif %} value="{{emailaddress.email}}"/>
-
-{{ emailaddress.email }}
-    {% if emailaddress.verified %}
-    <span class="verified">{% trans "Verified" %}</span>
-    {% else %}
-    <span class="unverified">{% trans "Unverified" %}</span>
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags == 'info' %}
+    <p class="text-primary"><i class="fa fa-info"></i> {{ message }}</p>
+    {% elif message.tags == 'success' %}
+    <p class="text-success"><i class="fa fa-info"></i> {{ message }}</p>
+    {% elif message.tags == 'error' %}
+    <p class="text-danger"><i class="fa fa-info"></i> {{ message }}</p>
     {% endif %}
-      {% if emailaddress.primary %}<span class="primary">{% trans "Primary" %}</span>{% endif %}
-</label>
-</div>
-  {% endfor %}
+    {% endfor %}
+    {% endif %}
 
-<div class="buttonHolder">
-      <button class="secondaryAction" type="submit" name="action_primary" >{% trans 'Make Primary' %}</button>
-      <button class="secondaryAction" type="submit" name="action_send" >{% trans 'Re-send Verification' %}</button>
-      <button class="primaryAction" type="submit" name="action_remove" >{% trans 'Remove' %}</button>
-</div>
 
-</fieldset>
-</form>
+    <fieldset class="blockLabels">
 
-{% else %}
-<p><strong>{% trans 'Warning:'%}</strong> {% trans "You currently do not have any e-mail address set up. You should really add an e-mail address so you can receive notifications, reset your password, etc." %}</p>
+      {% for emailaddress in user.emailaddress_set.all %}
+      <div class="ctrlHolder">
+        <label for="email_radio_{{ forloop.counter }}" class="{% if emailaddress.primary %}primary_email{% endif %}">
 
-{% endif %}
+          <input id="email_radio_{{ forloop.counter }}" type="radio" name="email" value="{{ emailaddress.email }}" />
 
-  {% if can_add_email %}
-    <h2>{% trans "Add E-mail Address" %}</h2>
+          {{ emailaddress.email }} -
+          {% if emailaddress.verified %}
+          <span class="text-primary">Потвърден</span>
+          {% else %}
+          <span class="text-primary">Непотвърден</span>
+          {% endif %}
+          {% if emailaddress.primary %}- <span class="text-primary">Главен</span>{% endif %}
+        </label>
+      </div>
+      {% endfor %}
 
-    <form method="post" action="{% url 'account_email' %}" class="add_email">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button name="action_add" type="submit">{% trans "Add E-mail" %}</button>
-    </form>
+      <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center">
+        <button class="btn btn-primary m-1" type="submit" name="action_primary">Направи главен</button>
+        <button class="btn btn-primary m-1" type="submit" name="action_send">Изпрати верификация отново</button>
+        <button class="btn btn-primary m-1" type="submit" name="action_remove">Премахни</button>
+      </div>
+
+    </fieldset>
+  </form>
+
+  {% else %}
+  <p class="text-center fw-light fs-4">
+    В момента нямате свързани e-mail адреси с вашия профил!
+  </p>
+
   {% endif %}
 
-{% endblock %}
-
-
-{% block extra_body %}
-<script type="text/javascript">
-(function() {
-  var message = "{% trans 'Do you really want to remove the selected e-mail address?' %}";
-  var actions = document.getElementsByName('action_remove');
-  if (actions.length) {
-    actions[0].addEventListener("click", function(e) {
-      if (! confirm(message)) {
-        e.preventDefault();
-      }
-    });
-  }
-})();
-</script>
-{% endblock %}
+  {% if can_add_email %}
+  <form method="post" action="{% url 'account_email' %}" class="add_email form-flex mt-5" novalidate>
+    {% csrf_token %}
+    <p class="text-center fw-light fs-5 m-0">Добавяне на e-mail адрес</p>
+    <div class="col-12 col-md-8 col-xl-6">
+      {{ form.email.label }}
+      {{ form.email }}
+      {{ form.email.errors }}
+    </div>
+    <button name="action_add" type="submit" class="btn btn-primary">Добави</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock content %}

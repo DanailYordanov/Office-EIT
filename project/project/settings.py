@@ -139,13 +139,12 @@ SITE_ID = 1
 AUTH_USER_MODEL = 'users.CustomUser'
 
 ACCOUNT_FORMS = {
-    # 'add_email': 'users.forms.CustomAddEmailFormForm',
-    # 'change_password': 'users.forms.CustomChangePasswordForm',
-    # 'login': 'users.forms.CustomLoginForm',
-    # 'reset_password': 'users.forms.CustomResetPasswordForm',
-    # 'reset_password_from_key': 'users.forms.CustomResetPasswordKeyForm',
-    # 'set_password': 'users.forms.CustomSetPasswordForm',
-    'signup': 'users.forms.CustomSignupForm'
+    'login': 'users.forms.CustomLoginForm',
+    'signup': 'users.forms.CustomSignupForm',
+    'add_email': 'users.forms.CustomAddEmailFormForm',
+    'change_password': 'users.forms.CustomChangePasswordForm',
+    'reset_password': 'users.forms.CustomResetPasswordForm',
+    'reset_password_from_key': 'users.forms.CustomResetPasswordKeyForm',
 }
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
@@ -154,3 +153,5 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_USERNAME_REQUIRED = False
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
