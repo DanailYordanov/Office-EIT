@@ -5,6 +5,9 @@ from allauth.account.forms import LoginForm, SignupForm, ResetPasswordKeyForm, R
 from .models import CustomUser
 
 
+DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
+
+
 class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm):
@@ -87,9 +90,24 @@ class CustomResetPasswordKeyForm(ResetPasswordKeyForm):
             attrs={'class': 'form-control'})
 
 
-class UserDocumentsForm(forms.ModelForm):
+class ProfileDetailsForm(forms.ModelForm):
+    id_card_expiration = forms.DateField(label='Изтичане на лична карта', input_formats=DATE_FORMATS, required=False,
+                                         widget=forms.TextInput(attrs={'class': 'form-control'}))
+    drivers_license_expiration = forms.DateField(label='Изтичане на шофьорска книжка', input_formats=DATE_FORMATS, required=False,
+                                                 widget=forms.TextInput(attrs={'class': 'form-control'}))
+    professional_competence = forms.DateField(label='Изтичане на професионална компетентност', input_formats=DATE_FORMATS, required=False,
+                                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    adr_expiration = forms.DateField(label='Изтичане на ADR', input_formats=DATE_FORMATS, required=False,
+                                     widget=forms.TextInput(attrs={'class': 'form-control'}))
+    digital_card_expiration = forms.DateField(label='Изтичане на дигитална карта', input_formats=DATE_FORMATS, required=False,
+                                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    psychological_test_expiration = forms.DateField(label='Изтичане на психотест', input_formats=DATE_FORMATS, required=False,
+                                                    widget=forms.TextInput(attrs={'class': 'form-control'}))
+    pasport_expiration = forms.DateField(label='Изтичане на паспорт', input_formats=DATE_FORMATS, required=False,
+                                         widget=forms.TextInput(attrs={'class': 'form-control'}))
+
     class Meta:
-        models = get_user_model()
+        model = get_user_model()
         fields = [
             'id_card_expiration',
             'drivers_license_expiration',
