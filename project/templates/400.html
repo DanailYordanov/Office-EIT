@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+{% with message="Вашият браузър е изпратил неправилна или незаконна заявка (400)" %}
+{% include "information_page.html" %}
+{% endwith %}
+{% endblock content %}

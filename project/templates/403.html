@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+{% with message="Тази страница е забранена за преглеждане (403)" %}
+{% include "information_page.html" %}
+{% endwith %}
+{% endblock content %}
