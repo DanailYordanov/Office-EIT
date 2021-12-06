@@ -1,5 +1,6 @@
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
+from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -219,3 +220,31 @@ class ServiceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def users_details_list(request):
+    if request.user.is_staff:
+        users = get_user_model().objects.filter(is_staff=False, is_active=True)
+    else:
+        raise PermissionDenied
+
+    context = {
+        'users': users,
+        'page_heading': 'Документи на шофьори'
+    }
+
+    return render(request, 'main/users_details_list.html', context)
+
+
+@login_required
+def user_set_unactive(request, pk=None):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            user = get_object_or_404(get_user_model(), pk=pk)
+            user.is_active = False
+            user.save()
+
+        return redirect('main:users-details-list')
+    else:
+        raise PermissionDenied

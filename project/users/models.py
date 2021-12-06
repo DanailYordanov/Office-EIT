@@ -17,3 +17,6 @@ class CustomUser(AbstractUser):
         'Изтичане на психотест', null=True, blank=True)
     pasport_expiration = models.DateField(
         'Изтичане на паспорт', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'

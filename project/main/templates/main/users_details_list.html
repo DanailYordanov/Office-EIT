@@ -1,0 +1,72 @@
+{% extends 'main/base.html' %}
+{% block content_main %}
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по име на шофьор
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-2">Шофьор</th>
+                <th class="col-1">Лична карта</th>
+                <th class="col-1">Шофьорска книжка</th>
+                <th class="col-1">Професионална компетентност</th>
+                <th class="col-1">ADR</th>
+                <th class="col-1">Дигитална карта</th>
+                <th class="col-1">Психотест</th>
+                <th class="col-1">Паспорт</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for user in users %}
+            <div class="modal fade" id="setUnactiveUser{{ user.id }}" tabindex="-1"
+                aria-labelledby="setUnactiveUser{{ user.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="setUnactiveUser{{ user.id }}Label">
+                                Изтриване на потребител
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете профила на {{ user }}?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:user-set-unactive' pk=user.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <th class="searchable">{{ user }}</th>
+                <td>{{ user.id_card_expiration }}</td>
+                <td>{{ user.drivers_license_expiration }}</td>
+                <td>{{ user.professional_competence }}</td>
+                <td>{{ user.adr_expiration }}</td>
+                <td>{{ user.digital_card_expiration }}</td>
+                <td>{{ user.psychological_test_expiration }}</td>
+                <td>{{ user.pasport_expiration }}</td>
+                <td class="text-center">
+                    <a href="{% url 'profile-details' pk=user.id %}" class="btn btn-primary table-action-button"><i
+                            class="fas fa-edit"></i></a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#setUnactiveUser{{ user.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}
