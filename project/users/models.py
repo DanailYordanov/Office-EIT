@@ -17,6 +17,3 @@ class CustomUser(AbstractUser):
         'Изтичане на психотест', null=True, blank=True)
     pasport_expiration = models.DateField(
         'Изтичане на паспорт', null=True, blank=True)
-
-    def get_absolute_url(self):
-        return reverse('profile-details')
