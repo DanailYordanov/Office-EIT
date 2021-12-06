@@ -34,3 +34,18 @@ class Service(models.Model):
 
     def __str__(self):
         return f'{self.car.brand} - {self.car.number_plate} - {self.service_type}'
+
+
+class Contractors(models.Model):
+    client_type = models.CharField(max_length=100)
+    bulstat = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    mol = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=100)
+    email = models.CharField(max_length=100)
+    charging_vat = models.CharField(max_length=100)
+    cmr_photo = models.FileField(upload_to='cmr_photos')
+    license_photo = models.FileField(upload_to='license_photos')

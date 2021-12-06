@@ -112,7 +112,7 @@
                             <i class="fas fa-user"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end user-dropdown mb-3" aria-labelledby="userDropdown">
-                            {% if user.is_authenticated %}
+                            {% if request.user.is_authenticated %}
                             <li>
                                 <a class="dropdown-item" href="{% url 'account_email' %}">
                                     <i class="fas fa-envelope"></i>
