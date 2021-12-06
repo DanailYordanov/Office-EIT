@@ -56,17 +56,22 @@ class Service(models.Model):
 class Contractor(models.Model):
     client_type = models.CharField(
         'Тип клиент', max_length=100, choices=CLIENT_TYPE_CHOICES)
-    bulstat = models.CharField('Булстат', max_length=100)
-    city = models.CharField('Град', max_length=100)
     name = models.CharField('Име', max_length=100)
-    mol = models.CharField('МОЛ', max_length=100)
-    country = models.CharField('Държава', max_length=100)
-    address = models.CharField('Адрес', max_length=100)
-    phone_number = models.CharField('Телефонен номер', max_length=100)
-    email = models.CharField('E-mail', max_length=100)
+    bulstat = models.CharField(
+        'Булстат', max_length=100, null=True, blank=True)
+    mol = models.CharField('МОЛ', max_length=100, null=True, blank=True)
+    country = models.CharField(
+        'Държава', max_length=100, null=True, blank=True)
+    city = models.CharField('Град', max_length=100, null=True, blank=True)
+    address = models.CharField('Адрес', max_length=100, null=True, blank=True)
+    phone_number = models.CharField(
+        'Телефонен номер', max_length=100, null=True, blank=True)
+    email = models.CharField('E-mail', max_length=100, null=True, blank=True)
     charging_vat = models.CharField('Основание за неначисление на ДДС',
-                                    max_length=100, choices=CHARGING_VAT_CHOICES)
-    cmr_photo = models.FileField('Прикачи ЧМР', upload_to='cmr_photos')
+                                    max_length=100, choices=CHARGING_VAT_CHOICES, null=True, blank=True)
+    cmr_photo = models.FileField(
+        'Прикачи ЧМР', upload_to='cmr_photos', null=True, blank=True)
     license_photo = models.FileField(
-        'Прикачи лиценз или друг документ', upload_to='license_photos')
-    expiration_date = models.DateField('Дата на изтичане')
+        'Прикачи лиценз или друг документ', upload_to='license_photos', null=True, blank=True)
+    expiration_date = models.DateField(
+        'Дата на изтичане', null=True, blank=True)
