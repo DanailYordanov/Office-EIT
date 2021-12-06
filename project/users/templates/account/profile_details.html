@@ -18,6 +18,7 @@
 <div class="container mt-5 mb-5">
     <form class="form-flex" method="POST" action="{{ redirect_url }}" novalidate>
         {% csrf_token %}
+        <p class="text-center fw-light fs-4">{{ message }}</p>
         {% for field in form %}
         <div class="col-12 col-md-8 col-xl-6">
             {{ field.label_tag }}
