@@ -10,7 +10,7 @@
 {% endblock head %}
 
 {% block content_main %}
-<form action="{{ url }}" class="form-flex" method="post" novalidate>
+<form action="{{ url }}" class="form-flex" method="post" novalidate autocomplete="off">
     {% csrf_token %}
     {% for field in form %}
     <div class="col-12 col-md-8 col-xl-6">

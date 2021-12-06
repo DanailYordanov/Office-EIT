@@ -49,13 +49,25 @@
             </div>
             <tr>
                 <th class="searchable">{{ user }}</th>
-                <td>{{ user.id_card_expiration }}</td>
-                <td>{{ user.drivers_license_expiration }}</td>
-                <td>{{ user.professional_competence }}</td>
-                <td>{{ user.adr_expiration }}</td>
-                <td>{{ user.digital_card_expiration }}</td>
-                <td>{{ user.psychological_test_expiration }}</td>
-                <td>{{ user.pasport_expiration }}</td>
+                <td>{% if user.id_card_expiration %}{{ user.id_card_expiration }}{% else %}-{% endif %}</td>
+                <td>
+                    {% if user.drivers_license_expiration %}{{ user.drivers_license_expiration }}{% else %}-{% endif %}
+                </td>
+                <td>
+                    {% if user.professional_competence %}{{ user.professional_competence }}{% else %}-{% endif %}
+                </td>
+                <td>
+                    {% if user.adr_expiration %}{{ user.adr_expiration }}{% else %}-{% endif %}
+                </td>
+                <td>{% if user.digital_card_expiration %}{{ user.digital_card_expiration }}{% else %}-{% endif %}</td>
+                <td>
+                    {% if user.psychological_test_expiration %}
+                    {{ user.psychological_test_expiration }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>{% if user.pasport_expiration %}{{ user.pasport_expiration }}{% else %}-{% endif %}</td>
                 <td class="text-center">
                     <a href="{% url 'profile-details' pk=user.id %}" class="btn btn-primary table-action-button"><i
                             class="fas fa-edit"></i></a>

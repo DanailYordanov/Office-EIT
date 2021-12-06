@@ -61,7 +61,7 @@
   {% endif %}
 
   {% if can_add_email %}
-  <form method="post" action="{% url 'account_email' %}" class="add_email form-flex mt-5" novalidate>
+  <form method="post" action="{% url 'account_email' %}" class="add_email form-flex mt-5" novalidate autocomplete="off">
     {% csrf_token %}
     <p class="text-center fw-light fs-5 m-0">Добавяне на e-mail адрес</p>
     <div class="col-12 col-md-8 col-xl-6">

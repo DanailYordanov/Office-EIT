@@ -16,7 +16,7 @@
     <h1>Информация за шофьор</h1>
 </div>
 <div class="container mt-5 mb-5">
-    <form class="form-flex" method="POST" action="{{ redirect_url }}" novalidate>
+    <form class="form-flex" method="POST" action="{{ redirect_url }}" novalidate autocomplete="off">
         {% csrf_token %}
         <p class="text-center fw-light fs-4">{{ message }}</p>
         {% for field in form %}
