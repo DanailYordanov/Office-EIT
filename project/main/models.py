@@ -46,7 +46,7 @@ class Service(models.Model):
     date = models.DateField('Дата')
     service_type = models.CharField('Вид обслужване', max_length=200)
     additional_information = models.CharField(
-        'Допълнителна информация', max_length=500)
+        'Допълнителна информация', max_length=500, null=True, blank=True)
     run = models.CharField('Пробег', max_length=30)
 
     def __str__(self):

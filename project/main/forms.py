@@ -20,7 +20,7 @@ class ReminderModelForm(forms.ModelForm):
         Car.objects.all(), label="Автомобил", empty_label="Избери")
     reminder_type = forms.ModelChoiceField(
         ReminderType.objects.all(), label="Вид напомняне", empty_label="Избери")
-    expiration_date = forms.DateField(input_formats=DATE_FORMATS, widget=forms.TextInput(
+    expiration_date = forms.DateField(label="Дата на изтичане", input_formats=DATE_FORMATS, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Дата на изтичане'}))
 
     class Meta:
@@ -31,17 +31,18 @@ class ReminderModelForm(forms.ModelForm):
 class ServiceModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
         Car.objects.all(), label="Автомобил", empty_label="Избери")
-    date = forms.DateField(input_formats=DATE_FORMATS, widget=forms.TextInput(
+    date = forms.DateField(label="Дата", input_formats=DATE_FORMATS, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Дата на извършване'}))
+    additional_information = forms.CharField(label="Допълнителна информация", required=False, widget=forms.Textarea(
+        attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
 
     class Meta:
         model = Service
         fields = ['car', 'service_type', 'run',
                   'additional_information', 'date']
         widgets = {
-            'service_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид на обслужване'}),
-            'additional_information': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}),
-            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'})
+            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'}),
+            'service_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид на обслужване'})
         }
 
 
