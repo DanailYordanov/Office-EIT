@@ -5,8 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from main.models import Car, Reminder, Service
-from main.forms import CarModelForm, ReminderModelForm, ServiceModelForm
+from main.models import Car, Reminder, Service, Contractor
+from main.forms import CarModelForm, ReminderModelForm, ServiceModelForm, ContractorsModelForm
 
 
 @login_required
@@ -248,3 +248,74 @@ def user_set_unactive(request, pk=None):
         return redirect('main:users-details-list')
     else:
         raise PermissionDenied
+
+
+@login_required
+def contractors_list(request):
+    if request.user.is_staff:
+        contractors = Contractor.objects.all()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'contractors': contractors,
+        'page_heading': 'Контрагенти'
+    }
+
+    return render(request, 'main/contractors_list.html', context)
+
+
+@login_required
+def add_contractor(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = ContractorsModelForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('main:contractors-list')
+        else:
+            form = ContractorsModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-contractor'),
+        'page_heading': 'Добавяне на контрагент'
+    }
+
+    return render(request, 'main/add_update_contractor.html', context)
+
+
+@login_required
+def update_contractor(request, pk):
+    if request.user.is_staff:
+        contractor = get_object_or_404(Contractor, id=pk)
+
+        if request.method == 'POST':
+            form = ContractorsModelForm(request.POST, instance=contractor)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:contractors-list')
+        else:
+            form = ContractorsModelForm(instance=contractor)
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-contractor', args=(pk,)),
+        'page_heading': 'Редактиране на контрагент'
+    }
+
+    return render(request, 'main/add_update_contractor.html', context)
+
+
+class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = Contractor
+    success_url = reverse_lazy('main:contractors-list')
+
+    def test_func(self):
+        return self.request.user.is_staff

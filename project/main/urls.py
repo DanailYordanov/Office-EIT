@@ -20,5 +20,11 @@ urlpatterns = [
          views.ServiceDeleteView.as_view(), name='delete-service'),
     path('users-details/', views.users_details_list, name='users-details-list'),
     path('set-unactive-user/<int:pk>/',
-         views.user_set_unactive, name='user-set-unactive')
+         views.user_set_unactive, name='user-set-unactive'),
+    path('contractors/', views.contractors_list, name='contractors-list'),
+    path('add-contractor/', views.add_contractor, name='add-contractor'),
+    path('update-contractor/<int:pk>/',
+         views.update_contractor, name='update-contractor'),
+    path('delete-contractor/<int:pk>/',
+         views.ContractorDeleteView.as_view(), name='delete-contractor')
 ]

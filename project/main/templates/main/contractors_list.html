@@ -1,0 +1,72 @@
+{% extends 'main/base.html' %}
+{% block content_main %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-contractor' %}" class="text-decoration-none">
+        Добавяне на контрагент
+        <i class="fas fa-plus ms-1"></i>
+    </a>
+</div>
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по име, булстат, държава, адрес или e-mail адрес
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-2">Име</th>
+                <th class="col-1">Булстат</th>
+                <th class="col-1">Държава</th>
+                <th class="col-2">Адрес</th>
+                <th class="col-2">E-mail</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for contractor in contractors %}
+            <div class="modal fade" id="deleteContractor{{ contractor.id }}" tabindex="-1"
+                aria-labelledby="deleteContractor{{ contractor.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteContractor{{ contractor.id }}Label">
+                                Изтриване на автомобил
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете контрагента '{{ contractor.name }}' ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-contractor' pk=contractor.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <td class="searchable">{{ contractor.name }}</td>
+                <td class="searchable">{{ contractor.bulstat }}</td>
+                <td class="searchable">{{ contractor.country }}</td>
+                <td class="searchable">{{ contractor.address }}</td>
+                <td class="searchable">{{ contractor.email }}</td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-contractor' pk=contractor.id %}"
+                        class="btn btn-primary table-action-button"><i class="fas fa-edit"></i></a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteContractor{{ contractor.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}

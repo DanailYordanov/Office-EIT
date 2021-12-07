@@ -75,3 +75,6 @@ class Contractor(models.Model):
         'Прикачи лиценз или друг документ', upload_to='license_photos', null=True, blank=True)
     expiration_date = models.DateField(
         'Дата на изтичане', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
