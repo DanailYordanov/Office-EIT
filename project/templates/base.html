@@ -86,6 +86,27 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarContractorsDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-address-book"></i>
+                                Контрагенти
+                            </a>
+                            <ul class="dropdown-menu mb-3" aria-labelledby="navbarContractorsDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:contractors-list' %}">
+                                        <i class="fas fa-address-book me-1"></i>
+                                        Списък с контрагенти
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:add-contractor' %}">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Добавяне на контрагент
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         {% endif %}
                     </ul>
                 </div>
