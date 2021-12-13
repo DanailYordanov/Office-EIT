@@ -3,16 +3,11 @@ main
     margin-top: 57px;
 }
 
-label
-{
-    margin-bottom: 0.25rem;
-}
-
 textarea
 {
     resize: none;
     height: 100px;
-}
+}   
 
 .page-heading
 {
@@ -72,6 +67,19 @@ textarea
     display: flex;
     align-items: center;
     flex-direction: column;
+}
+
+.field-label
+{
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.field a
+{
+    display: block;
+    word-break: break-all;
+    text-decoration: none;
 }
 
 .nice-select

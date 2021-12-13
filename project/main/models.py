@@ -67,6 +67,8 @@ class Contractor(models.Model):
     phone_number = models.CharField(
         'Телефонен номер', max_length=100, null=True, blank=True)
     email = models.CharField('E-mail', max_length=100, null=True, blank=True)
+    maturity_date = models.CharField(
+        'Дата на падеж', max_length=50, null=True, blank=True)
     charging_vat = models.CharField('Основание за неначисление на ДДС',
                                     max_length=100, choices=CHARGING_VAT_CHOICES, null=True, blank=True)
     cmr_photo = models.FileField(

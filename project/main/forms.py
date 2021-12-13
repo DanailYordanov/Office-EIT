@@ -65,16 +65,18 @@ class ContractorsModelForm(forms.ModelForm):
         attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}), required=False)
     email = forms.CharField(label='E-mail', widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'E-mail'}), required=False)
+    maturity_date = forms.CharField(label='Дата на падеж', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}), required=False)
     charging_vat = forms.ChoiceField(
         label='Основание за неначисление на ДДС', choices=CHARGING_VAT_CHOICES, required=False)
     cmr_photo = forms.FileField(
-        label='Прикачи ЧМР', widget=forms.FileInput(attrs={'class': 'form-control'}), required=False)
+        label='Прикачи ЧМР', widget=forms.ClearableFileInput(attrs={'class': 'form-control'}), required=False)
     license_photo = forms.FileField(
-        label='Прикачи лиценз или друг документ', widget=forms.FileInput(attrs={'class': 'form-control'}), required=False)
+        label='Прикачи лиценз или друг документ', widget=forms.ClearableFileInput(attrs={'class': 'form-control'}), required=False)
     expiration_date = forms.DateField(label='Дата на изтичане', widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Дата на изтичане'}), required=False)
 
     class Meta:
         model = Contractor
         fields = ['client_type', 'name', 'bulstat', 'mol', 'country', 'city', 'address',
-                  'phone_number', 'email', 'charging_vat', 'cmr_photo', 'license_photo', 'expiration_date']
+                  'phone_number', 'email', 'maturity_date', 'charging_vat', 'cmr_photo', 'license_photo', 'expiration_date']

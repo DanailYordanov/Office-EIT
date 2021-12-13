@@ -56,7 +56,7 @@ def update_car(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:cars-list')
+                return redirect('main:update-car', pk=pk)
         else:
             form = CarModelForm(instance=car)
     else:
@@ -127,7 +127,7 @@ def update_reminder(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:reminders-list')
+                return redirect('main:update-reminder', pk=pk)
         else:
             form = ReminderModelForm(instance=reminder)
     else:
@@ -198,7 +198,7 @@ def update_service(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:services-list')
+                return redirect('main:update-service', pk=pk)
         else:
             form = ServiceModelForm(instance=service)
     else:
@@ -269,7 +269,7 @@ def contractors_list(request):
 def add_contractor(request):
     if request.user.is_staff:
         if request.method == 'POST':
-            form = ContractorsModelForm(request.POST)
+            form = ContractorsModelForm(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
                 return redirect('main:contractors-list')
@@ -293,11 +293,12 @@ def update_contractor(request, pk):
         contractor = get_object_or_404(Contractor, id=pk)
 
         if request.method == 'POST':
-            form = ContractorsModelForm(request.POST, instance=contractor)
+            form = ContractorsModelForm(
+                request.POST, request.FILES, instance=contractor)
 
             if form.is_valid():
                 form.save()
-                return redirect('main:contractors-list')
+                return redirect('main:update-contractor', pk=pk)
         else:
             form = ContractorsModelForm(instance=contractor)
     else:
