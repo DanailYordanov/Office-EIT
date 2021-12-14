@@ -14,7 +14,16 @@ CHARGING_VAT_CHOICES = [
 ]
 
 
+class CarType(models.Model):
+    car_type = models.CharField('Вид автомобил', max_length=50)
+
+    def __str__(self):
+        return self.car_type
+
+
 class Car(models.Model):
+    car_type = models.ForeignKey(
+        CarType, verbose_name='Вид автомобил', null=True, on_delete=models.SET_NULL)
     number_plate = models.CharField('Регистрационен номер', max_length=50)
     brand = models.CharField('Марка', max_length=50)
 
@@ -33,21 +42,29 @@ class Reminder(models.Model):
     car = models.ForeignKey(
         Car, verbose_name='Автомобил', on_delete=models.CASCADE)
     reminder_type = models.ForeignKey(
-        ReminderType, verbose_name='Вид напомняне', on_delete=models.CASCADE)
+        ReminderType, verbose_name='Вид напомняне', null=True, on_delete=models.SET_NULL)
     expiration_date = models.DateField('Дата на изтичнане')
 
     def __str__(self):
         return f'{self.car.number_plate} - {self.reminder_type.reminder_type}'
 
 
+class ServiceType(models.Model):
+    service_type = models.CharField('Вид обслужване', max_length=100)
+
+    def __str__(self):
+        return self.service_type
+
+
 class Service(models.Model):
     car = models.ForeignKey(
         Car, verbose_name='Автомобил', on_delete=models.CASCADE)
-    date = models.DateField('Дата')
-    service_type = models.CharField('Вид обслужване', max_length=200)
+    service_type = models.ForeignKey(
+        ServiceType, verbose_name='Вид обслужване', null=True, on_delete=models.SET_NULL)
     additional_information = models.CharField(
         'Допълнителна информация', max_length=500, null=True, blank=True)
-    run = models.CharField('Пробег', max_length=30)
+    run = models.CharField('Пробег', max_length=20)
+    date = models.DateField('Дата')
 
     def __str__(self):
         return f'{self.car.brand} - {self.car.number_plate} - {self.service_type}'
