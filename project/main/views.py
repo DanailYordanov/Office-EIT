@@ -43,7 +43,7 @@ def add_car(request):
         'page_heading': 'Добавяне на автомобил'
     }
 
-    return render(request, 'main/add_update_car.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 @login_required
@@ -68,7 +68,7 @@ def update_car(request, pk):
         'page_heading': 'Редактиране на автомобил'
     }
 
-    return render(request, 'main/add_update_car.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 class CarDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -114,7 +114,7 @@ def add_reminder(request):
         'page_heading': 'Добавяне на напомняне'
     }
 
-    return render(request, 'main/add_update_reminder.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 @login_required
@@ -139,7 +139,7 @@ def update_reminder(request, pk):
         'page_heading': 'Редактиране на напомняне'
     }
 
-    return render(request, 'main/add_update_reminder.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 class ReminderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -185,7 +185,7 @@ def add_service(request):
         'page_heading': 'Добавяне на техническо обслужване'
     }
 
-    return render(request, 'main/add_update_service.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 @login_required
@@ -210,7 +210,7 @@ def update_service(request, pk):
         'page_heading': 'Редактиране на техническо обслужване'
     }
 
-    return render(request, 'main/add_update_service.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 class ServiceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -284,7 +284,7 @@ def add_contractor(request):
         'page_heading': 'Добавяне на контрагент'
     }
 
-    return render(request, 'main/add_update_contractor.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 @login_required
@@ -310,7 +310,7 @@ def update_contractor(request, pk):
         'page_heading': 'Редактиране на контрагент'
     }
 
-    return render(request, 'main/add_update_contractor.html', context)
+    return render(request, 'main/add_update_form.html', context)
 
 
 class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

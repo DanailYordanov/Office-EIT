@@ -21,7 +21,7 @@ class ReminderModelForm(forms.ModelForm):
     reminder_type = forms.ModelChoiceField(
         ReminderType.objects.all(), label="Вид напомняне", empty_label="Избери")
     expiration_date = forms.DateField(label="Дата на изтичане", input_formats=DATE_FORMATS, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Дата на изтичане'}))
+        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
 
     class Meta:
         model = Reminder
@@ -32,7 +32,7 @@ class ServiceModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
         Car.objects.all(), label="Автомобил", empty_label="Избери")
     date = forms.DateField(label="Дата", input_formats=DATE_FORMATS, widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Дата на извършване'}))
+        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
     additional_information = forms.CharField(label="Допълнителна информация", required=False, widget=forms.Textarea(
         attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
 
@@ -74,7 +74,7 @@ class ContractorsModelForm(forms.ModelForm):
     license_photo = forms.FileField(
         label='Прикачи лиценз или друг документ', widget=forms.ClearableFileInput(attrs={'class': 'form-control'}), required=False)
     expiration_date = forms.DateField(label='Дата на изтичане', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Дата на изтичане'}), required=False)
+        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}), required=False)
 
     class Meta:
         model = Contractor
