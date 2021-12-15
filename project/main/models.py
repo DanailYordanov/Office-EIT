@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 CLIENT_TYPE_CHOICES = [
@@ -11,6 +12,19 @@ CHARGING_VAT_CHOICES = [
     ('', 'Избери'),
     ('чл.21 ал.2 от ЗДДС', 'чл.21 ал.2 от ЗДДС'),
     ('чл. 30, ал.1 от ЗДДС', 'чл. 30, ал.1 от ЗДДС')
+]
+
+CURRENCY_CHOICES = [
+    ('BGN', 'BGN'),
+    ('EUR', 'EUR'),
+    ('USD', 'USD'),
+    ('GBP', 'GBP'),
+    ('CAD', 'CAD')
+]
+
+LOADING_TYPE_CHOICES = [
+    ('loading_address', 'Адрес на товарене'),
+    ('unloading_address', 'Адрес на разтоварване')
 ]
 
 
@@ -97,3 +111,44 @@ class Contractor(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Bank(models.Model):
+    name = models.CharField('Име', max_length=50)
+
+
+class Course(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
+    car = models.ForeignKey(
+        Car, verbose_name='Автомобил', null=True, on_delete=models.SET_NULL)
+    contractor = models.ForeignKey(
+        Contractor, verbose_name='Контрагент', null=True, on_delete=models.SET_NULL)
+    bank = models.ForeignKey(Bank, verbose_name='Банка',
+                             null=True, on_delete=models.SET_NULL)
+    from_to = models.CharField('Релация', max_length=100)
+    description = models.CharField(
+        'Описание', max_length=1000, null=True, blank=True)
+    price = models.IntegerField('Цена')
+    currency = models.CharField(
+        'Валута', choices=CURRENCY_CHOICES, max_length=5)
+    cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
+    other_conditions = models.CharField(
+        'Други условия', max_length=1000, null=True, blank=True)
+
+
+class Address(models.Model):
+    address = models.CharField('Адрес', max_length=200)
+    contact_person = models.CharField('Лице за контакт', max_length=50)
+    contact_phone = models.CharField('Телефон за връзка', max_length=30)
+    gps_coordinats = models.CharField('GPS координати', max_length=100)
+
+
+class CourseAddress(models.Model):
+    course = models.ForeignKey(
+        Course, verbose_name='Курс', on_delete=models.CASCADE)
+    address = models.ForeignKey(
+        Address, verbose_name='Адрес', null=True, on_delete=models.SET_NULL)
+    loаding_type = models.CharField(
+        'Вид на товарене', choices=LOADING_TYPE_CHOICES)
+    date = models.DateField('Дата')
