@@ -150,5 +150,5 @@ class CourseAddress(models.Model):
     address = models.ForeignKey(
         Address, verbose_name='Адрес', null=True, on_delete=models.SET_NULL)
     loаding_type = models.CharField(
-        'Вид на товарене', choices=LOADING_TYPE_CHOICES)
+        'Вид на товарене', max_length=20, choices=LOADING_TYPE_CHOICES)
     date = models.DateField('Дата')
