@@ -5,8 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from main.models import Car, Reminder, Service, Contractor
-from main.forms import CarModelForm, ReminderModelForm, ServiceModelForm, ContractorsModelForm
+from main.models import Car, Reminder, Service, Contractor, Address, CourseAddress
+from main.forms import CarModelForm, ReminderModelForm, ServiceModelForm, ContractorsModelForm, CourseModelForm, CourseAddressFormset
 
 
 @login_required
@@ -320,3 +320,57 @@ class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def add_course(request):
+    if request.user.is_staff:
+
+        addresses = Address.objects.all()
+
+        if request.method == 'POST':
+            form = CourseModelForm(request.POST)
+            formset = CourseAddressFormset(request.POST)
+
+            if form.is_valid() and formset.is_valid():
+                instance = form.save()
+
+                for f in formset.forms:
+                    load_type = f.cleaned_data.get('load_type')
+                    address = f.cleaned_data.get('address')
+                    date = f.cleaned_data.get('date')
+                    save = f.cleaned_data.get('save')
+
+                    if load_type and address and date:
+
+                        address_object = Address.objects.filter(
+                            address=address)
+
+                        if not address_object:
+                            if save:
+                                address_object = Address.objects.create(
+                                    address=address, contact_person=None, contact_phone=None, gps_coordinats=None)
+                            else:
+                                address_object = None
+                        else:
+                            address_object = address_object[0]
+
+                        CourseAddress.objects.create(
+                            course=instance, address_obj=address_object, address_input=address, load_type=load_type, date=date)
+
+                return redirect('main:add-course')
+        else:
+            form = CourseModelForm()
+            formset = CourseAddressFormset()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'formset': formset,
+        'addresses': addresses,
+        'url': reverse('main:add-course'),
+        'page_heading': 'Добавяне на курс'
+    }
+
+    return render(request, 'main/add_course.html', context)

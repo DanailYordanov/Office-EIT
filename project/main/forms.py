@@ -1,5 +1,7 @@
 from django import forms
-from main.models import Car, CarType, Reminder, ReminderType, Service, ServiceType, Contractor, CHARGING_VAT_CHOICES, CLIENT_TYPE_CHOICES
+from django.forms import formset_factory
+from django.contrib.auth import get_user_model
+from main import models
 
 
 DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
@@ -7,10 +9,10 @@ DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
 
 class CarModelForm(forms.ModelForm):
     car_type = forms.ModelChoiceField(
-        CarType.objects.all(), label='Вид автомобил', empty_label='Избери')
+        models.CarType.objects.all(), label='Вид автомобил', empty_label='Избери')
 
     class Meta:
-        model = Car
+        model = models.Car
         fields = ['car_type', 'brand', 'number_plate']
         widgets = {
             'brand': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Марка'}),
@@ -20,29 +22,29 @@ class CarModelForm(forms.ModelForm):
 
 class ReminderModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
-        Car.objects.all(), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
     reminder_type = forms.ModelChoiceField(
-        ReminderType.objects.all(), label='Вид напомняне', empty_label='Избери')
+        models.ReminderType.objects.all(), label='Вид напомняне', empty_label='Избери')
     expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.TextInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
 
     class Meta:
-        model = Reminder
+        model = models.Reminder
         fields = ['reminder_type', 'car', 'expiration_date']
 
 
 class ServiceModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
-        Car.objects.all(), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
     service_type = forms.ModelChoiceField(
-        ServiceType.objects.all(), label='Вид обслужване', empty_label='Избери')
+        models.ServiceType.objects.all(), label='Вид обслужване', empty_label='Избери')
     date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
     additional_information = forms.CharField(label='Допълнителна информация', required=False, widget=forms.Textarea(
         attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
 
     class Meta:
-        model = Service
+        model = models.Service
         fields = ['car', 'service_type', 'run',
                   'additional_information', 'date']
         widgets = {
@@ -52,7 +54,7 @@ class ServiceModelForm(forms.ModelForm):
 
 class ContractorsModelForm(forms.ModelForm):
     client_type = forms.ChoiceField(
-        label='Тип клиент', choices=CLIENT_TYPE_CHOICES)
+        label='Тип клиент', choices=models.CLIENT_TYPE_CHOICES)
     name = forms.CharField(label='Име', widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Име'}))
     bulstat = forms.CharField(label='Булстат', widget=forms.TextInput(
@@ -72,7 +74,7 @@ class ContractorsModelForm(forms.ModelForm):
     maturity_date = forms.CharField(label='Дата на падеж', widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}), required=False)
     charging_vat = forms.ChoiceField(
-        label='Основание за неначисление на ДДС', choices=CHARGING_VAT_CHOICES, required=False)
+        label='Основание за неначисление на ДДС', choices=models.CHARGING_VAT_CHOICES, required=False)
     cmr_photo = forms.FileField(
         label='Прикачи ЧМР', widget=forms.ClearableFileInput(attrs={'class': 'form-control'}), required=False)
     license_photo = forms.FileField(
@@ -81,6 +83,43 @@ class ContractorsModelForm(forms.ModelForm):
         attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}), required=False)
 
     class Meta:
-        model = Contractor
+        model = models.Contractor
         fields = ['client_type', 'name', 'bulstat', 'mol', 'country', 'city', 'address',
                   'phone_number', 'email', 'maturity_date', 'charging_vat', 'cmr_photo', 'license_photo', 'expiration_date']
+
+
+class CourseModelForm(forms.ModelForm):
+    car = forms.ModelChoiceField(
+        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
+    user = forms.ModelChoiceField(
+        get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
+    contractor = forms.ModelChoiceField(
+        models.Contractor.objects.all(), label='Контрагент', empty_label='Избери')
+    bank = forms.ModelChoiceField(
+        models.Bank.objects.all(), label='Банка', empty_label='Избери')
+
+    class Meta:
+        model = models.Course
+        fields = ['user', 'car', 'contractor', 'bank', 'from_to',
+                  'description', 'price', 'currency', 'cargo_type', 'other_conditions']
+        widgets = {
+            'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
+            'price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена'}),
+            'cargo_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид и тегло на товара'}),
+            'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'})
+        }
+
+
+class CourseAddresModelForm(forms.Form):
+    load_type = forms.ChoiceField(
+        label='Вид на товарене', choices=models.LOADING_TYPE_CHOICES)
+    address = forms.CharField(label='Адрес', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Адрес', 'list': 'datalistAddresses'}))
+    date = forms.DateField(label='Дата', widget=forms.TextInput(
+        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата'}))
+    save = forms.BooleanField(label='Запази', widget=forms.CheckboxInput(
+        attrs={'class': 'form-check-input'}), required=False)
+
+
+CourseAddressFormset = formset_factory(CourseAddresModelForm, extra=2)

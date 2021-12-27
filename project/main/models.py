@@ -15,6 +15,7 @@ CHARGING_VAT_CHOICES = [
 ]
 
 CURRENCY_CHOICES = [
+    ('', 'Избери'),
     ('BGN', 'BGN'),
     ('EUR', 'EUR'),
     ('USD', 'USD'),
@@ -23,6 +24,7 @@ CURRENCY_CHOICES = [
 ]
 
 LOADING_TYPE_CHOICES = [
+    ('', 'Избери'),
     ('loading_address', 'Адрес на товарене'),
     ('unloading_address', 'Адрес на разтоварване')
 ]
@@ -116,6 +118,9 @@ class Contractor(models.Model):
 class Bank(models.Model):
     name = models.CharField('Име', max_length=50)
 
+    def __str__(self):
+        return self.name
+
 
 class Course(models.Model):
     user = models.ForeignKey(
@@ -135,20 +140,35 @@ class Course(models.Model):
     cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
     other_conditions = models.CharField(
         'Други условия', max_length=1000, null=True, blank=True)
+    create_date = models.DateField('Дата на създаване', auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} - {self.contractor} - {self.from_to}'
 
 
 class Address(models.Model):
     address = models.CharField('Адрес', max_length=200)
-    contact_person = models.CharField('Лице за контакт', max_length=50)
-    contact_phone = models.CharField('Телефон за връзка', max_length=30)
-    gps_coordinats = models.CharField('GPS координати', max_length=100)
+    contact_person = models.CharField(
+        'Лице за контакт', max_length=50, null=True, blank=True)
+    contact_phone = models.CharField(
+        'Телефон за връзка', max_length=30, null=True, blank=True)
+    gps_coordinats = models.CharField(
+        'GPS координати', max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.address
 
 
 class CourseAddress(models.Model):
     course = models.ForeignKey(
         Course, verbose_name='Курс', on_delete=models.CASCADE)
-    address = models.ForeignKey(
-        Address, verbose_name='Адрес', null=True, on_delete=models.SET_NULL)
-    loаding_type = models.CharField(
-        'Вид на товарене', max_length=20, choices=LOADING_TYPE_CHOICES)
+    address_obj = models.ForeignKey(
+        Address, verbose_name='Свързан адрес', null=True, blank=True, on_delete=models.SET_NULL)
+    address_input = models.CharField(
+        'Въведен адрес', max_length=200, null=True, blank=True)
+    load_type = models.CharField('Вид на товарене',
+                                 choices=LOADING_TYPE_CHOICES, max_length=30)
     date = models.DateField('Дата')
+
+    def __str__(self):
+        return f'{self.course} - {self.address_input} - {self.date}'

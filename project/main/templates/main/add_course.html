@@ -1,0 +1,89 @@
+{% extends 'main/base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"
+    integrity="sha512-YdYyWQf8AS4WSB0WWdc3FbQ3Ypdm0QCWD2k4hgfqbQbRCJBEgX0iAegkl2S1Evma5ImaVXLBeUkIlP6hQ1eYKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css"
+    integrity="sha512-CruCP+TD3yXzlvvijET8wV5WxxEh5H8P4cmz0RFbKK6FlZ2sYl3AEsKlLPHbniXKSrDdFewhbmBK5skbdsASbQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock head %}
+
+{% block content_main %}
+<form action="{{ url }}" class="form-flex" method="post" autocomplete="off" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    {% for field in form %}
+    <div class="col-12 col-md-8 col-xl-6">
+        <div class="field-label">
+            {{ field.label_tag }}
+        </div>
+        <div class="field">
+            {{ field }}
+        </div>
+        {{ field.errors }}
+    </div>
+    {% endfor %}
+
+    {% for formset_field in formset %}
+    <p class="fw-light text-center fs-4">Адрес</p>
+    {% for f in formset_field %}
+    <div class="col-12 col-md-8 col-xl-6">
+        {% if f.field.widget.input_type == 'checkbox' %}
+
+        {{ f }}
+        <label class="form-check-label" for="{{ f.id_for_label }}">
+            Запази
+        </label>
+
+        {% elif f.name == 'address' %}
+
+        <div class="field-label">
+            {{ f.label_tag }}
+        </div>
+        <div class="field">
+            {{ f }}
+            <datalist id="datalistAddresses">
+                {% for address in addresses %}
+                <option value="{{ address }}"></option>
+                {% endfor %}
+            </datalist>
+        </div>
+        {{ f.errors }}
+
+        {% else %}
+
+        <div class="field-label">
+            {{ f.label_tag }}
+        </div>
+        <div class="field">
+            {{ f }}
+        </div>
+        {{ f.errors }}
+
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Изпращане</button>
+</form>
+{% endblock content_main %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"
+    integrity="sha512-NqYds8su6jivy1/WLoW8x1tZMRD7/1ZfhWG/jcRQLOzV1k1rIODCpMgoBnar5QXshKJGV7vi0LXLNXPoFsM5Zg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"
+    integrity="sha512-RCgrAvvoLpP7KVgTkTctrUdv7C6t7Un3p1iaoPr1++3pybCyCsCZZN7QEHMZTcJTmcJ7jzexTO+eFpHk4OCFAg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(function () {
+        $('select').niceSelect();
+        $(".date-picker").datepicker({
+            format: 'yyyy-mm-dd',
+        });
+    });
+</script>
+{% endblock scripts %}
