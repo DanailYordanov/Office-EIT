@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import formset_factory
+from django.forms import modelformset_factory
 from django.contrib.auth import get_user_model
 from main import models
 
@@ -111,15 +111,20 @@ class CourseModelForm(forms.ModelForm):
         }
 
 
-class CourseAddresModelForm(forms.Form):
-    load_type = forms.ChoiceField(
-        label='Вид на товарене', choices=models.LOADING_TYPE_CHOICES)
-    address = forms.CharField(label='Адрес', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Адрес', 'list': 'datalistAddresses'}))
-    date = forms.DateField(label='Дата', widget=forms.TextInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата'}))
+class CourseAddresModelForm(forms.ModelForm):
     save = forms.BooleanField(label='Запази', widget=forms.CheckboxInput(
         attrs={'class': 'form-check-input'}), required=False)
 
+    class Meta:
+        model = models.CourseAddress
+        fields = ['load_type', 'address_input', 'date', 'save']
+        widgets = {
+            'address_input': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес', 'list': 'datalistAddresses'}),
+            'date': forms.TextInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата'})
+        }
 
-CourseAddressFormset = formset_factory(CourseAddresModelForm, extra=2)
+
+CourseAddressFormset = modelformset_factory(
+    models.CourseAddress, form=CourseAddresModelForm, extra=2)

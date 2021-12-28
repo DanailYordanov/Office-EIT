@@ -333,30 +333,29 @@ def add_course(request):
             formset = CourseAddressFormset(request.POST)
 
             if form.is_valid() and formset.is_valid():
-                instance = form.save()
+                form_instance = form.save()
 
-                for f in formset.forms:
-                    load_type = f.cleaned_data.get('load_type')
-                    address = f.cleaned_data.get('address')
-                    date = f.cleaned_data.get('date')
-                    save = f.cleaned_data.get('save')
+                for f in formset:
+                    if f.is_valid():
+                        f.instance.course = form_instance
 
-                    if load_type and address and date:
+                        address_input = f.cleaned_data.get('address_input')
+                        save = f.cleaned_data.get('save')
 
                         address_object = Address.objects.filter(
-                            address=address)
+                            address=address_input)
 
                         if not address_object:
                             if save:
                                 address_object = Address.objects.create(
-                                    address=address, contact_person=None, contact_phone=None, gps_coordinats=None)
+                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinats=None)
                             else:
                                 address_object = None
                         else:
                             address_object = address_object[0]
 
-                        CourseAddress.objects.create(
-                            course=instance, address_obj=address_object, address_input=address, load_type=load_type, date=date)
+                        f.instance.address_obj = address_object
+                        f.save()
 
                 return redirect('main:add-course')
         else:

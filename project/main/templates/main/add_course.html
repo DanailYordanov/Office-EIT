@@ -37,7 +37,7 @@
             Запази
         </label>
 
-        {% elif f.name == 'address' %}
+        {% elif f.name == 'address_input' %}
 
         <div class="field-label">
             {{ f.label_tag }}
@@ -54,9 +54,11 @@
 
         {% else %}
 
+        {% if f.name != 'id' %}
         <div class="field-label">
             {{ f.label_tag }}
         </div>
+        {% endif %}
         <div class="field">
             {{ f }}
         </div>
