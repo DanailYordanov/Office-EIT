@@ -5,8 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from main.models import Car, Reminder, Service, Contractor, Address, CourseAddress
-from main.forms import CarModelForm, ReminderModelForm, ServiceModelForm, ContractorsModelForm, CourseModelForm, CourseAddressFormset
+from main.models import Car, Reminder, Service, Contractor, Address, Course
+from main.forms import CarModelForm, ReminderModelForm, ServiceModelForm, ContractorsModelForm, CourseModelForm, CourseAddressAddFormset, CourseAddressUpdateFormset
 
 
 @login_required
@@ -330,7 +330,7 @@ def add_course(request):
 
         if request.method == 'POST':
             form = CourseModelForm(request.POST)
-            formset = CourseAddressFormset(request.POST)
+            formset = CourseAddressAddFormset(request.POST)
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
@@ -360,7 +360,7 @@ def add_course(request):
                 return redirect('main:add-course')
         else:
             form = CourseModelForm()
-            formset = CourseAddressFormset()
+            formset = CourseAddressAddFormset()
     else:
         raise PermissionDenied
 
@@ -373,3 +373,60 @@ def add_course(request):
     }
 
     return render(request, 'main/add_course.html', context)
+
+
+@login_required
+def update_course(request, pk):
+    if request.user.is_staff:
+
+        addresses = Address.objects.all()
+        course = get_object_or_404(Course, id=pk)
+
+        if request.method == 'POST':
+            form = CourseModelForm(request.POST, instance=course)
+            formset = CourseAddressUpdateFormset(request.POST, instance=course)
+
+            if form.is_valid() and formset.is_valid():
+                form_instance = form.save()
+
+                for f in formset:
+                    if f.is_valid():
+                        f.instance.course = form_instance
+
+                        if 'address_input' in f.changed_data or 'save' in f.changed_data:
+                            address_input = f.cleaned_data.get('address_input')
+                            save = f.cleaned_data.get('save')
+
+                            address_object = Address.objects.filter(
+                                address=address_input)
+
+                            if not address_object:
+                                if save:
+                                    address_object = Address.objects.create(
+                                        address=address_input, contact_person=None, contact_phone=None, gps_coordinats=None)
+                                else:
+                                    address_object = None
+                            else:
+                                address_object = address_object[0]
+
+                            f.instance.address_obj = address_object
+                            f.save()
+
+                formset.save()
+                return redirect('main:update-course', pk=pk)
+        else:
+            form = CourseModelForm(instance=course)
+            formset = CourseAddressUpdateFormset(instance=course)
+
+        context = {
+            'form': form,
+            'formset': formset,
+            'addresses': addresses,
+            'url': reverse('main:update-course', args=(pk,)),
+            'page_heading': 'Редактиране на курс'
+        }
+
+        return render(request, 'main/add_course.html', context)
+
+    else:
+        raise PermissionDenied

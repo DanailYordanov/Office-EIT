@@ -29,43 +29,41 @@
     {% for formset_field in formset %}
     <p class="fw-light text-center fs-4">Адрес</p>
     {% for f in formset_field %}
+    {% if f.field.widget.input_type != 'hidden' %}
     <div class="col-12 col-md-8 col-xl-6">
         {% if f.field.widget.input_type == 'checkbox' %}
 
         {{ f }}
         <label class="form-check-label" for="{{ f.id_for_label }}">
+            {% if f.name == 'save' %}
             Запази
+            {% else %}
+            Изтрий
+            {% endif %}
         </label>
 
-        {% elif f.name == 'address_input' %}
+        {% else %}
 
         <div class="field-label">
             {{ f.label_tag }}
         </div>
         <div class="field">
             {{ f }}
+            {% if f.name == 'address_input' %}
             <datalist id="datalistAddresses">
                 {% for address in addresses %}
                 <option value="{{ address }}"></option>
                 {% endfor %}
             </datalist>
-        </div>
-        {{ f.errors }}
-
-        {% else %}
-
-        {% if f.name != 'id' %}
-        <div class="field-label">
-            {{ f.label_tag }}
-        </div>
-        {% endif %}
-        <div class="field">
-            {{ f }}
+            {% endif %}
         </div>
         {{ f.errors }}
 
         {% endif %}
     </div>
+    {% else %}
+    {{ f }}
+    {% endif %}
     {% endfor %}
     {% endfor %}
 

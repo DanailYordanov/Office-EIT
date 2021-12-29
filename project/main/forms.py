@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import modelformset_factory
 from django.contrib.auth import get_user_model
 from main import models
 
@@ -126,5 +125,15 @@ class CourseAddresModelForm(forms.ModelForm):
         }
 
 
-CourseAddressFormset = modelformset_factory(
-    models.CourseAddress, form=CourseAddresModelForm, extra=2)
+class CustomBaseInlineFormSet(forms.BaseInlineFormSet):
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        form.fields['DELETE'].widget = forms.CheckboxInput(
+            attrs={'class': 'form-check-input'})
+
+
+CourseAddressUpdateFormset = forms.inlineformset_factory(models.Course,
+                                                         models.CourseAddress, formset=CustomBaseInlineFormSet, form=CourseAddresModelForm, extra=0)
+
+CourseAddressAddFormset = forms.inlineformset_factory(models.Course,
+                                                      models.CourseAddress, form=CourseAddresModelForm, can_delete=False, extra=2)
