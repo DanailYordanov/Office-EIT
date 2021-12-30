@@ -137,3 +137,20 @@ CourseAddressUpdateFormset = forms.inlineformset_factory(models.Course,
 
 CourseAddressAddFormset = forms.inlineformset_factory(models.Course,
                                                       models.CourseAddress, form=CourseAddresModelForm, can_delete=False, extra=2)
+
+
+class AddressModelForm(forms.ModelForm):
+    class Meta:
+        model = models.Address
+        fields = ['address', 'contact_person',
+                  'contact_phone', 'gps_coordinates']
+        widgets = {
+            'address': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
+            'contact_person': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Лице за контакт'}),
+            'contact_phone': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Телефон за връзка'}),
+            'gps_coordinates': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'GPS координати'})
+        }

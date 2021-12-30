@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from main.models import Car, Reminder, Service, Contractor, Address, Course
-from main.forms import CarModelForm, ReminderModelForm, ServiceModelForm, ContractorsModelForm, CourseModelForm, CourseAddressAddFormset, CourseAddressUpdateFormset
+from main import forms
 
 
 @login_required
@@ -28,12 +28,13 @@ def cars_list(request):
 def add_car(request):
     if request.user.is_staff:
         if request.method == 'POST':
-            form = CarModelForm(request.POST)
+            form = forms.CarModelForm(request.POST)
+
             if form.is_valid():
                 form.save()
                 return redirect('main:cars-list')
         else:
-            form = CarModelForm()
+            form = forms.CarModelForm()
     else:
         raise PermissionDenied
 
@@ -52,13 +53,13 @@ def update_car(request, pk):
         car = get_object_or_404(Car, id=pk)
 
         if request.method == 'POST':
-            form = CarModelForm(request.POST, instance=car)
+            form = forms.CarModelForm(request.POST, instance=car)
 
             if form.is_valid():
                 form.save()
                 return redirect('main:update-car', pk=pk)
         else:
-            form = CarModelForm(instance=car)
+            form = forms.CarModelForm(instance=car)
     else:
         raise PermissionDenied
 
@@ -99,12 +100,13 @@ def reminders_list(request):
 def add_reminder(request):
     if request.user.is_staff:
         if request.method == 'POST':
-            form = ReminderModelForm(request.POST)
+            form = forms.ReminderModelForm(request.POST)
+
             if form.is_valid():
                 form.save()
                 return redirect('main:reminders-list')
         else:
-            form = ReminderModelForm()
+            form = forms.ReminderModelForm()
     else:
         raise PermissionDenied
 
@@ -123,13 +125,13 @@ def update_reminder(request, pk):
         reminder = get_object_or_404(Reminder, id=pk)
 
         if request.method == 'POST':
-            form = ReminderModelForm(request.POST, instance=reminder)
+            form = forms.ReminderModelForm(request.POST, instance=reminder)
 
             if form.is_valid():
                 form.save()
                 return redirect('main:update-reminder', pk=pk)
         else:
-            form = ReminderModelForm(instance=reminder)
+            form = forms.ReminderModelForm(instance=reminder)
     else:
         raise PermissionDenied
 
@@ -170,12 +172,13 @@ def services_list(request):
 def add_service(request):
     if request.user.is_staff:
         if request.method == 'POST':
-            form = ServiceModelForm(request.POST)
+            form = forms.ServiceModelForm(request.POST)
+
             if form.is_valid():
                 form.save()
                 return redirect('main:services-list')
         else:
-            form = ServiceModelForm()
+            form = forms.ServiceModelForm()
     else:
         raise PermissionDenied
 
@@ -194,13 +197,13 @@ def update_service(request, pk):
         service = get_object_or_404(Service, id=pk)
 
         if request.method == 'POST':
-            form = ServiceModelForm(request.POST, instance=service)
+            form = forms.ServiceModelForm(request.POST, instance=service)
 
             if form.is_valid():
                 form.save()
                 return redirect('main:update-service', pk=pk)
         else:
-            form = ServiceModelForm(instance=service)
+            form = forms.ServiceModelForm(instance=service)
     else:
         raise PermissionDenied
 
@@ -269,12 +272,13 @@ def contractors_list(request):
 def add_contractor(request):
     if request.user.is_staff:
         if request.method == 'POST':
-            form = ContractorsModelForm(request.POST, request.FILES)
+            form = forms.ContractorsModelForm(request.POST, request.FILES)
+
             if form.is_valid():
                 form.save()
                 return redirect('main:contractors-list')
         else:
-            form = ContractorsModelForm()
+            form = forms.ContractorsModelForm()
     else:
         raise PermissionDenied
 
@@ -293,14 +297,14 @@ def update_contractor(request, pk):
         contractor = get_object_or_404(Contractor, id=pk)
 
         if request.method == 'POST':
-            form = ContractorsModelForm(
+            form = forms.ContractorsModelForm(
                 request.POST, request.FILES, instance=contractor)
 
             if form.is_valid():
                 form.save()
                 return redirect('main:update-contractor', pk=pk)
         else:
-            form = ContractorsModelForm(instance=contractor)
+            form = forms.ContractorsModelForm(instance=contractor)
     else:
         raise PermissionDenied
 
@@ -344,8 +348,8 @@ def add_course(request):
         addresses = Address.objects.all()
 
         if request.method == 'POST':
-            form = CourseModelForm(request.POST)
-            formset = CourseAddressAddFormset(request.POST)
+            form = forms.CourseModelForm(request.POST)
+            formset = forms.CourseAddressAddFormset(request.POST)
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
@@ -363,7 +367,7 @@ def add_course(request):
                         if not address_object:
                             if save:
                                 address_object = Address.objects.create(
-                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinats=None)
+                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
                             else:
                                 address_object = None
                         else:
@@ -374,8 +378,8 @@ def add_course(request):
 
                 return redirect('main:courses-list')
         else:
-            form = CourseModelForm()
-            formset = CourseAddressAddFormset()
+            form = forms.CourseModelForm()
+            formset = forms.CourseAddressAddFormset()
     else:
         raise PermissionDenied
 
@@ -398,8 +402,9 @@ def update_course(request, pk):
         course = get_object_or_404(Course, id=pk)
 
         if request.method == 'POST':
-            form = CourseModelForm(request.POST, instance=course)
-            formset = CourseAddressUpdateFormset(request.POST, instance=course)
+            form = forms.CourseModelForm(request.POST, instance=course)
+            formset = forms.CourseAddressUpdateFormset(
+                request.POST, instance=course)
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
@@ -418,7 +423,7 @@ def update_course(request, pk):
                             if not address_object:
                                 if save:
                                     address_object = Address.objects.create(
-                                        address=address_input, contact_person=None, contact_phone=None, gps_coordinats=None)
+                                        address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
                                 else:
                                     address_object = None
                             else:
@@ -430,8 +435,8 @@ def update_course(request, pk):
                 formset.save()
                 return redirect('main:update-course', pk=pk)
         else:
-            form = CourseModelForm(instance=course)
-            formset = CourseAddressUpdateFormset(instance=course)
+            form = forms.CourseModelForm(instance=course)
+            formset = forms.CourseAddressUpdateFormset(instance=course)
 
         context = {
             'form': form,
@@ -451,6 +456,78 @@ class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     model = Course
     success_url = reverse_lazy('main:courses-list')
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+@login_required
+def addresses_list(request):
+    if request.user.is_staff:
+        addresses = Address.objects.all()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'addresses': addresses,
+        'page_heading': 'Адреси'
+    }
+
+    return render(request, 'main/addresses_list.html', context)
+
+
+@login_required
+def add_address(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.AddressModelForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:addresses-list')
+        else:
+            form = forms.AddressModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-address'),
+        'page_heading': 'Добавяне на адрес'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def update_address(request, pk):
+    if request.user.is_staff:
+        address = get_object_or_404(Address, id=pk)
+
+        if request.method == 'POST':
+            form = forms.AddressModelForm(request.POST, instance=address)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:update-address', pk=pk)
+        else:
+            form = forms.AddressModelForm(instance=address)
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-address', args=(pk,)),
+        'page_heading': 'Редактиране на адрес'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+class AddressDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = Address
+    success_url = reverse_lazy('main:addresses-list')
 
     def test_func(self):
         return self.request.user.is_staff

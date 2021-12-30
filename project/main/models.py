@@ -152,7 +152,7 @@ class Address(models.Model):
         'Лице за контакт', max_length=50, null=True, blank=True)
     contact_phone = models.CharField(
         'Телефон за връзка', max_length=30, null=True, blank=True)
-    gps_coordinats = models.CharField(
+    gps_coordinates = models.CharField(
         'GPS координати', max_length=100, null=True, blank=True)
 
     def __str__(self):

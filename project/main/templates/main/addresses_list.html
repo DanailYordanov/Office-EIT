@@ -1,0 +1,71 @@
+{% extends 'main/base.html' %}
+{% block content_main %}
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по адрес, лице за контакт, телефон за връзка или GPS координати
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-2">Адрес</th>
+                <th class="col-2">Лице за контакт</th>
+                <th class="col-2">Телефон за връзка</th>
+                <th class="col-2">GPS координати</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for address in addresses %}
+            <div class="modal fade" id="deleteAddress{{ address.id }}" tabindex="-1"
+                aria-labelledby="deleteAddress{{ address.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteAddress{{ address.id }}Label">
+                                Изтриване на адрес
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете адреса - {{ address.address }} ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-address' pk=address.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <td class="searchable">{{ address.address }}</td>
+                <td class="searchable">
+                    {% if address.contact_person %}{{ address.contact_person }}{% else %}-{% endif %}
+                </td>
+                <td class="searchable">
+                    {% if address.contact_phone %}{{ address.contact_phone }}{% else %}-{% endif %}
+                </td>
+                <td class="searchable">
+                    {% if address.gps_coordinates %}{{ address.gps_coordinates }}{% else %}-{% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-address' pk=address.id %}" class="btn btn-primary table-action-button">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteAddress{{ address.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}
