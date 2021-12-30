@@ -10,7 +10,8 @@
 {% endblock head %}
 
 {% block content_main %}
-<form action="{{ url }}" class="form-flex" method="post" autocomplete="off" enctype="multipart/form-data" novalidate>
+<form action="{{ url }}" class="form-flex" id="courseForm" method="post" autocomplete="off"
+    enctype="multipart/form-data" novalidate>
     {% csrf_token %}
     {{ formset.management_form }}
 
@@ -27,45 +28,51 @@
     {% endfor %}
 
     {% for formset_field in formset %}
-    <p class="fw-light text-center fs-4">Адрес</p>
-    {% for f in formset_field %}
-    {% if f.field.widget.input_type != 'hidden' %}
-    <div class="col-12 col-md-8 col-xl-6">
-        {% if f.field.widget.input_type == 'checkbox' %}
+    <div class="col-12 form-flex adress-form">
+        <p class="fw-light text-center fs-4">Адрес</p>
+        {% for f in formset_field %}
+        {% if f.field.widget.input_type != 'hidden' %}
+        <div class="col-12 col-md-8 col-xl-6 address-field">
+            {% if f.field.widget.input_type == 'checkbox' %}
 
-        {{ f }}
-        <label class="form-check-label" for="{{ f.id_for_label }}">
-            {% if f.name == 'save' %}
-            Запази
-            {% else %}
-            Изтрий
-            {% endif %}
-        </label>
-
-        {% else %}
-
-        <div class="field-label">
-            {{ f.label_tag }}
-        </div>
-        <div class="field">
             {{ f }}
-            {% if f.name == 'address_input' %}
-            <datalist id="datalistAddresses">
-                {% for address in addresses %}
-                <option value="{{ address }}"></option>
-                {% endfor %}
-            </datalist>
+            <label class="form-check-label" for="{{ f.id_for_label }}">
+                {% if f.name == 'save' %}
+                Запази
+                {% else %}
+                Изтрий
+                {% endif %}
+            </label>
+
+            {% else %}
+
+            <div class="field-label">
+                {{ f.label_tag }}
+            </div>
+            <div class="field">
+                {{ f }}
+                {% if f.name == 'address_input' %}
+                <datalist id="datalistAddresses">
+                    {% for address in addresses %}
+                    <option value="{{ address }}"></option>
+                    {% endfor %}
+                </datalist>
+                {% endif %}
+            </div>
+            {{ f.errors }}
+
             {% endif %}
         </div>
-        {{ f.errors }}
-
+        {% else %}
+        {{ f }}
         {% endif %}
+        {% endfor %}
     </div>
-    {% else %}
-    {{ f }}
-    {% endif %}
     {% endfor %}
-    {% endfor %}
+    <a href="#" class="text-decoration-none text-center" id="addCourseBtn">
+        Добави адрес
+        <i class="fas fa-plus ms-1"></i>
+    </a>
 
     <button type="submit" class="btn btn-primary">Изпращане</button>
 </form>
