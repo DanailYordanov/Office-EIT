@@ -33,7 +33,7 @@
                 {% if request.user.is_authenticated %}
                 <div class="collapse navbar-collapse ms-lg-3" id="navBarCollapse">
                     <ul class="navbar-nav me-auto">
-                        <a class="navbar-brand" href="#">TrackSpedition</a>
+                        <a class="navbar-brand" href="{% url 'main:courses-list' %}">TrackSpedition</a>
                         {% if request.user.is_staff %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarCarsDropdown" role="button"
@@ -124,6 +124,27 @@
                                     <a class="dropdown-item" href="{% url 'main:add-address' %}">
                                         <i class="fas fa-plus me-1"></i>
                                         Добавяне на адрес
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarCoursesDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-road"></i>
+                                Курсове
+                            </a>
+                            <ul class="dropdown-menu mb-3" aria-labelledby="navbarCoursesDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:courses-list' %}">
+                                        <i class="fas fa-road"></i>
+                                        Списък с курсове
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:add-course' %}">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Добавяне на курс
                                     </a>
                                 </li>
                             </ul>
