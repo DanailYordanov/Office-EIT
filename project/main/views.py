@@ -323,6 +323,21 @@ class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 @login_required
+def courses_list(request):
+    if request.user.is_staff:
+        courses = Course.objects.all()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'courses': courses,
+        'page_heading': 'Курсове'
+    }
+
+    return render(request, 'main/courses_list.html', context)
+
+
+@login_required
 def add_course(request):
     if request.user.is_staff:
 
@@ -357,7 +372,7 @@ def add_course(request):
                         f.instance.address_obj = address_object
                         f.save()
 
-                return redirect('main:add-course')
+                return redirect('main:courses-list')
         else:
             form = CourseModelForm()
             formset = CourseAddressAddFormset()
@@ -430,3 +445,12 @@ def update_course(request, pk):
 
     else:
         raise PermissionDenied
+
+
+class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = Course
+    success_url = reverse_lazy('main:courses-list')
+
+    def test_func(self):
+        return self.request.user.is_staff

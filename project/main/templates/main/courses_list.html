@@ -1,0 +1,74 @@
+{% extends 'main/base.html' %}
+{% block content_main %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-course' %}" class="text-decoration-none">
+        Добавяне на курс
+        <i class="fas fa-plus ms-1"></i></a>
+</div>
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по релация, автомобил, шофьор, контрагент или дата
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-1">#</th>
+                <th class="col-2">Релация</th>
+                <th class="col-2">Автомобил</th>
+                <th class="col-2">Шофьор</th>
+                <th class="col-2">Контрагент</th>
+                <th class="col-1">Дата на създаване</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for course in courses %}
+            <div class="modal fade" id="deleteCourse{{ course.id }}" tabindex="-1"
+                aria-labelledby="deleteCourse{{ course.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteCourse{{ course.id }}Label">
+                                Изтриване на курс
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете курс {{ course.from_to }} на {{ course.user }} ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-course' pk=course.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <th>{{ forloop.counter }}</th>
+                <td class="searchable">{{ course.from_to }}</td>
+                <td class="searchable">{{ course.car }}</td>
+                <td class="searchable">{{ course.user }}</td>
+                <td class="searchable">{{ course.contractor }}</td>
+                <td class="searchable">{{ course.create_date }}</td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-course' pk=course.id %}" class="btn btn-primary table-action-button">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteCourse{{ course.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}
