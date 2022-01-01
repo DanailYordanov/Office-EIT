@@ -10,8 +10,7 @@
 {% endblock head %}
 
 {% block content_main %}
-<form action="{{ url }}" class="form-flex" id="courseForm" method="post" autocomplete="off"
-    enctype="multipart/form-data" novalidate>
+<form action="{{ url }}" class="form-flex" method="post" autocomplete="off" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
     {{ formset.management_form }}
 

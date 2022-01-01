@@ -329,7 +329,7 @@ class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required
 def courses_list(request):
     if request.user.is_staff:
-        courses = models.Course.objects.all()
+        courses = models.Course.objects.all().order_by('-pk')
     else:
         raise PermissionDenied
 

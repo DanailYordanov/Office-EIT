@@ -51,7 +51,11 @@
                 </div>
             </div>
             <tr>
-                <th>{{ forloop.counter }}</th>
+                <th>
+                    <a href="{% url 'main:course-information' pk=course.id %}" class="text-decoration-none">
+                        {{ course.id }}
+                    </a>
+                </th>
                 <td class="searchable">{{ course.from_to }}</td>
                 <td class="searchable">{{ course.car }}</td>
                 <td class="searchable">{{ course.user }}</td>

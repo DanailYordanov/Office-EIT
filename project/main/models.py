@@ -142,7 +142,7 @@ class Course(models.Model):
     from_to = models.CharField('Релация', max_length=100)
     description = models.CharField(
         'Описание', max_length=1000, null=True, blank=True)
-    price = models.IntegerField('Цена')
+    price = models.FloatField('Цена')
     currency = models.CharField(
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
     cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
@@ -176,7 +176,7 @@ class CourseAddress(models.Model):
         'Въведен адрес', max_length=200, null=True, blank=True)
     load_type = models.CharField('Вид на товарене',
                                  choices=LOADING_TYPE_CHOICES, max_length=30)
-    date = models.DateField('Дата')
+    date = models.DateField('Дата', null=True, blank=True)
 
     def __str__(self):
         return f'{self.course} - {self.address_input} - {self.date}'
