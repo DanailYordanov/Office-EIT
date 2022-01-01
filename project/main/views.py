@@ -567,7 +567,7 @@ def update_expense(request, pk):
         if form.is_valid():
             form.save()
 
-            return redirect('main:update-expense', pk=pk)
+            return redirect('main:course-information', pk=expense.course.id)
     else:
         form = forms.ExpenseModelForm(instance=expense)
 
