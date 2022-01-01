@@ -1,0 +1,206 @@
+{% extends 'main/base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"
+    integrity="sha512-YdYyWQf8AS4WSB0WWdc3FbQ3Ypdm0QCWD2k4hgfqbQbRCJBEgX0iAegkl2S1Evma5ImaVXLBeUkIlP6hQ1eYKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css"
+    integrity="sha512-CruCP+TD3yXzlvvijET8wV5WxxEh5H8P4cmz0RFbKK6FlZ2sYl3AEsKlLPHbniXKSrDdFewhbmBK5skbdsASbQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock head %}
+
+{% block content_main %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-expense' pk=course.id %}" class="text-decoration-none">
+        Добавяне на разход
+        <i class="fas fa-plus ms-1"></i></a>
+</div>
+
+<div class="col-12 col-md-8 col-lg-6 m-auto text-center fw-light fs-5 mb-5">
+    <p>
+        <span class="fw-normal">Автомобил:</span> {{ course.car }}
+    </p>
+
+    <p>
+        <span class="fw-normal">Релация:</span> {{ course.from_to }}
+    </p>
+
+    <p>
+        <span class="fw-normal">Контрагент:</span> {{ course.contractor }}
+    </p>
+
+    <p>
+        <span class="fw-normal">Вид и тегло на товара:</span> {{ course.cargo_type }}
+    </p>
+
+    {% if request.user.is_staff %}
+    <p>
+        <span class="fw-normal">Шофьор:</span> {{ course.user }}
+    </p>
+
+    <p>
+        <span class="fw-normal">Цена:</span> {{ course.price }} {{ course.currency }}
+    </p>
+
+    <p>
+        <span class="fw-normal">Банка:</span> {{ course.bank.name }}
+    </p>
+
+    {% if course.description %}
+    <p>
+        <span class="fw-normal">Описание:</span> {{ course.description }}
+    </p>
+    {% endif %}
+
+    {% if course.additional_information %}
+    <p>
+        <span class="fw-normal">Допълнителна информация:</span> {{ course.additional_information }}
+    </p>
+    {% endif %}
+
+    <p>
+        <span class="fw-normal">Дата на създаване:</span> {{ course.create_date }}
+    </p>
+    {% endif %}
+</div>
+
+<form action="{{ url }}" class="form-flex mb-5" method="post" autocomplete="off" enctype="multipart/form-data"
+    novalidate>
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    {% for formset_field in formset %}
+    <div class="col-12 form-flex adress-form">
+        <p class="fw-light text-center fs-4">Адрес</p>
+        {% for f in formset_field %}
+        {% if f.field.widget.input_type != 'hidden' %}
+        <div class="col-12 col-md-8 col-xl-6 address-field">
+            {% if f.field.widget.input_type == 'checkbox' %}
+
+            {{ f }}
+            <label class="form-check-label" for="{{ f.id_for_label }}">
+                {% if f.name == 'save' %}
+                Запази
+                {% else %}
+                Изтрий
+                {% endif %}
+            </label>
+
+            {% else %}
+
+            <div class="field-label">
+                {{ f.label_tag }}
+            </div>
+            <div class="field">
+                {{ f }}
+                {% if f.name == 'address_input' %}
+                <datalist id="datalistAddresses">
+                    {% for address in addresses %}
+                    <option value="{{ address }}"></option>
+                    {% endfor %}
+                </datalist>
+                {% endif %}
+            </div>
+            {{ f.errors }}
+
+            {% endif %}
+        </div>
+        {% else %}
+        {{ f }}
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <a href="#" class="text-decoration-none text-center" id="addCourseBtn">
+        Добави адрес
+        <i class="fas fa-plus ms-1"></i>
+    </a>
+
+    <button type="submit" class="btn btn-primary">Редактирай</button>
+</form>
+
+<p class="fw-light text-center fs-4">Разходи на курса</p>
+
+<div class="form-floating mb-4 mt-5 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по вид разход, цена, вид плащане, допълнителна информация
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-1">Разход</th>
+                <th class="col-1">Цена</th>
+                <th class="col-1">Вид плащане</th>
+                <th class="col-1">Допълнителна информация</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for expense in expenses %}
+            <div class="modal fade" id="deleteExpense{{ expense.id }}" tabindex="-1"
+                aria-labelledby="deleteExpense{{ expense.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteExpense{{ expense.id }}Label">
+                                Изтриване на разход
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете този разхода за {{ expense.expense_type.expense_type}}
+                            -
+                            {{ expense.price }} {{ expense.currency }} ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-expense' course_pk=expense.course.id  pk=expense.id %}"
+                                method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <td class="searchable">{{ expense.expense_type.expense_type }}</td>
+                <td class="searchable">{{ expense.price }} {{ expense.currency }}</td>
+                <td class="searchable">{{ expense.payment_type }}</td>
+                <td class="searchable">{{ expense.additional_information }}</td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-expense' pk=expense.id %}" class="btn btn-primary table-action-button">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteExpense{{ expense.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"
+    integrity="sha512-NqYds8su6jivy1/WLoW8x1tZMRD7/1ZfhWG/jcRQLOzV1k1rIODCpMgoBnar5QXshKJGV7vi0LXLNXPoFsM5Zg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"
+    integrity="sha512-RCgrAvvoLpP7KVgTkTctrUdv7C6t7Un3p1iaoPr1++3pybCyCsCZZN7QEHMZTcJTmcJ7jzexTO+eFpHk4OCFAg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(function () {
+        $('select').niceSelect();
+        $(".date-picker").datepicker({
+            format: 'yyyy-mm-dd',
+        });
+    });
+</script>
+{% endblock scripts %}

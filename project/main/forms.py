@@ -154,3 +154,19 @@ class AddressModelForm(forms.ModelForm):
             'gps_coordinates': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'GPS координати'})
         }
+
+
+class ExpenseModelForm(forms.ModelForm):
+    expense_type = forms.ModelChoiceField(
+        models.ExpenseType.objects.all(), label='Вид разход', empty_label='Избери')
+
+    class Meta:
+        model = models.Expense
+        fields = ['expense_type', 'price', 'currency',
+                  'payment_type', 'additional_information']
+        widgets = {
+            'price': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Цена'}),
+            'additional_information': forms.Textarea(
+                attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}),
+        }

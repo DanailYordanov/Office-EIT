@@ -5,14 +5,14 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from main.models import Car, Reminder, Service, Contractor, Address, Course
+from main import models
 from main import forms
 
 
 @login_required
 def cars_list(request):
     if request.user.is_staff:
-        cars = Car.objects.all()
+        cars = models.Car.objects.all()
     else:
         raise PermissionDenied
 
@@ -50,7 +50,7 @@ def add_car(request):
 @login_required
 def update_car(request, pk):
     if request.user.is_staff:
-        car = get_object_or_404(Car, id=pk)
+        car = get_object_or_404(models.Car, id=pk)
 
         if request.method == 'POST':
             form = forms.CarModelForm(request.POST, instance=car)
@@ -74,7 +74,7 @@ def update_car(request, pk):
 
 class CarDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
-    model = Car
+    model = models.Car
     success_url = reverse_lazy('main:cars-list')
 
     def test_func(self):
@@ -84,7 +84,7 @@ class CarDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required
 def reminders_list(request):
     if request.user.is_staff:
-        reminders = Reminder.objects.all()
+        reminders = models.Reminder.objects.all()
     else:
         raise PermissionDenied
 
@@ -122,7 +122,7 @@ def add_reminder(request):
 @login_required
 def update_reminder(request, pk):
     if request.user.is_staff:
-        reminder = get_object_or_404(Reminder, id=pk)
+        reminder = get_object_or_404(models.Reminder, id=pk)
 
         if request.method == 'POST':
             form = forms.ReminderModelForm(request.POST, instance=reminder)
@@ -146,7 +146,7 @@ def update_reminder(request, pk):
 
 class ReminderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
-    model = Reminder
+    model = models.Reminder
     success_url = reverse_lazy('main:reminders-list')
 
     def test_func(self):
@@ -156,7 +156,7 @@ class ReminderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required
 def services_list(request):
     if request.user.is_staff:
-        services = Service.objects.all()
+        services = models.Service.objects.all()
     else:
         raise PermissionDenied
 
@@ -194,7 +194,7 @@ def add_service(request):
 @login_required
 def update_service(request, pk):
     if request.user.is_staff:
-        service = get_object_or_404(Service, id=pk)
+        service = get_object_or_404(models.Service, id=pk)
 
         if request.method == 'POST':
             form = forms.ServiceModelForm(request.POST, instance=service)
@@ -218,7 +218,7 @@ def update_service(request, pk):
 
 class ServiceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
-    model = Service
+    model = models.Service
     success_url = reverse_lazy('main:services-list')
 
     def test_func(self):
@@ -256,7 +256,7 @@ def user_set_unactive(request, pk=None):
 @login_required
 def contractors_list(request):
     if request.user.is_staff:
-        contractors = Contractor.objects.all()
+        contractors = models.Contractor.objects.all()
     else:
         raise PermissionDenied
 
@@ -294,7 +294,7 @@ def add_contractor(request):
 @login_required
 def update_contractor(request, pk):
     if request.user.is_staff:
-        contractor = get_object_or_404(Contractor, id=pk)
+        contractor = get_object_or_404(models.Contractor, id=pk)
 
         if request.method == 'POST':
             form = forms.ContractorsModelForm(
@@ -319,7 +319,7 @@ def update_contractor(request, pk):
 
 class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
-    model = Contractor
+    model = models.Contractor
     success_url = reverse_lazy('main:contractors-list')
 
     def test_func(self):
@@ -329,7 +329,7 @@ class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required
 def courses_list(request):
     if request.user.is_staff:
-        courses = Course.objects.all()
+        courses = models.Course.objects.all()
     else:
         raise PermissionDenied
 
@@ -345,7 +345,7 @@ def courses_list(request):
 def add_course(request):
     if request.user.is_staff:
 
-        addresses = Address.objects.all()
+        addresses = models.Address.objects.all()
 
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST)
@@ -361,12 +361,12 @@ def add_course(request):
                         address_input = f.cleaned_data.get('address_input')
                         save = f.cleaned_data.get('save')
 
-                        address_object = Address.objects.filter(
+                        address_object = models.Address.objects.filter(
                             address=address_input)
 
                         if not address_object:
                             if save:
-                                address_object = Address.objects.create(
+                                address_object = models.Address.objects.create(
                                     address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
                             else:
                                 address_object = None
@@ -398,8 +398,8 @@ def add_course(request):
 def update_course(request, pk):
     if request.user.is_staff:
 
-        addresses = Address.objects.all()
-        course = get_object_or_404(Course, id=pk)
+        addresses = models.Address.objects.all()
+        course = get_object_or_404(models.Course, id=pk)
 
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST, instance=course)
@@ -417,12 +417,12 @@ def update_course(request, pk):
                             address_input = f.cleaned_data.get('address_input')
                             save = f.cleaned_data.get('save')
 
-                            address_object = Address.objects.filter(
+                            address_object = models.Address.objects.filter(
                                 address=address_input)
 
                             if not address_object:
                                 if save:
-                                    address_object = Address.objects.create(
+                                    address_object = models.Address.objects.create(
                                         address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
                                 else:
                                     address_object = None
@@ -454,7 +454,7 @@ def update_course(request, pk):
 
 class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
-    model = Course
+    model = models.Course
     success_url = reverse_lazy('main:courses-list')
 
     def test_func(self):
@@ -464,7 +464,7 @@ class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required
 def addresses_list(request):
     if request.user.is_staff:
-        addresses = Address.objects.all()
+        addresses = models.Address.objects.all()
     else:
         raise PermissionDenied
 
@@ -502,7 +502,7 @@ def add_address(request):
 @login_required
 def update_address(request, pk):
     if request.user.is_staff:
-        address = get_object_or_404(Address, id=pk)
+        address = get_object_or_404(models.Address, id=pk)
 
         if request.method == 'POST':
             form = forms.AddressModelForm(request.POST, instance=address)
@@ -526,8 +526,113 @@ def update_address(request, pk):
 
 class AddressDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
-    model = Address
+    model = models.Address
     success_url = reverse_lazy('main:addresses-list')
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def add_expense(request, pk):
+    course = get_object_or_404(models.Course, id=pk)
+
+    if request.method == 'POST':
+        form = forms.ExpenseModelForm(request.POST)
+
+        if form.is_valid():
+            form.instance.course = course
+            form.save()
+
+            return redirect('main:course-information', pk=pk)
+    else:
+        form = forms.ExpenseModelForm()
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-expense', args=(pk,)),
+        'page_heading': 'Добавяне на разход'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def update_expense(request, pk):
+    expense = get_object_or_404(models.Expense, id=pk)
+
+    if request.method == 'POST':
+        form = forms.ExpenseModelForm(request.POST, instance=expense)
+
+        if form.is_valid():
+            form.save()
+
+            return redirect('main:update-expense', pk=pk)
+    else:
+        form = forms.ExpenseModelForm(instance=expense)
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-expense', args=(pk,)),
+        'page_heading': 'Редактиране на разход'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
+
+    model = models.Expense
+
+    def get_success_url(self):
+        return reverse_lazy('main:course-information', kwargs={'pk': self.kwargs['course_pk']})
+
+
+@login_required
+def course_information(request, pk):
+
+    course = get_object_or_404(models.Course, id=pk)
+
+    if request.method == 'POST':
+        formset = forms.CourseAddressUpdateFormset(
+            request.POST, instance=course)
+
+        if formset.is_valid():
+            for f in formset:
+                if f.is_valid():
+                    f.instance.course = course
+
+                    if 'address_input' in f.changed_data or 'save' in f.changed_data:
+                        address_input = f.cleaned_data.get('address_input')
+                        save = f.cleaned_data.get('save')
+
+                        address_object = models.Address.objects.filter(
+                            address=address_input)
+
+                        if not address_object:
+                            if save:
+                                address_object = models.Address.objects.create(
+                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
+                            else:
+                                address_object = None
+                        else:
+                            address_object = address_object[0]
+
+                        f.instance.address_obj = address_object
+                        f.save()
+
+                    formset.save()
+                    return redirect('main:course-information', pk=pk)
+
+    else:
+        expenses = models.Expense.objects.filter(course=course)
+        formset = forms.CourseAddressUpdateFormset(instance=course)
+
+    context = {
+        'course': course,
+        'formset': formset,
+        'expenses': expenses,
+        'page_heading': 'Информация за курс'
+    }
+
+    return render(request, 'main/course_information.html', context)

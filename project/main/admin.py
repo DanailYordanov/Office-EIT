@@ -1,15 +1,17 @@
 from django.contrib import admin
-from main.models import Car, CarType, Reminder, ReminderType, Service, ServiceType, Contractor, Bank, Address, Course, CourseAddress
+from main import models
 
 
-admin.site.register(Car)
-admin.site.register(CarType)
-admin.site.register(Bank)
-admin.site.register(Service)
-admin.site.register(ServiceType)
-admin.site.register(Reminder)
-admin.site.register(Contractor)
-admin.site.register(ReminderType)
-admin.site.register(Course)
-admin.site.register(Address)
-admin.site.register(CourseAddress)
+admin.site.register(models.Car)
+admin.site.register(models.CarType)
+admin.site.register(models.Bank)
+admin.site.register(models.Service)
+admin.site.register(models.ServiceType)
+admin.site.register(models.Contractor)
+admin.site.register(models.Reminder)
+admin.site.register(models.ReminderType)
+admin.site.register(models.Course)
+admin.site.register(models.Expense)
+admin.site.register(models.ExpenseType)
+admin.site.register(models.Address)
+admin.site.register(models.CourseAddress)

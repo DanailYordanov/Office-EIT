@@ -29,6 +29,14 @@ LOADING_TYPE_CHOICES = [
     ('unloading_address', 'Адрес на разтоварване')
 ]
 
+PAYMENT_TYPE_CHOICES = [
+    ('', 'Избери'),
+    ('Кеш', 'Кеш'),
+    ('Дебитна карта', 'Дебитна карта'),
+    ('Кредитна карта', 'Кредитна карта'),
+    ('Банков превод', 'Банков превод')
+]
+
 
 class CarType(models.Model):
     car_type = models.CharField('Вид автомобил', max_length=50)
@@ -172,3 +180,27 @@ class CourseAddress(models.Model):
 
     def __str__(self):
         return f'{self.course} - {self.address_input} - {self.date}'
+
+
+class ExpenseType(models.Model):
+    expense_type = models.CharField('Вид разход', max_length=50)
+
+    def __str__(self):
+        return self.expense_type
+
+
+class Expense(models.Model):
+    course = models.ForeignKey(
+        Course, verbose_name='Курс', on_delete=models.CASCADE)
+    expense_type = models.ForeignKey(
+        ExpenseType, verbose_name='Вид разход', on_delete=models.CASCADE)
+    price = models.FloatField('Цена')
+    currency = models.CharField(
+        'Валута', choices=CURRENCY_CHOICES, max_length=5)
+    payment_type = models.CharField(
+        'Вид плащане', max_length=50, choices=PAYMENT_TYPE_CHOICES)
+    additional_information = models.CharField(
+        'Допълнителна информация', max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.course} - {self.expense_type} - {self.price}'
