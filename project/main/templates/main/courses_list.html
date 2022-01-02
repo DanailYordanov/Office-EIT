@@ -1,10 +1,14 @@
 {% extends 'main/base.html' %}
 {% block content_main %}
+
+{% if request.user.is_staff %}
 <div class="col-12 text-center mb-4">
     <a href="{% url 'main:add-course' %}" class="text-decoration-none">
         Добавяне на курс
         <i class="fas fa-plus ms-1"></i></a>
 </div>
+{% endif %}
+
 <div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
     <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
     <label for="tableSearch">Потърси:</label>
@@ -22,7 +26,9 @@
                 <th class="col-2">Шофьор</th>
                 <th class="col-2">Контрагент</th>
                 <th class="col-1">Дата на създаване</th>
+                {% if request.user.is_staff %}
                 <th class="col-1">Действия</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody class="table-body">
@@ -61,6 +67,7 @@
                 <td class="searchable">{{ course.user }}</td>
                 <td class="searchable">{{ course.contractor }}</td>
                 <td class="searchable">{{ course.create_date }}</td>
+                {% if request.user.is_staff %}
                 <td class="text-center">
                     <a href="{% url 'main:update-course' pk=course.id %}" class="btn btn-primary table-action-button">
                         <i class="fas fa-edit"></i>
@@ -70,6 +77,7 @@
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
