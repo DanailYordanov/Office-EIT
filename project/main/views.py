@@ -622,8 +622,8 @@ def course_information(request, pk):
                         f.instance.address_obj = address_object
                         f.save()
 
-                    formset.save()
-                    return redirect('main:course-information', pk=pk)
+            formset.save()
+            return redirect('main:course-information', pk=pk)
 
     else:
         expenses = models.Expense.objects.filter(course=course)
