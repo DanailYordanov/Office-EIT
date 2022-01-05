@@ -131,7 +131,7 @@ class Bank(models.Model):
 
 
 class Course(models.Model):
-    user = models.ForeignKey(
+    driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
     car = models.ForeignKey(
         Car, verbose_name='Автомобил', null=True, on_delete=models.SET_NULL)
@@ -151,7 +151,7 @@ class Course(models.Model):
     create_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user} - {self.contractor} - {self.from_to}'
+        return f'№{self.pk} - {self.driver} - {self.contractor} - {self.from_to}'
 
 
 class Address(models.Model):

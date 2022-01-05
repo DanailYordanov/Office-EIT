@@ -38,7 +38,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            Сигурни ли сте, че искате да изтриете курс {{ course.from_to }} на {{ course.user }} ?
+                            Сигурни ли сте, че искате да изтриете курс {{ course.from_to }} на {{ course.driver }} ?
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
@@ -58,7 +58,7 @@
                 </th>
                 <td class="searchable">{{ course.from_to }}</td>
                 <td class="searchable">{{ course.car }}</td>
-                <td class="searchable">{{ course.user }}</td>
+                <td class="searchable">{{ course.driver }}</td>
                 <td class="searchable">{{ course.contractor }}</td>
                 <td class="searchable">{{ course.create_date }}</td>
                 <td class="text-center">

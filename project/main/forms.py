@@ -90,7 +90,7 @@ class ContractorsModelForm(forms.ModelForm):
 class CourseModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
         models.Car.objects.all(), label='Автомобил', empty_label='Избери')
-    user = forms.ModelChoiceField(
+    driver = forms.ModelChoiceField(
         get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
     contractor = forms.ModelChoiceField(
         models.Contractor.objects.all(), label='Контрагент', empty_label='Избери')
@@ -99,7 +99,7 @@ class CourseModelForm(forms.ModelForm):
 
     class Meta:
         model = models.Course
-        fields = ['user', 'car', 'contractor', 'bank', 'from_to',
+        fields = ['driver', 'car', 'contractor', 'bank', 'from_to',
                   'description', 'price', 'currency', 'cargo_type', 'other_conditions']
         widgets = {
             'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация'}),
@@ -111,6 +111,8 @@ class CourseModelForm(forms.ModelForm):
 
 
 class CourseAddresModelForm(forms.ModelForm):
+    load_type = forms.ChoiceField(
+        label='Вид на товарене', choices=models.LOADING_TYPE_CHOICES, required=False)
     save = forms.BooleanField(label='Запази', widget=forms.CheckboxInput(
         attrs={'class': 'form-check-input'}), required=False)
 
