@@ -331,7 +331,8 @@ def courses_list(request):
     if request.user.is_staff:
         courses = models.Course.objects.all().order_by('-pk')
     else:
-        raise PermissionDenied
+        courses = models.Course.objects.filter(
+            user=request.user).order_by('-pk')
 
     context = {
         'courses': courses,
@@ -621,8 +622,8 @@ def course_information(request, pk):
                         f.instance.address_obj = address_object
                         f.save()
 
-                    formset.save()
-                    return redirect('main:course-information', pk=pk)
+            formset.save()
+            return redirect('main:course-information', pk=pk)
 
     else:
         expenses = models.Expense.objects.filter(course=course)
