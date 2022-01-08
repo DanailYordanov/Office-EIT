@@ -66,7 +66,8 @@
                         data-bs-target="#deleteTripOrder{{ trip_order.id }}">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                    <a href="#" class="btn btn-success table-action-button">
+                    <a href="{% url 'main:trip-order-xlsx' pk=trip_order.id %}"
+                        class="btn btn-success table-action-button">
                         <i class="fa fa-download" aria-hidden="true"></i>
                     </a>
                 </td>

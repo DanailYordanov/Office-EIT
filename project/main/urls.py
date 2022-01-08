@@ -52,6 +52,8 @@ urlpatterns = [
          views.update_trip_order, name='update-trip-order'),
     path('delete-trip-order/<int:pk>/',
          views.TripOrderDeleteView.as_view(), name='delete-trip-order'),
+    path('download/trip-order/<int:pk>/',
+         views.trip_order_xlsx, name='trip-order-xlsx'),
     path('load/course-options/', views.load_course_options,
          name='load-course-options'),
     path('load/dates/', views.load_dates,

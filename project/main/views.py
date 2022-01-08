@@ -1,11 +1,14 @@
-from django.http import JsonResponse
+import os
+from django.conf import settings
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
+from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from openpyxl import load_workbook
 from main import models
 from main import forms
 
@@ -755,5 +758,35 @@ def load_dates(request):
                 data['to_date'] = to_date.last().date
 
         return JsonResponse(data)
+    else:
+        raise PermissionDenied
+
+
+@login_required
+def trip_order_xlsx(request, pk):
+    if request.user.is_staff:
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="Data.xlsx"'
+
+        trip_order = get_object_or_404(models.TripOrder, id=pk)
+        duration_time = (trip_order.to_date - trip_order.from_date).days
+        xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/trip_order.xlsx')
+
+        wb = load_workbook(filename=xlsx_path)
+        ws = wb.active
+        ws['E3'] = trip_order.id
+        ws['G3'] = trip_order.creation_date
+        ws['A8'] = f'{trip_order.driver.first_name} {trip_order.driver.last_name}'
+        ws['B12'] = trip_order.destination
+        ws['C13'] = trip_order.from_date
+        ws['E13'] = trip_order.to_date
+        ws['I13'] = duration_time
+        ws['F15'] = trip_order.course.car.number_plate
+        ws['A29'] = f'{trip_order.driver.first_name} {trip_order.driver.last_name}'
+
+        wb.save(response)
+
+        return response
     else:
         raise PermissionDenied
