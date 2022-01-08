@@ -457,6 +457,82 @@ def update_course(request, pk):
         raise PermissionDenied
 
 
+@login_required
+def course_information(request, pk):
+
+    course = get_object_or_404(models.Course, id=pk)
+
+    if request.method == 'POST':
+        formset = forms.CourseAddressUpdateFormset(
+            request.POST, instance=course)
+
+        if formset.is_valid():
+            for f in formset:
+                if f.is_valid():
+                    f.instance.course = course
+
+                    if 'address_input' in f.changed_data or 'save' in f.changed_data:
+                        address_input = f.cleaned_data.get('address_input')
+                        save = f.cleaned_data.get('save')
+
+                        address_object = models.Address.objects.filter(
+                            address=address_input)
+
+                        if not address_object:
+                            if save:
+                                address_object = models.Address.objects.create(
+                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
+                            else:
+                                address_object = None
+                        else:
+                            address_object = address_object[0]
+
+                        f.instance.address_obj = address_object
+                        f.save()
+
+            formset.save()
+            return redirect('main:course-information', pk=pk)
+
+    else:
+        expenses = models.Expense.objects.filter(course=course)
+        formset = forms.CourseAddressUpdateFormset(instance=course)
+
+    context = {
+        'course': course,
+        'formset': formset,
+        'expenses': expenses,
+        'page_heading': 'Информация за курс'
+    }
+
+    return render(request, 'main/course_information.html', context)
+
+
+@login_required
+def course_expenses_xlsx(request, pk):
+    if request.user.is_staff:
+        course = get_object_or_404(models.Course, id=pk)
+        trip_order = course.triporder_set.all()[0]
+
+        xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/course_expenses.xlsx')
+
+        wb = load_workbook(filename=xlsx_path)
+        ws = wb.active
+        ws['B1'] = trip_order.id
+        ws['E1'] = trip_order.from_date
+        ws['B2'] = course.car.number_plate
+        ws['G2'] = course.driver.__str__()
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Course {course.id} Expenses.xlsx"'
+
+        wb.save(response)
+
+        return response
+    else:
+        raise PermissionDenied
+
+
 class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     model = models.Course
@@ -594,56 +670,6 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
 
 
 @login_required
-def course_information(request, pk):
-
-    course = get_object_or_404(models.Course, id=pk)
-
-    if request.method == 'POST':
-        formset = forms.CourseAddressUpdateFormset(
-            request.POST, instance=course)
-
-        if formset.is_valid():
-            for f in formset:
-                if f.is_valid():
-                    f.instance.course = course
-
-                    if 'address_input' in f.changed_data or 'save' in f.changed_data:
-                        address_input = f.cleaned_data.get('address_input')
-                        save = f.cleaned_data.get('save')
-
-                        address_object = models.Address.objects.filter(
-                            address=address_input)
-
-                        if not address_object:
-                            if save:
-                                address_object = models.Address.objects.create(
-                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
-                            else:
-                                address_object = None
-                        else:
-                            address_object = address_object[0]
-
-                        f.instance.address_obj = address_object
-                        f.save()
-
-            formset.save()
-            return redirect('main:course-information', pk=pk)
-
-    else:
-        expenses = models.Expense.objects.filter(course=course)
-        formset = forms.CourseAddressUpdateFormset(instance=course)
-
-    context = {
-        'course': course,
-        'formset': formset,
-        'expenses': expenses,
-        'page_heading': 'Информация за курс'
-    }
-
-    return render(request, 'main/course_information.html', context)
-
-
-@login_required
 def trip_orders_list(request):
     if request.user.is_staff:
         trip_orders = models.TripOrder.objects.all().order_by('-pk')
@@ -765,9 +791,6 @@ def load_dates(request):
 @login_required
 def trip_order_xlsx(request, pk):
     if request.user.is_staff:
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename="Data.xlsx"'
-
         trip_order = get_object_or_404(models.TripOrder, id=pk)
         duration_time = (trip_order.to_date - trip_order.from_date).days
         xlsx_path = os.path.join(
@@ -784,6 +807,9 @@ def trip_order_xlsx(request, pk):
         ws['I13'] = duration_time
         ws['F15'] = trip_order.course.car.number_plate
         ws['A29'] = f'{trip_order.driver.first_name} {trip_order.driver.last_name}'
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.id}.xlsx"'
 
         wb.save(response)
 

@@ -76,6 +76,10 @@
                         data-bs-target="#deleteCourse{{ course.id }}">
                         <i class="fas fa-trash-alt"></i>
                     </button>
+                    <a href="{% url 'main:course-expenses-xlsx' pk=course.id %}"
+                        class="btn btn-success table-action-button">
+                        <i class="fa fa-download" aria-hidden="true"></i>
+                    </a>
                 </td>
                 {% endif %}
             </tr>
