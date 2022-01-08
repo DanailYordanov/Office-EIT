@@ -1,14 +1,21 @@
-$("#tableSearch").keyup(function () {
-    var rows = $(".table-body").find("tr").hide();
-    if (this.value.length) {
-        var data = this.value.split(" ");
-        $.each(data, function (i, v) {
-            rows.find('.searchable').filter(":contains('" + v + "')").parent().show();
-        });
-    } else rows.show();
+$(document).ready(function () {
+    $("#tableSearch").keyup(function () {
+        var rows = $(".table-body").find("tr").hide();
+        if (this.value.length) {
+            var data = this.value.split(" ");
+            $.each(data, function (i, v) {
+                rows.find('.searchable').filter(":contains('" + v + "')").parent().show();
+            });
+        } else rows.show();
+    });
+
+    $('#addCourseBtn').click(addAddressField);
+
+    $('#driverTripOrderID').change(courseOptionsLoad);
+
+    $('#courseTripOrderID').change(datesLoad);
 });
 
-$('#addCourseBtn').click(addAddressField);
 
 function addAddressField(e) {
     e.preventDefault();
@@ -31,5 +38,55 @@ function addAddressField(e) {
 
     $(".date-picker").datepicker({
         format: 'yyyy-mm-dd',
+    });
+}
+
+
+function courseOptionsLoad() {
+    var driver_id = $(this).val();
+    var loadCoursesURL = $(this).attr('data-load-courses-url');
+    var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
+
+    $.ajax({
+        url: loadCoursesURL,
+        type: 'POST',
+        data: {
+            'driver_id': driver_id
+        },
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function (data) {
+            $('#courseTripOrderID').html(data);
+            $('#courseTripOrderID').niceSelect('update');
+        },
+        error: function (response) {
+            alert('Нещо се обърка. Опитайте отново!');
+        }
+    });
+}
+
+
+function datesLoad() {
+    var course_id = $(this).val();
+    var loadDatesURL = $(this).attr('data-load-dates-url');
+    var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
+
+    $.ajax({
+        url: loadDatesURL,
+        type: 'POST',
+        data: {
+            'course_id': course_id
+        },
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function (data) {
+            $('#id_from_date').val(data['from_date']);
+            $('#id_to_date').val(data['to_date']);
+        },
+        error: function (response) {
+            alert('Нещо се обърка. Опитайте отново!');
+        }
     });
 }

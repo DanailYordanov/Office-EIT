@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
@@ -637,3 +638,75 @@ def course_information(request, pk):
     }
 
     return render(request, 'main/course_information.html', context)
+
+
+@login_required
+def add_trip_order(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.TripOrderModelForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:addresses-list')
+        else:
+            form = forms.TripOrderModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-trip-order'),
+        'page_heading': 'Добавяне на командировъчна заповед'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def load_course_options(request):
+    if request.method == 'POST':
+        driver_id = request.POST.get('driver_id')
+
+        if driver_id != '':
+            courses = models.Course.objects.filter(driver__id=int(driver_id))
+        else:
+            courses = models.Course.objects.none()
+
+        context = {
+            'courses': courses
+        }
+
+        return render(request, 'main/course_select_options.html', context)
+    else:
+        raise PermissionDenied
+
+
+@login_required
+def load_dates(request):
+    if request.method == 'POST':
+        course_id = request.POST.get('course_id')
+
+        data = {
+            'from_date': None,
+            'to_date': None
+        }
+
+        if course_id != '':
+            course_addresses = models.CourseAddress.objects.filter(
+                course__id=int(course_id))
+
+            from_date = course_addresses.filter(
+                load_type='loading_address').order_by('date')
+            to_date = course_addresses.filter(
+                load_type='unloading_address').order_by('date')
+
+            if (from_date):
+                data['from_date'] = from_date.first().date
+
+            if (to_date):
+                data['to_date'] = to_date.last().date
+
+        return JsonResponse(data)
+    else:
+        raise PermissionDenied

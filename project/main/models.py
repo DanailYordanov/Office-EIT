@@ -204,3 +204,17 @@ class Expense(models.Model):
 
     def __str__(self):
         return f'{self.course} - {self.expense_type} - {self.price}'
+
+
+class TripOrder(models.Model):
+    course = models.ForeignKey(
+        Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
+    destination = models.CharField('Дестинация', max_length=100)
+    from_date = models.DateField('Начална дата')
+    to_date = models.DateField('Крайна дата')
+    creation_date = models.DateField('Дата на създаване', auto_now_add=True)
+
+    def __str__(self):
+        return f'Командировъчна заповед № - {self.id}'

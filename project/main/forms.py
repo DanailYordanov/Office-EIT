@@ -1,4 +1,5 @@
 from django import forms
+from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
 from main import models
 
@@ -172,3 +173,53 @@ class ExpenseModelForm(forms.ModelForm):
             'additional_information': forms.Textarea(
                 attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}),
         }
+
+
+class TripOrderModelForm(forms.ModelForm):
+    driver = forms.ModelChoiceField(
+        get_user_model().objects.filter(is_active=True, is_staff=False),
+        label='Шорфьор',
+        empty_label='Избери',
+        widget=forms.Select(
+            attrs={
+                'data-load-courses-url': reverse_lazy('main:load-course-options'),
+                'id': 'driverTripOrderID'
+            })
+    )
+    course = forms.ModelChoiceField(
+        models.Course.objects.none(),
+        label='Курс',
+        empty_label='Избери',
+        widget=forms.Select(
+            attrs={
+                'data-load-dates-url': reverse_lazy('main:load-dates'),
+                'id': 'courseTripOrderID'
+            })
+    )
+
+    class Meta:
+        model = models.TripOrder
+        fields = ['driver', 'course', 'destination', 'from_date', 'to_date']
+        widgets = {
+            'destination': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Дестинация'}),
+            'from_date': forms.TextInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Начална дата'}),
+            'to_date': forms.TextInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Крайна дата'})
+        }
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        if 'driver' in self.data:
+            try:
+                driver_id = int(self.data.get('driver'))
+                self.fields['course'].queryset = models.Course.objects.filter(
+                    driver__id=driver_id)
+                print(self.fields['course'].queryset)
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:
+            self.fields['course'].queryset = self.instance.driver.course_set
