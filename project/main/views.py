@@ -522,6 +522,7 @@ def course_expenses_xlsx(request, pk):
         ws['E1'] = trip_order.from_date
         ws['B2'] = course.car.number_plate
         ws['G2'] = course.driver.__str__()
+        ws['G17'] = course.driver.debit_card_number
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = f'attachment; filename="Course {course.id} Expenses.xlsx"'
@@ -800,13 +801,13 @@ def trip_order_xlsx(request, pk):
         ws = wb.active
         ws['E3'] = trip_order.id
         ws['G3'] = trip_order.creation_date
-        ws['A8'] = f'{trip_order.driver.first_name} {trip_order.driver.last_name}'
+        ws['A8'] = trip_order.driver.__str__()
         ws['B12'] = trip_order.destination
         ws['C13'] = trip_order.from_date
         ws['E13'] = trip_order.to_date
         ws['I13'] = duration_time
         ws['F15'] = trip_order.course.car.number_plate
-        ws['A29'] = f'{trip_order.driver.first_name} {trip_order.driver.last_name}'
+        ws['A29'] = trip_order.driver.__str__()
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.id}.xlsx"'
