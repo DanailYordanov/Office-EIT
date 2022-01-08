@@ -1,0 +1,78 @@
+{% extends 'main/base.html' %}
+{% block content_main %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-trip-order' %}" class="text-decoration-none">
+        Добавяне на командировъчна заповед
+        <i class="fas fa-plus ms-1"></i></a>
+</div>
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по име на шофьор, дестинация, номер на заповед или курс
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-1">Запоед №</th>
+                <th class="col-1">Курс №</th>
+                <th class="col-3">Шофьор</th>
+                <th class="col-3">Дестинация</th>
+                <th class="col-2">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for trip_order in trip_orders %}
+            <div class="modal fade" id="deleteTripOrder{{ trip_order.id }}" tabindex="-1"
+                aria-labelledby="deleteTripOrder{{ trip_order.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteTripOrder{{ trip_order.id }}Label">
+                                Изтриване на техническо обслужване
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете командировъчна заповед № {{ trip_order.id }}?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-trip-order' pk=trip_order.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <td class="searchable">{{ trip_order.id }}</td>
+                <td class="searchable">
+                    <a href="{% url 'main:course-information' pk=trip_order.course.id %}" class="text-decoration-none">
+                        {{ trip_order.course.id }}
+                    </a>
+                </td>
+                <td class="searchable">{{ trip_order.driver }}</td>
+                <td class="searchable">{{ trip_order.destination }}</td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-trip-order' pk=trip_order.id %}"
+                        class="btn btn-primary table-action-button">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteTripOrder{{ trip_order.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <a href="#" class="btn btn-success table-action-button">
+                        <i class="fa fa-download" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}

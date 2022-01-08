@@ -641,6 +641,21 @@ def course_information(request, pk):
 
 
 @login_required
+def trip_orders_list(request):
+    if request.user.is_staff:
+        trip_orders = models.TripOrder.objects.all().order_by('-pk')
+    else:
+        raise PermissionDenied
+
+    context = {
+        'trip_orders': trip_orders,
+        'page_heading': 'Командировъчни заповеди'
+    }
+
+    return render(request, 'main/trip_orders_list.html', context)
+
+
+@login_required
 def add_trip_order(request):
     if request.user.is_staff:
         if request.method == 'POST':
@@ -648,7 +663,7 @@ def add_trip_order(request):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:addresses-list')
+                return redirect('main:trip-orders-list')
         else:
             form = forms.TripOrderModelForm()
     else:
@@ -661,6 +676,38 @@ def add_trip_order(request):
     }
 
     return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def update_trip_order(request, pk):
+    trip_order = get_object_or_404(models.TripOrder, id=pk)
+
+    if request.method == 'POST':
+        form = forms.TripOrderModelForm(request.POST, instance=trip_order)
+
+        if form.is_valid():
+            form.save()
+
+            return redirect('main:trip-orders-list')
+    else:
+        form = forms.TripOrderModelForm(instance=trip_order)
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-trip-order', args=(pk,)),
+        'page_heading': 'Редактиране на командировъчна заповед'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+class TripOrderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = models.TripOrder
+    success_url = reverse_lazy('main:trip-orders-list')
+
+    def test_func(self):
+        return self.request.user.is_staff
 
 
 @login_required
