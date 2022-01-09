@@ -107,6 +107,8 @@ class ProfileDetailsForm(forms.ModelForm):
                                          widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
     debit_card_number = forms.IntegerField(
         label='Номер на дебитна карта', widget=forms.NumberInput(attrs={'class': 'form-control'}), required=False)
+    phone_number = forms.CharField(
+        label='Телефонен номер', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
 
     class Meta:
         model = get_user_model()
@@ -118,5 +120,6 @@ class ProfileDetailsForm(forms.ModelForm):
             'digital_card_expiration',
             'psychological_test_expiration',
             'pasport_expiration',
-            'debit_card_number'
+            'debit_card_number',
+            'phone_number'
         ]
