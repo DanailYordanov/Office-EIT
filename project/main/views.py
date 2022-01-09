@@ -817,3 +817,115 @@ def trip_order_xlsx(request, pk):
         return response
     else:
         raise PermissionDenied
+
+
+@login_required
+def expense_orders_list(request):
+    if request.user.is_staff:
+        expense_orders = models.ExpenseOrder.objects.all().order_by('-pk')
+    else:
+        raise PermissionDenied
+
+    context = {
+        'expense_orders': expense_orders,
+        'page_heading': 'Разходни ордери'
+    }
+
+    return render(request, 'main/expense_orders_list.html', context)
+
+
+@login_required
+def add_expense_order(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.ExpenseOrderModelForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:expense-orders-list')
+        else:
+            form = forms.ExpenseOrderModelForm()
+
+        context = {
+            'form': form,
+            'url': reverse('main:add-expense-order'),
+            'page_heading': 'Добавяне на разходен ордер'
+        }
+
+        return render(request, 'main/add_update_form.html', context)
+    else:
+        raise PermissionDenied
+
+
+@login_required
+def update_expense_order(request, pk):
+    if request.user.is_staff:
+        expense_order = get_object_or_404(models.ExpenseOrder, id=pk)
+
+        if request.method == 'POST':
+            form = forms.ExpenseOrderModelForm(
+                request.POST, instance=expense_order)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:expense-orders-list')
+        else:
+            form = forms.ExpenseOrderModelForm(instance=expense_order)
+
+        context = {
+            'form': form,
+            'url': reverse('main:update-expense-order', args=(pk,)),
+            'page_heading': 'Редактиране на разходен ордер'
+        }
+
+        return render(request, 'main/add_update_form.html', context)
+    else:
+        raise PermissionDenied
+
+
+class ExpenseOrderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = models.ExpenseOrder
+    success_url = reverse_lazy('main:expense-orders-list')
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+@login_required
+def expense_order_xlsx(request, pk):
+    if request.user.is_staff:
+        expense_order = get_object_or_404(models.ExpenseOrder, id=pk)
+        duration_time = (expense_order.trip_order.to_date -
+                         expense_order.trip_order.from_date).days
+        xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/expense_order.xlsx')
+
+        wb = load_workbook(filename=xlsx_path)
+        ws = wb.active
+        ws['E3'] = expense_order.id
+        ws['G3'] = expense_order.creation_date
+        ws['D5'] = expense_order.trip_order.driver.__str__()
+
+        if expense_order.BGN_amount:
+            ws['B7'] = expense_order.BGN_amount
+
+        if expense_order.EUR_amount:
+            ws['E7'] = expense_order.EUR_amount
+
+        ws['F10'] = expense_order.trip_order.id
+        ws['H10'] = expense_order.trip_order.from_date
+        ws['G12'] = expense_order.trip_order.driver.debit_card_number
+        ws['A19'] = expense_order.trip_order.driver.__str__()
+        ws['C21'] = expense_order.trip_order.from_date
+        ws['C23'] = expense_order.trip_order.to_date
+        ws['C25'] = duration_time
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Expense Order {expense_order.id}.xlsx"'
+
+        wb.save(response)
+
+        return response
+    else:
+        raise PermissionDenied

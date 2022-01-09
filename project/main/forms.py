@@ -223,3 +223,18 @@ class TripOrderModelForm(forms.ModelForm):
                 pass
         elif self.instance.pk:
             self.fields['course'].queryset = self.instance.driver.course_set
+
+
+class ExpenseOrderModelForm(forms.ModelForm):
+    trip_order = forms.ModelChoiceField(
+        models.TripOrder.objects.all(), label='Командировъчна заповед', empty_label='Избери')
+
+    class Meta:
+        model = models.ExpenseOrder
+        fields = ['trip_order', 'BGN_amount', 'EUR_amount']
+        widgets = {
+            'BGN_amount': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Сума в лева'}),
+            'EUR_amount': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Сума в евро'}),
+        }

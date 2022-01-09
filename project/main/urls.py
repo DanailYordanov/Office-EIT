@@ -59,5 +59,13 @@ urlpatterns = [
     path('load/course-options/', views.load_course_options,
          name='load-course-options'),
     path('load/dates/', views.load_dates,
-         name='load-dates')
+         name='load-dates'),
+    path('expense-orders/', views.expense_orders_list, name='expense-orders-list'),
+    path('add-expense-order/', views.add_expense_order, name='add-expense-order'),
+    path('update-expense-order/<int:pk>/',
+         views.update_expense_order, name='update-expense-order'),
+    path('delete-expense-order/<int:pk>/',
+         views.ExpenseOrderDeleteView.as_view(), name='delete-expense-order'),
+    path('download/expense-order/<int:pk>/',
+         views.expense_order_xlsx, name='expense-order-xlsx'),
 ]

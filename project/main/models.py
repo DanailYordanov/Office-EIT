@@ -218,3 +218,14 @@ class TripOrder(models.Model):
 
     def __str__(self):
         return f'Командировъчна заповед № - {self.id}'
+
+
+class ExpenseOrder(models.Model):
+    trip_order = models.ForeignKey(
+        TripOrder, verbose_name='Командировъчна заповед', null=True, on_delete=models.SET_NULL)
+    BGN_amount = models.FloatField('Сума в лева', null=True, blank=True)
+    EUR_amount = models.FloatField('Сума в евро', null=True, blank=True)
+    creation_date = models.DateField('Дата на създаване', auto_now_add=True)
+
+    def __str__(self):
+        return f'Разходен ордер № - {self.id}'
