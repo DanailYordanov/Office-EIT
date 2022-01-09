@@ -625,7 +625,6 @@ def add_expense(request, pk):
         if form.is_valid():
             form.instance.course = course
             form.save()
-
             return redirect('main:course-information', pk=pk)
     else:
         form = forms.ExpenseModelForm()
@@ -648,7 +647,6 @@ def update_expense(request, pk):
 
         if form.is_valid():
             form.save()
-
             return redirect('main:course-information', pk=expense.course.id)
     else:
         form = forms.ExpenseModelForm(instance=expense)
@@ -717,7 +715,6 @@ def update_trip_order(request, pk):
 
         if form.is_valid():
             form.save()
-
             return redirect('main:trip-orders-list')
     else:
         form = forms.TripOrderModelForm(instance=trip_order)
