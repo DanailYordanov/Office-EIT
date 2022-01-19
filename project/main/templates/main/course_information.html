@@ -1,14 +1,4 @@
 {% extends 'main/base.html' %}
-
-{% block head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"
-    integrity="sha512-YdYyWQf8AS4WSB0WWdc3FbQ3Ypdm0QCWD2k4hgfqbQbRCJBEgX0iAegkl2S1Evma5ImaVXLBeUkIlP6hQ1eYKQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css"
-    integrity="sha512-CruCP+TD3yXzlvvijET8wV5WxxEh5H8P4cmz0RFbKK6FlZ2sYl3AEsKlLPHbniXKSrDdFewhbmBK5skbdsASbQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-{% endblock head %}
-
 {% block content_main %}
 <div class="col-12 text-center mb-4">
     <a href="{% url 'main:add-expense' pk=course.id %}" class="text-decoration-none">
@@ -131,76 +121,4 @@
         </tbody>
     </table>
 </div>
-
-<form action="{{ url }}" class="form-flex mb-5" method="post" autocomplete="off" enctype="multipart/form-data"
-    novalidate>
-    {% csrf_token %}
-    {{ formset.management_form }}
-
-    {% for formset_field in formset %}
-    <div class="col-12 form-flex adress-form">
-        <p class="fw-light text-center fs-4">Адрес</p>
-        {% for f in formset_field %}
-        {% if f.field.widget.input_type != 'hidden' %}
-        <div class="col-12 col-md-8 col-xl-6 address-field">
-            {% if f.field.widget.input_type == 'checkbox' %}
-
-            {{ f }}
-            <label class="form-check-label" for="{{ f.id_for_label }}">
-                {% if f.name == 'save' %}
-                Запази
-                {% else %}
-                Изтрий
-                {% endif %}
-            </label>
-
-            {% else %}
-
-            <div class="field-label">
-                {{ f.label_tag }}
-            </div>
-            <div class="field">
-                {{ f }}
-                {% if f.name == 'address_input' %}
-                <datalist id="datalistAddresses">
-                    {% for address in addresses %}
-                    <option value="{{ address }}"></option>
-                    {% endfor %}
-                </datalist>
-                {% endif %}
-            </div>
-            {{ f.errors }}
-
-            {% endif %}
-        </div>
-        {% else %}
-        {{ f }}
-        {% endif %}
-        {% endfor %}
-    </div>
-    {% endfor %}
-    <a href="#" class="text-decoration-none text-center" id="addCourseBtn">
-        Добави адрес
-        <i class="fas fa-plus ms-1"></i>
-    </a>
-
-    <button type="submit" class="btn btn-primary">Редактирай</button>
-</form>
 {% endblock content_main %}
-
-{% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"
-    integrity="sha512-NqYds8su6jivy1/WLoW8x1tZMRD7/1ZfhWG/jcRQLOzV1k1rIODCpMgoBnar5QXshKJGV7vi0LXLNXPoFsM5Zg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"
-    integrity="sha512-RCgrAvvoLpP7KVgTkTctrUdv7C6t7Un3p1iaoPr1++3pybCyCsCZZN7QEHMZTcJTmcJ7jzexTO+eFpHk4OCFAg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
-    $(function () {
-        $('select').niceSelect();
-        $(".date-picker").datepicker({
-            format: 'yyyy-mm-dd',
-        });
-    });
-</script>
-{% endblock scripts %}

@@ -459,47 +459,11 @@ def update_course(request, pk):
 
 @login_required
 def course_information(request, pk):
-
     course = get_object_or_404(models.Course, id=pk)
-
-    if request.method == 'POST':
-        formset = forms.CourseAddressUpdateFormset(
-            request.POST, instance=course)
-
-        if formset.is_valid():
-            for f in formset:
-                if f.is_valid():
-                    f.instance.course = course
-
-                    if 'address_input' in f.changed_data or 'save' in f.changed_data:
-                        address_input = f.cleaned_data.get('address_input')
-                        save = f.cleaned_data.get('save')
-
-                        address_object = models.Address.objects.filter(
-                            address=address_input)
-
-                        if not address_object:
-                            if save:
-                                address_object = models.Address.objects.create(
-                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
-                            else:
-                                address_object = None
-                        else:
-                            address_object = address_object[0]
-
-                        f.instance.address_obj = address_object
-                        f.save()
-
-            formset.save()
-            return redirect('main:course-information', pk=pk)
-
-    else:
-        expenses = models.Expense.objects.filter(course=course)
-        formset = forms.CourseAddressUpdateFormset(instance=course)
+    expenses = models.Expense.objects.filter(course=course)
 
     context = {
         'course': course,
-        'formset': formset,
         'expenses': expenses,
         'page_heading': 'Информация за курс'
     }
