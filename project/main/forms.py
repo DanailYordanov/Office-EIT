@@ -67,6 +67,8 @@ class ContractorsModelForm(forms.ModelForm):
         attrs={'class': 'form-control', 'placeholder': 'Град'}), required=False)
     address = forms.CharField(label='Адрес', widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Адрес'}), required=False)
+    correspondence_address = forms.CharField(label='Адрес за кореспонденция', widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Адрес за кореспонденция'}), required=False)
     phone_number = forms.CharField(label='Телефонен номер', widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}), required=False)
     email = forms.CharField(label='E-mail', widget=forms.TextInput(
@@ -84,7 +86,7 @@ class ContractorsModelForm(forms.ModelForm):
 
     class Meta:
         model = models.Contractor
-        fields = ['client_type', 'name', 'bulstat', 'mol', 'country', 'city', 'address',
+        fields = ['client_type', 'name', 'bulstat', 'mol', 'country', 'city', 'address', 'correspondence_address',
                   'phone_number', 'email', 'maturity_date', 'charging_vat', 'cmr_photo', 'license_photo', 'expiration_date']
 
 
