@@ -238,3 +238,18 @@ class ExpenseOrderModelForm(forms.ModelForm):
             'EUR_amount': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Сума в евро'}),
         }
+
+
+class CourseInvoiceModelForm(forms.ModelForm):
+    course = forms.ModelChoiceField(
+        models.Course.objects.all(), label='Курс', empty_label='Избери')
+
+    class Meta:
+        model = models.CourseInvoice
+        fields = '__all__'
+        widgets = {
+            'quantity': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Количество'}),
+            'price': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Цена'})
+        }

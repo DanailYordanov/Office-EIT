@@ -68,4 +68,12 @@ urlpatterns = [
          views.ExpenseOrderDeleteView.as_view(), name='delete-expense-order'),
     path('download/expense-order/<int:pk>/',
          views.expense_order_xlsx, name='expense-order-xlsx'),
+    path('course-invoices-list/', views.course_invoices_list,
+         name='course-invoices-list'),
+    path('add-course-invoice/', views.add_course_invoice,
+         name='add-course-invoice'),
+    path('update-course-invoice/<int:pk>/',
+         views.update_course_invoice, name='update-course-invoice'),
+    path('delete-course-invoice/<int:pk>/',
+         views.CourseInvoiceDeleteView.as_view(), name='delete-course-invoice')
 ]

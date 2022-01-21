@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.shortcuts import reverse
 
 
 CLIENT_TYPE_CHOICES = [
@@ -35,6 +36,30 @@ PAYMENT_TYPE_CHOICES = [
     ('Дебитна карта', 'Дебитна карта'),
     ('Кредитна карта', 'Кредитна карта'),
     ('Банков превод', 'Банков превод')
+]
+
+
+MEASURE_TYPE_CHOICES = [
+    ('', 'Избери'),
+    ('Тон', 'Тон'),
+    ('Курс', 'Курс'),
+    ('Брой', 'Брой'),
+    ('Километър', 'Километър')
+]
+
+
+INVOICE_TYPE_CHOICES = [
+    ('', 'Избери'),
+    ('Фактура', 'Фактура'),
+    ('Кредитно известие', 'Кредитно известие'),
+    ('Дебитно известие', 'Дебитно известие')
+]
+
+
+TAX_TYPE_CHOICES = [
+    ('', 'Избери'),
+    ('Стандартна фактура', 'Стандартна фактура'),
+    ('Фактура без начисление на ДДС', 'Фактура без начисление на ДДС')
 ]
 
 
@@ -153,6 +178,11 @@ class Course(models.Model):
     def __str__(self):
         return f'№{self.pk} - {self.driver} - {self.contractor} - {self.from_to}'
 
+    def get_absolute_url(self):
+        return reverse('main:course-information', kwargs={
+            'pk': self.id,
+        })
+
 
 class Address(models.Model):
     address = models.CharField('Адрес', max_length=200)
@@ -229,3 +259,21 @@ class ExpenseOrder(models.Model):
 
     def __str__(self):
         return f'Разходен ордер № - {self.id}'
+
+
+class CourseInvoice(models.Model):
+    course = models.ForeignKey(
+        Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
+    payment_type = models.CharField(
+        'Вид плащане', max_length=50, choices=PAYMENT_TYPE_CHOICES)
+    measure_type = models.CharField(
+        'Мярка', max_length=15, choices=MEASURE_TYPE_CHOICES)
+    invoice_type = models.CharField(
+        'Вид документ', max_length=30, choices=INVOICE_TYPE_CHOICES)
+    tax_type = models.CharField(
+        'ДДС', max_length=30, choices=TAX_TYPE_CHOICES)
+    quantity = models.IntegerField('Количество')
+    price = models.FloatField('Цена')
+
+    def __str__(self):
+        return f'Фактура за курс № - {self.id}'

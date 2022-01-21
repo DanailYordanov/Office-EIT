@@ -890,3 +890,73 @@ def expense_order_xlsx(request, pk):
         return response
     else:
         raise PermissionDenied
+
+
+@login_required
+def course_invoices_list(request):
+    if request.user.is_staff:
+        course_invoices = models.CourseInvoice.objects.all().order_by('-pk')
+    else:
+        raise PermissionDenied
+
+    context = {
+        'course_invoices': course_invoices,
+        'page_heading': 'Фактури за курсове'
+    }
+
+    return render(request, 'main/course_invoices_list.html', context)
+
+
+@login_required
+def add_course_invoice(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.CourseInvoiceModelForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:course-invoices-list')
+        else:
+            form = forms.CourseInvoiceModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-course-invoice'),
+        'page_heading': 'Добавяне на фактура за курс'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def update_course_invoice(request, pk):
+    course_invoice = get_object_or_404(models.CourseInvoice, id=pk)
+
+    if request.method == 'POST':
+        form = forms.CourseInvoiceModelForm(
+            request.POST, instance=course_invoice)
+
+        if form.is_valid():
+            form.save()
+            return redirect('main:course-invoices-list')
+    else:
+        form = forms.CourseInvoiceModelForm(instance=course_invoice)
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-course-invoice', args=(pk,)),
+        'page_heading': 'Редактиране на фактура за курс'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+class CourseInvoiceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = models.CourseInvoice
+    success_url = reverse_lazy('main:course-invoices-list')
+
+    def test_func(self):
+        return self.request.user.is_staff
