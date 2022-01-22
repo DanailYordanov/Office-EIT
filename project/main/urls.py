@@ -75,5 +75,7 @@ urlpatterns = [
     path('update-course-invoice/<int:pk>/',
          views.update_course_invoice, name='update-course-invoice'),
     path('delete-course-invoice/<int:pk>/',
-         views.CourseInvoiceDeleteView.as_view(), name='delete-course-invoice')
+         views.CourseInvoiceDeleteView.as_view(), name='delete-course-invoice'),
+    path('download/course-invoice/<int:pk>/',
+         views.course_invoice_xlsx, name='course-invoice-xlsx')
 ]

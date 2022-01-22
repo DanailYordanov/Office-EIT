@@ -276,6 +276,7 @@ class CourseInvoice(models.Model):
         'ДДС', max_length=30, choices=TAX_TYPE_CHOICES)
     quantity = models.IntegerField('Количество')
     price = models.FloatField('Цена')
+    creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
         return f'Фактура за курс № - {self.id}'

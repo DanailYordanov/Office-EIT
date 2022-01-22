@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from openpyxl import load_workbook
+from num2cyrillic import NumberToWords
 from main import models
 from main import forms
 
@@ -960,3 +961,53 @@ class CourseInvoiceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVie
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def course_invoice_xlsx(request, pk):
+    if request.user.is_staff:
+        course_invoice = get_object_or_404(models.CourseInvoice, id=pk)
+        xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/course_invoice.xlsx')
+
+        contractor = course_invoice.course.contractor
+        price_sum = float(course_invoice.price) * int(course_invoice.quantity)
+        price_in_words = NumberToWords()
+
+        wb = load_workbook(filename=xlsx_path)
+        ws = wb.active
+        ws['V5'] = str(course_invoice.id).zfill(10)
+        ws['V6'] = course_invoice.creation_date
+        ws['G9'] = contractor.name
+        ws['G11'] = None  # ДДС №
+        ws['G12'] = None  # Идент №
+        ws['G13'] = contractor.city
+        ws['G14'] = contractor.address
+        ws['G16'] = contractor.mol
+        ws['G17'] = contractor.phone_number
+        ws['M21'] = course_invoice.measure_type
+        ws['Q21'] = course_invoice.quantity
+        ws['T21'] = course_invoice.price
+        ws['X21'] = price_sum
+
+        if course_invoice.tax_type == 'Стандартна фактура':
+            ws['X23'] = price_sum
+            ws['X24'] = price_sum * 0.2
+            ws['X25'] = price_sum + price_sum * 0.2
+            ws['G23'] = f'{price_in_words.cyrillic(int(price_sum + price_sum * 0.2))} лв.'
+        else:
+            ws['X23'] = None
+            ws['X24'] = None
+            ws['X25'] = price_sum
+            ws['G23'] = f'{price_in_words.cyrillic(price_sum)} лв.'
+
+        ws['J27'] = course_invoice.creation_date
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.id}.xlsx"'
+
+        wb.save(response)
+
+        return response
+    else:
+        raise PermissionDenied
