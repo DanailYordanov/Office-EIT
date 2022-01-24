@@ -149,6 +149,51 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarCoursesDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-file-invoice"></i>
+                                Документи
+                            </a>
+                            <ul class="dropdown-menu mb-3" aria-labelledby="navbarCoursesDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:course-invoices-list' %}">
+                                        <i class="fas fa-file-invoice"></i>
+                                        Списък с фактури
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:add-course-invoice' %}">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Добавяне на фактура
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:expense-orders-list' %}">
+                                        <i class="fas fa-euro-sign"></i>
+                                        Списък с разходни ордери
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:add-expense-order' %}">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Добавяне на разходен ордер
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:trip-orders-list' %}">
+                                        <i class="fas fa-globe-africa"></i>
+                                        Списък с командировъчни заповеди
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:add-trip-order' %}">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Добавяне на командировъчна заповед
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'main:courses-list' %}">
