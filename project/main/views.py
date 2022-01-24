@@ -1011,3 +1011,73 @@ def course_invoice_xlsx(request, pk):
         return response
     else:
         raise PermissionDenied
+
+
+@login_required
+def companies_list(request):
+    if request.user.is_staff:
+        companies = models.Company.objects.all()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'companies': companies,
+        'page_heading': 'Фирми'
+    }
+
+    return render(request, 'main/companies_list.html', context)
+
+
+@login_required
+def add_company(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.CompanyModelForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:companies-list')
+        else:
+            form = forms.CompanyModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-company'),
+        'page_heading': 'Добавяне на фирма'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def update_company(request, pk):
+    company = get_object_or_404(models.Company, id=pk)
+
+    if request.method == 'POST':
+        form = forms.CompanyModelForm(
+            request.POST, instance=company)
+
+        if form.is_valid():
+            form.save()
+            return redirect('main:companies-list')
+    else:
+        form = forms.CompanyModelForm(instance=company)
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-company', args=(pk,)),
+        'page_heading': 'Редактиране на фирма'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+class CompanyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = models.Company
+    success_url = reverse_lazy('main:companies-list')
+
+    def test_func(self):
+        return self.request.user.is_staff

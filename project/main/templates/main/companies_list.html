@@ -1,0 +1,68 @@
+{% extends 'main/base.html' %}
+{% block content_main %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-company' %}" class="text-decoration-none">
+        Добавяне на фирма
+        <i class="fas fa-plus ms-1"></i>
+    </a>
+</div>
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по име, булстат или МОЛ
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-2">Име</th>
+                <th class="col-1">Булстат</th>
+                <th class="col-1">МОЛ</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for company in companies %}
+            <div class="modal fade" id="deleteCompany{{ company.id }}" tabindex="-1"
+                aria-labelledby="deleteCompany{{ company.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteCompany{{ company.id }}Label">
+                                Изтриване на фирма
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете фирмата {{ company }} ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-company' pk=company.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <td class="searchable">{{ company.name }}</td>
+                <td class="searchable">{{ company.bulstat }}</td>
+                <td class="searchable">{{ company.mol }}</td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-company' pk=company.id %}"
+                        class="btn btn-primary table-action-button"><i class="fas fa-edit"></i></a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteCompany{{ company.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}

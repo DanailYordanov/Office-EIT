@@ -280,3 +280,19 @@ class CourseInvoice(models.Model):
 
     def __str__(self):
         return f'Фактура за курс № - {self.id}'
+
+
+class Company(models.Model):
+    name = models.CharField('Име', max_length=100)
+    bulstat = models.CharField(
+        'Булстат', max_length=100, null=True, blank=True)
+    mol = models.CharField('МОЛ', max_length=100, null=True, blank=True)
+    city = models.CharField('Град', max_length=100, null=True, blank=True)
+    address = models.CharField('Адрес', max_length=100, null=True, blank=True)
+    correspondence_address = models.CharField(
+        'Адрес за кореспонденция', max_length=100, null=True, blank=True)
+    phone_number = models.CharField(
+        'Телефонен номер', max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.name

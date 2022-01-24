@@ -255,3 +255,25 @@ class CourseInvoiceModelForm(forms.ModelForm):
             'price': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Цена'})
         }
+
+
+class CompanyModelForm(forms.ModelForm):
+    class Meta:
+        model = models.Company
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Име'}),
+            'bulstat': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Булстат'}),
+            'mol': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'МОЛ'}),
+            'city': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Град'}),
+            'address': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
+            'correspondence_address': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес за кореспонденция'}),
+            'phone_number': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'})
+        }
