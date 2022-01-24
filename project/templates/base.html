@@ -39,7 +39,7 @@
                             <a class="nav-link dropdown-toggle" href="#" id="navbarCarsDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-car me-1"></i>
-                                Автомобили
+                                Управление
                             </a>
                             <ul class="dropdown-menu mb-3" aria-labelledby="navbarCarsDropdown">
                                 <li>
@@ -49,21 +49,9 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'main:add-car' %}">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Добавяне на автомобил
-                                    </a>
-                                </li>
-                                <li>
                                     <a class="dropdown-item" href="{% url 'main:reminders-list' %}">
                                         <i class="fas fa-clock"></i>
                                         Списък с напоняния
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'main:add-reminder' %}">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Добавяне на напомняне
                                     </a>
                                 </li>
                                 <li>
@@ -73,9 +61,9 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'main:add-service' %}">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Добавяне на техническо обслужване
+                                    <a class="dropdown-item" href="{% url 'main:companies-list' %}">
+                                        <i class="fas fa-book"></i>
+                                        Списък с фирми
                                     </a>
                                 </li>
                                 <li>
@@ -163,33 +151,15 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'main:add-course-invoice' %}">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Добавяне на фактура
-                                    </a>
-                                </li>
-                                <li>
                                     <a class="dropdown-item" href="{% url 'main:expense-orders-list' %}">
                                         <i class="fas fa-euro-sign"></i>
                                         Списък с разходни ордери
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'main:add-expense-order' %}">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Добавяне на разходен ордер
-                                    </a>
-                                </li>
-                                <li>
                                     <a class="dropdown-item" href="{% url 'main:trip-orders-list' %}">
                                         <i class="fas fa-globe-africa"></i>
                                         Списък с командировъчни заповеди
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'main:add-trip-order' %}">
-                                        <i class="fas fa-plus me-1"></i>
-                                        Добавяне на командировъчна заповед
                                     </a>
                                 </li>
                             </ul>
