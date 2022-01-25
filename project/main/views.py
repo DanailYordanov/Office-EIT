@@ -971,36 +971,50 @@ def course_invoice_xlsx(request, pk):
             settings.BASE_DIR, 'main/xlsx_files/course_invoice.xlsx')
 
         contractor = course_invoice.course.contractor
-        price_sum = float(course_invoice.price) * int(course_invoice.quantity)
+        price_sum = round(float(course_invoice.price) *
+                          int(course_invoice.quantity), 2)
+
+        if course_invoice.tax_type == 'Стандартна фактура':
+            calculated_price = round(price_sum + price_sum * 0.2, 2)
+        else:
+            calculated_price = price_sum
+
+        whole_part = int(calculated_price)
+        fractional_part = int(
+            (round((calculated_price - whole_part), 2) * 100))
         price_in_words = NumberToWords()
 
         wb = load_workbook(filename=xlsx_path)
         ws = wb.active
+
         ws['V5'] = str(course_invoice.id).zfill(10)
         ws['V6'] = course_invoice.creation_date
         ws['G9'] = contractor.name
-        ws['G11'] = None  # ДДС №
-        ws['G12'] = None  # Идент №
+        ws['G11'] = contractor.bulstat
+
+        if contractor.client_type == 'Български':
+            ws['G12'] = contractor.bulstat[2:]
+        else:
+            ws['G12'] = contractor.bulstat
+
         ws['G13'] = contractor.city
         ws['G14'] = contractor.address
         ws['G16'] = contractor.mol
         ws['G17'] = contractor.phone_number
         ws['M21'] = course_invoice.measure_type
         ws['Q21'] = course_invoice.quantity
-        ws['T21'] = course_invoice.price
+        ws['T21'] = round(course_invoice.price, 2)
         ws['X21'] = price_sum
 
         if course_invoice.tax_type == 'Стандартна фактура':
             ws['X23'] = price_sum
-            ws['X24'] = price_sum * 0.2
-            ws['X25'] = price_sum + price_sum * 0.2
-            ws['G23'] = f'{price_in_words.cyrillic(int(price_sum + price_sum * 0.2))} лв.'
+            ws['X24'] = round(price_sum * 0.2, 2)
         else:
             ws['X23'] = None
             ws['X24'] = None
-            ws['X25'] = price_sum
-            ws['G23'] = f'{price_in_words.cyrillic(price_sum)} лв.'
 
+        ws['X25'] = calculated_price
+        ws['G23'] = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
         ws['J27'] = course_invoice.creation_date
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
