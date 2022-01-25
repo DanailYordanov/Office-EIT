@@ -1,0 +1,72 @@
+{% extends 'main/base.html' %}
+{% block content_main %}
+
+{% if request.user.is_staff %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-bank' %}" class="text-decoration-none">
+        Добавяне на банка
+        <i class="fas fa-plus ms-1"></i></a>
+</div>
+{% endif %}
+
+<div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
+    <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
+    <label for="tableSearch">Потърси:</label>
+    <div id="tableSearchHelp" class="form-text">
+        Потърсете по име, банков код или IBAN
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th class="col-2">Име</th>
+                <th class="col-2">Банков код</th>
+                <th class="col-2">IBAN</th>
+                <th class="col-1">Действия</th>
+            </tr>
+        </thead>
+        <tbody class="table-body">
+            {% for bank in banks %}
+            <div class="modal fade" id="deleteBank{{ bank.id }}" tabindex="-1"
+                aria-labelledby="deleteBank{{ bank.id }}Label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteBank{{ bank.id }}Label">
+                                Изтриване на банка
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Сигурни ли сте, че искате да изтриете {{ bank }} ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
+                            <form action="{% url 'main:delete-bank' pk=bank.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Изтриване</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <tr>
+                <td class="searchable">{{ bank.name }}</td>
+                <td class="searchable">{% if bank.bank_code %}{{ bank.bank_code }}{% endif %}</td>
+                <td class="searchable">{{ bank.iban }}</td>
+                <td class="text-center">
+                    <a href="{% url 'main:update-bank' pk=bank.id %}" class="btn btn-primary table-action-button">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-danger table-action-button" data-bs-toggle="modal"
+                        data-bs-target="#deleteBank{{ bank.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content_main %}

@@ -1095,3 +1095,73 @@ class CompanyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def banks_list(request):
+    if request.user.is_staff:
+        banks = models.Bank.objects.all()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'banks': banks,
+        'page_heading': 'Банки'
+    }
+
+    return render(request, 'main/banks_list.html', context)
+
+
+@login_required
+def add_bank(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.BankModelForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:banks-list')
+        else:
+            form = forms.BankModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-bank'),
+        'page_heading': 'Добавяне на банка'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def update_bank(request, pk):
+    bank = get_object_or_404(models.Bank, id=pk)
+
+    if request.method == 'POST':
+        form = forms.BankModelForm(
+            request.POST, instance=bank)
+
+        if form.is_valid():
+            form.save()
+            return redirect('main:banks-list')
+    else:
+        form = forms.BankModelForm(instance=bank)
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-bank', args=(pk,)),
+        'page_heading': 'Редактиране на банка'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+class BankDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = models.Bank
+    success_url = reverse_lazy('main:banks-list')
+
+    def test_func(self):
+        return self.request.user.is_staff

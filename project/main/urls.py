@@ -85,5 +85,13 @@ urlpatterns = [
     path('update-company/<int:pk>/',
          views.update_company, name='update-company'),
     path('delete-company/<int:pk>/',
-         views.CompanyDeleteView.as_view(), name='delete-company')
+         views.CompanyDeleteView.as_view(), name='delete-company'),
+    path('banks-list/', views.banks_list,
+         name='banks-list'),
+    path('add-bank/', views.add_bank,
+         name='add-bank'),
+    path('update-bank/<int:pk>/',
+         views.update_bank, name='update-bank'),
+    path('delete-bank/<int:pk>/',
+         views.BankDeleteView.as_view(), name='delete-bank')
 ]

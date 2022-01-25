@@ -38,7 +38,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarCarsDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-car me-1"></i>
+                                <i class="fas fa-cogs me-1"></i>
                                 Управление
                             </a>
                             <ul class="dropdown-menu mb-3" aria-labelledby="navbarCarsDropdown">
@@ -64,6 +64,12 @@
                                     <a class="dropdown-item" href="{% url 'main:companies-list' %}">
                                         <i class="fas fa-book"></i>
                                         Списък с фирми
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:banks-list' %}">
+                                        <i class="far fa-credit-card"></i>
+                                        Списък с банки
                                     </a>
                                 </li>
                                 <li>

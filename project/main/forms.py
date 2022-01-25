@@ -277,3 +277,17 @@ class CompanyModelForm(forms.ModelForm):
             'phone_number': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'})
         }
+
+
+class BankModelForm(forms.ModelForm):
+    class Meta:
+        model = models.Bank
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Име'}),
+            'bank_code': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Банков код'}),
+            'iban': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'IBAN'})
+        }
