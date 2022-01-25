@@ -152,9 +152,11 @@ class Contractor(models.Model):
 
 class Bank(models.Model):
     name = models.CharField('Име', max_length=50)
+    branch_name = models.CharField('Банков клон', max_length=50)
+    iban = models.CharField('IBAN', max_length=50)
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.branch_name} - {self.iban}'
 
 
 class Course(models.Model):
