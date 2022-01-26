@@ -248,6 +248,8 @@ class ExpenseOrderModelForm(forms.ModelForm):
 class CourseInvoiceModelForm(forms.ModelForm):
     course = forms.ModelChoiceField(
         models.Course.objects.all(), label='Курс', empty_label='Избери')
+    tax_transaction_basis = forms.ModelChoiceField(
+        models.TaxTransactionBasis.objects.all(), label='Основание на сделката', empty_label='Избери')
 
     class Meta:
         model = models.CourseInvoice

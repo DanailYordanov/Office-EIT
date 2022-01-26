@@ -176,6 +176,13 @@ class Company(models.Model):
         return self.name
 
 
+class TaxTransactionBasis(models.Model):
+    name = models.CharField('Име', max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class Course(models.Model):
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
@@ -301,6 +308,8 @@ class CourseInvoice(models.Model):
         'Вид документ', max_length=30, choices=INVOICE_TYPE_CHOICES)
     tax_type = models.CharField(
         'ДДС', max_length=30, choices=TAX_TYPE_CHOICES)
+    tax_transaction_basis = models.ForeignKey(
+        TaxTransactionBasis, verbose_name='Основане на сделка', null=True, on_delete=models.SET_NULL)
     quantity = models.FloatField('Количество')
     price = models.FloatField('Цена')
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
