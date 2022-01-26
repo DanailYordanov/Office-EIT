@@ -258,7 +258,9 @@ class CourseInvoiceModelForm(forms.ModelForm):
             'quantity': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Количество'}),
             'price': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Цена'})
+                attrs={'class': 'form-control', 'placeholder': 'Цена'}),
+            'additional_information': forms.Textarea(
+                attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'})
         }
 
 

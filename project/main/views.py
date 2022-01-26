@@ -1033,6 +1033,8 @@ def course_invoice_xlsx(request, pk):
         to_destination = course_invoice.course.from_to.split(' ')[2]
         from_to = f'Транспорт от {from_destination} до {to_destination} с камион'
 
+        ws['H27'] = course_invoice.additional_information
+
         ws['C21'] = from_to
         ws['I22'] = course_invoice.course.car.number_plate
         ws['H23'] = course_invoice.course.request_number

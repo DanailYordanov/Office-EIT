@@ -312,6 +312,8 @@ class CourseInvoice(models.Model):
         TaxTransactionBasis, verbose_name='Основане на сделка', null=True, on_delete=models.SET_NULL)
     quantity = models.FloatField('Количество')
     price = models.FloatField('Цена')
+    additional_information = models.CharField(
+        'Допълнителна информация', max_length=500, null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
