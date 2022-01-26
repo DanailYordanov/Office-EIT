@@ -1040,7 +1040,7 @@ def course_invoice_xlsx(request, pk):
         ws['H23'] = course_invoice.course.request_number
 
         ws['J28'] = course_invoice.creation_date
-        ws['J29'] = course_invoice.tax_transaction_basis
+        ws['J29'] = course_invoice.tax_transaction_basis.__str__()
 
         ws['R28'] = course_invoice.payment_type
         ws['R29'] = bank.iban
