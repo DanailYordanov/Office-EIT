@@ -160,15 +160,35 @@ class Bank(models.Model):
         return f'{self.name} - {self.bank_code} - {self.iban}'
 
 
+class Company(models.Model):
+    name = models.CharField('Име', max_length=100)
+    bulstat = models.CharField(
+        'Булстат', max_length=100, null=True, blank=True)
+    mol = models.CharField('МОЛ', max_length=100, null=True, blank=True)
+    city = models.CharField('Град', max_length=100, null=True, blank=True)
+    address = models.CharField('Адрес', max_length=100, null=True, blank=True)
+    correspondence_address = models.CharField(
+        'Адрес за кореспонденция', max_length=100, null=True, blank=True)
+    phone_number = models.CharField(
+        'Телефонен номер', max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Course(models.Model):
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
     car = models.ForeignKey(
         Car, verbose_name='Автомобил', null=True, on_delete=models.SET_NULL)
+    company = models.ForeignKey(
+        Company, verbose_name='Фирма', null=True, on_delete=models.SET_NULL)
     contractor = models.ForeignKey(
         Contractor, verbose_name='Контрагент', null=True, on_delete=models.SET_NULL)
     bank = models.ForeignKey(Bank, verbose_name='Банка',
                              null=True, on_delete=models.SET_NULL)
+    request_number = models.CharField(
+        'Номер на заявка', max_length=50, null=True, blank=True)
     from_to = models.CharField('Релация', max_length=100)
     description = models.CharField(
         'Описание', max_length=1000, null=True, blank=True)
@@ -176,6 +196,8 @@ class Course(models.Model):
     currency = models.CharField(
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
     cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
+    contact_person = models.CharField(
+        'Лице за контакт', max_length=50, null=True, blank=True)
     other_conditions = models.CharField(
         'Други условия', max_length=1000, null=True, blank=True)
     create_date = models.DateField('Дата на създаване', auto_now_add=True)
@@ -267,6 +289,8 @@ class ExpenseOrder(models.Model):
 
 
 class CourseInvoice(models.Model):
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
     course = models.ForeignKey(
         Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
     payment_type = models.CharField(
@@ -277,25 +301,9 @@ class CourseInvoice(models.Model):
         'Вид документ', max_length=30, choices=INVOICE_TYPE_CHOICES)
     tax_type = models.CharField(
         'ДДС', max_length=30, choices=TAX_TYPE_CHOICES)
-    quantity = models.IntegerField('Количество')
+    quantity = models.FloatField('Количество')
     price = models.FloatField('Цена')
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
         return f'Фактура за курс № - {self.id}'
-
-
-class Company(models.Model):
-    name = models.CharField('Име', max_length=100)
-    bulstat = models.CharField(
-        'Булстат', max_length=100, null=True, blank=True)
-    mol = models.CharField('МОЛ', max_length=100, null=True, blank=True)
-    city = models.CharField('Град', max_length=100, null=True, blank=True)
-    address = models.CharField('Адрес', max_length=100, null=True, blank=True)
-    correspondence_address = models.CharField(
-        'Адрес за кореспонденция', max_length=100, null=True, blank=True)
-    phone_number = models.CharField(
-        'Телефонен номер', max_length=100, null=True, blank=True)
-
-    def __str__(self):
-        return self.name

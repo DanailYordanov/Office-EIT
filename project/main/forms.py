@@ -95,6 +95,8 @@ class CourseModelForm(forms.ModelForm):
         models.Car.objects.all(), label='Автомобил', empty_label='Избери')
     driver = forms.ModelChoiceField(
         get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
+    company = forms.ModelChoiceField(
+        models.Company.objects.all(), label='Фирма', empty_label='Избери')
     contractor = forms.ModelChoiceField(
         models.Contractor.objects.all(), label='Контрагент', empty_label='Избери')
     bank = forms.ModelChoiceField(
@@ -102,13 +104,14 @@ class CourseModelForm(forms.ModelForm):
 
     class Meta:
         model = models.Course
-        fields = ['driver', 'car', 'contractor', 'bank', 'from_to',
-                  'description', 'price', 'currency', 'cargo_type', 'other_conditions']
+        exclude = ('create_date',)
         widgets = {
+            'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на заявка'}),
             'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
             'price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена'}),
             'cargo_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид и тегло на товара'}),
+            'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Лице за контакт'}),
             'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'})
         }
 
@@ -248,7 +251,7 @@ class CourseInvoiceModelForm(forms.ModelForm):
 
     class Meta:
         model = models.CourseInvoice
-        fields = '__all__'
+        exclude = ('creator',)
         widgets = {
             'quantity': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Количество'}),

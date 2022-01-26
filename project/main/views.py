@@ -915,7 +915,9 @@ def add_course_invoice(request):
             form = forms.CourseInvoiceModelForm(request.POST)
 
             if form.is_valid():
+                form.instance.creator = request.user
                 form.save()
+
                 return redirect('main:course-invoices-list')
         else:
             form = forms.CourseInvoiceModelForm()
@@ -971,8 +973,10 @@ def course_invoice_xlsx(request, pk):
             settings.BASE_DIR, 'main/xlsx_files/course_invoice.xlsx')
 
         contractor = course_invoice.course.contractor
-        price_sum = round(float(course_invoice.price) *
-                          int(course_invoice.quantity), 2)
+        bank = course_invoice.course.bank
+        company = course_invoice.course.company
+
+        price_sum = round(course_invoice.price * course_invoice.quantity, 2)
 
         if course_invoice.tax_type == 'Стандартна фактура':
             calculated_price = round(price_sum + price_sum * 0.2, 2)
@@ -980,8 +984,7 @@ def course_invoice_xlsx(request, pk):
             calculated_price = price_sum
 
         whole_part = int(calculated_price)
-        fractional_part = int(
-            (round((calculated_price - whole_part), 2) * 100))
+        fractional_part = int(((calculated_price - whole_part) * 100))
         price_in_words = NumberToWords()
 
         wb = load_workbook(filename=xlsx_path)
@@ -989,6 +992,7 @@ def course_invoice_xlsx(request, pk):
 
         ws['V5'] = str(course_invoice.id).zfill(10)
         ws['V6'] = course_invoice.creation_date
+
         ws['G9'] = contractor.name
         ws['G11'] = contractor.bulstat
 
@@ -1001,21 +1005,48 @@ def course_invoice_xlsx(request, pk):
         ws['G14'] = contractor.address
         ws['G16'] = contractor.mol
         ws['G17'] = contractor.phone_number
+
+        ws['R9'] = company.name
+        ws['R11'] = company.bulstat
+        ws['R12'] = company.bulstat[2:]
+        ws['R13'] = company.city
+        ws['R14'] = company.address
+        ws['R16'] = company.mol
+        ws['R17'] = company.phone_number
+
         ws['M21'] = course_invoice.measure_type
         ws['Q21'] = course_invoice.quantity
         ws['T21'] = round(course_invoice.price, 2)
         ws['X21'] = price_sum
 
         if course_invoice.tax_type == 'Стандартна фактура':
-            ws['X23'] = price_sum
-            ws['X24'] = round(price_sum * 0.2, 2)
+            ws['X24'] = price_sum
+            ws['X25'] = round(price_sum * 0.2, 2)
         else:
-            ws['X23'] = None
             ws['X24'] = None
+            ws['X25'] = None
 
-        ws['X25'] = calculated_price
-        ws['G23'] = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
-        ws['J27'] = course_invoice.creation_date
+        ws['X26'] = calculated_price
+        ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
+
+        from_destination = course_invoice.course.from_to.split(' ')[0]
+        to_destination = course_invoice.course.from_to.split(' ')[2]
+        from_to = f'Транспорт от {from_destination} до {to_destination} с камион'
+
+        ws['C21'] = from_to
+        ws['I22'] = course_invoice.course.car.number_plate
+        ws['H23'] = course_invoice.course.request_number
+
+        ws['J28'] = course_invoice.creation_date
+        ws['J29'] = None  # TO:DO
+
+        ws['R28'] = course_invoice.payment_type
+        ws['R29'] = bank.iban
+        ws['R31'] = bank.name
+        ws['R33'] = bank.bank_code
+
+        ws['I35'] = course_invoice.course.contact_person
+        ws['S35'] = course_invoice.creator.__str__()
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.id}.xlsx"'
