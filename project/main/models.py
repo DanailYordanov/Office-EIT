@@ -285,6 +285,8 @@ class TripOrder(models.Model):
 
 
 class ExpenseOrder(models.Model):
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
     trip_order = models.ForeignKey(
         TripOrder, verbose_name='Командировъчна заповед', null=True, on_delete=models.SET_NULL)
     BGN_amount = models.FloatField('Сума в лева', null=True, blank=True)

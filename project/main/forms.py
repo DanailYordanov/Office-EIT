@@ -236,7 +236,7 @@ class ExpenseOrderModelForm(forms.ModelForm):
 
     class Meta:
         model = models.ExpenseOrder
-        fields = ['trip_order', 'BGN_amount', 'EUR_amount']
+        exclude = ('creator',)
         widgets = {
             'BGN_amount': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Сума в лева'}),

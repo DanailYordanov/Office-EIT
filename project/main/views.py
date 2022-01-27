@@ -806,7 +806,9 @@ def add_expense_order(request):
             form = forms.ExpenseOrderModelForm(request.POST)
 
             if form.is_valid():
+                form.instance.creator = request.user
                 form.save()
+
                 return redirect('main:expense-orders-list')
         else:
             form = forms.ExpenseOrderModelForm()
@@ -861,35 +863,42 @@ class ExpenseOrderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView
 def expense_order_xlsx(request, pk):
     if request.user.is_staff:
         expense_order = get_object_or_404(models.ExpenseOrder, id=pk)
-        duration_time = (expense_order.trip_order.to_date -
-                         expense_order.trip_order.from_date).days
+
+        unique_token = secrets.token_hex(32)
+
         xlsx_path = os.path.join(
             settings.BASE_DIR, 'main/xlsx_files/expense_order.xlsx')
 
-        wb = load_workbook(filename=xlsx_path)
+        unique_xlsx_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/expense_order-{unique_token}.xlsx')
+
+        shutil.copy(xlsx_path, unique_xlsx_path)
+
+        company = expense_order.trip_order.course.company
+        heading = f'"{company.name}", {company.city}, ЕИК {company.bulstat}'
+
+        wb = load_workbook(filename=unique_xlsx_path)
         ws = wb.active
+
+        ws['A1'] = heading
         ws['E3'] = expense_order.id
         ws['G3'] = expense_order.creation_date
         ws['D5'] = expense_order.trip_order.driver.__str__()
-
-        if expense_order.BGN_amount:
-            ws['B7'] = expense_order.BGN_amount
-
-        if expense_order.EUR_amount:
-            ws['E7'] = expense_order.EUR_amount
-
+        ws['B7'] = expense_order.BGN_amount
+        ws['E7'] = expense_order.EUR_amount
         ws['F10'] = expense_order.trip_order.id
         ws['H10'] = expense_order.trip_order.from_date
         ws['G12'] = expense_order.trip_order.driver.debit_card_number
+        ws['E13'] = expense_order.trip_order.driver.bank.iban
         ws['A19'] = expense_order.trip_order.driver.__str__()
-        ws['C21'] = expense_order.trip_order.from_date
-        ws['C23'] = expense_order.trip_order.to_date
-        ws['C25'] = duration_time
+        ws['F19'] = expense_order.creator.__str__()
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = f'attachment; filename="Expense Order {expense_order.id}.xlsx"'
 
         wb.save(response)
+
+        os.remove(unique_xlsx_path)
 
         return response
     else:
