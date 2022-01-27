@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from main.models import Bank
 
 
 class CustomUser(AbstractUser):
@@ -16,6 +17,8 @@ class CustomUser(AbstractUser):
         'Изтичане на психотест', null=True, blank=True)
     pasport_expiration = models.DateField(
         'Изтичане на паспорт', null=True, blank=True)
+    bank = models.ForeignKey(Bank, verbose_name='Банка',
+                             null=True, on_delete=models.SET_NULL)
     debit_card_number = models.IntegerField(
         'Номер на дебитна карта', null=True, blank=True)
     phone_number = models.CharField(

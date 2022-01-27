@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from allauth.account.forms import LoginForm, SignupForm, ResetPasswordKeyForm, ResetPasswordForm, ChangePasswordForm, AddEmailForm, SetPasswordForm
 from .models import CustomUser
+from main.models import Bank
 
 
 DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
@@ -91,24 +92,8 @@ class CustomResetPasswordKeyForm(ResetPasswordKeyForm):
 
 
 class ProfileDetailsForm(forms.ModelForm):
-    id_card_expiration = forms.DateField(label='Изтичане на лична карта', input_formats=DATE_FORMATS, required=False,
-                                         widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
-    drivers_license_expiration = forms.DateField(label='Изтичане на шофьорска книжка', input_formats=DATE_FORMATS, required=False,
-                                                 widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
-    professional_competence = forms.DateField(label='Изтичане на професионална компетентност', input_formats=DATE_FORMATS, required=False,
-                                              widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
-    adr_expiration = forms.DateField(label='Изтичане на ADR', input_formats=DATE_FORMATS, required=False,
-                                     widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
-    digital_card_expiration = forms.DateField(label='Изтичане на дигитална карта', input_formats=DATE_FORMATS, required=False,
-                                              widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
-    psychological_test_expiration = forms.DateField(label='Изтичане на психотест', input_formats=DATE_FORMATS, required=False,
-                                                    widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
-    pasport_expiration = forms.DateField(label='Изтичане на паспорт', input_formats=DATE_FORMATS, required=False,
-                                         widget=forms.TextInput(attrs={'class': 'form-control date-picker'}))
-    debit_card_number = forms.IntegerField(
-        label='Номер на дебитна карта', widget=forms.NumberInput(attrs={'class': 'form-control'}), required=False)
-    phone_number = forms.CharField(
-        label='Телефонен номер', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    bank = forms.ModelChoiceField(
+        Bank.objects.all(), label='Банка', empty_label='Избери')
 
     class Meta:
         model = get_user_model()
@@ -120,6 +105,18 @@ class ProfileDetailsForm(forms.ModelForm):
             'digital_card_expiration',
             'psychological_test_expiration',
             'pasport_expiration',
+            'bank',
             'debit_card_number',
             'phone_number'
         ]
+        widgets = {
+            'id_card_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'drivers_license_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'professional_competence': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'adr_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'digital_card_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'psychological_test_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'pasport_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'debit_card_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control'})
+        }
