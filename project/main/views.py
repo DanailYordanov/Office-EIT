@@ -1,4 +1,9 @@
+from enum import unique
 import os
+import shutil
+import secrets
+from openpyxl import load_workbook
+from num2cyrillic import NumberToWords
 from django.conf import settings
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
@@ -8,8 +13,6 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from openpyxl import load_workbook
-from num2cyrillic import NumberToWords
 from main import models
 from main import forms
 
@@ -969,8 +972,24 @@ class CourseInvoiceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVie
 def course_invoice_xlsx(request, pk):
     if request.user.is_staff:
         course_invoice = get_object_or_404(models.CourseInvoice, id=pk)
-        xlsx_path = os.path.join(
+
+        unique_token = secrets.token_hex(32)
+
+        unique_dir_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/{unique_token}')
+
+        os.mkdir(unique_dir_path)
+
+        original_xlsx_path = os.path.join(
             settings.BASE_DIR, 'main/xlsx_files/course_invoice.xlsx')
+
+        original_unique_xlsx_path = os.path.join(
+            unique_dir_path, f'course_invoice_original.xlsx')
+
+        copy_unique_xlsx_path = os.path.join(
+            unique_dir_path, f'course_invoice_copy.xlsx')
+
+        shutil.copy(original_xlsx_path, original_unique_xlsx_path)
 
         contractor = course_invoice.course.contractor
         bank = course_invoice.course.bank
@@ -987,7 +1006,7 @@ def course_invoice_xlsx(request, pk):
         fractional_part = int(((calculated_price - whole_part) * 100))
         price_in_words = NumberToWords()
 
-        wb = load_workbook(filename=xlsx_path)
+        wb = load_workbook(filename=original_unique_xlsx_path)
         ws = wb.active
 
         ws['V5'] = str(course_invoice.id).zfill(10)
@@ -1050,10 +1069,28 @@ def course_invoice_xlsx(request, pk):
         ws['I35'] = course_invoice.course.contact_person
         ws['S35'] = course_invoice.creator.__str__()
 
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.id}.xlsx"'
+        wb.save(original_unique_xlsx_path)
 
-        wb.save(response)
+        shutil.copy(original_unique_xlsx_path, copy_unique_xlsx_path)
+
+        wb = load_workbook(filename=copy_unique_xlsx_path)
+        ws = wb.active
+
+        ws['L3'] = 'Копие'
+
+        wb.save(copy_unique_xlsx_path)
+
+        shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
+
+        zip_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/{unique_token}.zip')
+
+        response = HttpResponse(open(zip_path, 'rb'))
+        response['Content-Type'] = 'application/zip'
+        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.id}.zip"'
+
+        os.remove(zip_path)
+        shutil.rmtree(unique_dir_path, ignore_errors=True)
 
         return response
     else:
