@@ -271,10 +271,12 @@ class Expense(models.Model):
 
 
 class TripOrder(models.Model):
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='creator', null=True, on_delete=models.SET_NULL)
     course = models.ForeignKey(
         Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
     driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='driver', null=True, on_delete=models.SET_NULL)
     destination = models.CharField('Дестинация', max_length=100)
     from_date = models.DateField('Начална дата')
     to_date = models.DateField('Крайна дата')

@@ -658,7 +658,9 @@ def add_trip_order(request):
             form = forms.TripOrderModelForm(request.POST)
 
             if form.is_valid():
+                form.instance.creator = request.user
                 form.save()
+
                 return redirect('main:trip-orders-list')
         else:
             form = forms.TripOrderModelForm()
@@ -706,6 +708,53 @@ class TripOrderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 @login_required
+def trip_order_xlsx(request, pk):
+    if request.user.is_staff:
+        trip_order = get_object_or_404(models.TripOrder, id=pk)
+
+        unique_token = secrets.token_hex(32)
+
+        xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/trip_order.xlsx')
+
+        unique_xlsx_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/trip_order_{unique_token}.xlsx')
+
+        shutil.copy(xlsx_path, unique_xlsx_path)
+
+        duration_time = (trip_order.to_date - trip_order.from_date).days
+        company = trip_order.course.company
+        heading = f'"{company.name}", {company.city}, ЕИК {company.bulstat}'
+
+        wb = load_workbook(filename=unique_xlsx_path)
+        ws = wb.active
+
+        ws['A1'] = heading
+        ws['E3'] = trip_order.id
+        ws['G3'] = trip_order.creation_date
+        ws['A8'] = trip_order.driver.__str__()
+        ws['B12'] = trip_order.destination
+        ws['C13'] = trip_order.from_date
+        ws['E13'] = trip_order.to_date
+        ws['I13'] = duration_time
+        ws['F15'] = trip_order.course.car.number_plate
+        ws['F18'] = f'"{company.name}"'
+        ws['A29'] = trip_order.driver.__str__()
+        ws['F29'] = trip_order.creator.__str__()
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.id}.xlsx"'
+
+        wb.save(response)
+
+        os.remove(unique_xlsx_path)
+
+        return response
+    else:
+        raise PermissionDenied
+
+
+@login_required
 def load_course_options(request):
     if request.method == 'POST':
         driver_id = request.POST.get('driver_id')
@@ -750,36 +799,6 @@ def load_dates(request):
                 data['to_date'] = to_date.last().date
 
         return JsonResponse(data)
-    else:
-        raise PermissionDenied
-
-
-@login_required
-def trip_order_xlsx(request, pk):
-    if request.user.is_staff:
-        trip_order = get_object_or_404(models.TripOrder, id=pk)
-        duration_time = (trip_order.to_date - trip_order.from_date).days
-        xlsx_path = os.path.join(
-            settings.BASE_DIR, 'main/xlsx_files/trip_order.xlsx')
-
-        wb = load_workbook(filename=xlsx_path)
-        ws = wb.active
-        ws['E3'] = trip_order.id
-        ws['G3'] = trip_order.creation_date
-        ws['A8'] = trip_order.driver.__str__()
-        ws['B12'] = trip_order.destination
-        ws['C13'] = trip_order.from_date
-        ws['E13'] = trip_order.to_date
-        ws['I13'] = duration_time
-        ws['F15'] = trip_order.course.car.number_plate
-        ws['A29'] = trip_order.driver.__str__()
-
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.id}.xlsx"'
-
-        wb.save(response)
-
-        return response
     else:
         raise PermissionDenied
 
