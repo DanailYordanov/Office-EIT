@@ -481,10 +481,17 @@ def course_expenses_xlsx(request, pk):
         course = get_object_or_404(models.Course, id=pk)
         trip_order = course.triporder_set.all()[0]
 
+        unique_token = secrets.token_hex(32)
+
         xlsx_path = os.path.join(
             settings.BASE_DIR, 'main/xlsx_files/course_expenses.xlsx')
 
-        wb = load_workbook(filename=xlsx_path)
+        unique_xlsx_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/course_expenses_{unique_token}.xlsx')
+
+        shutil.copy(xlsx_path, unique_xlsx_path)
+
+        wb = load_workbook(filename=unique_xlsx_path)
         ws = wb.active
         ws['B1'] = trip_order.id
         ws['E1'] = trip_order.from_date
@@ -496,6 +503,8 @@ def course_expenses_xlsx(request, pk):
         response['Content-Disposition'] = f'attachment; filename="Course {course.id} Expenses.xlsx"'
 
         wb.save(response)
+
+        os.remove(unique_xlsx_path)
 
         return response
     else:
