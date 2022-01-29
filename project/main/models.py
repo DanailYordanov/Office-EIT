@@ -307,16 +307,12 @@ class CourseInvoice(models.Model):
         Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
     payment_type = models.CharField(
         'Вид плащане', max_length=50, choices=PAYMENT_TYPE_CHOICES)
-    measure_type = models.CharField(
-        'Мярка', max_length=15, choices=MEASURE_TYPE_CHOICES)
     invoice_type = models.CharField(
         'Вид документ', max_length=30, choices=INVOICE_TYPE_CHOICES)
     tax_type = models.CharField(
         'ДДС', max_length=30, choices=TAX_TYPE_CHOICES)
     tax_transaction_basis = models.ForeignKey(
         TaxTransactionBasis, verbose_name='Основане на сделка', null=True, on_delete=models.SET_NULL)
-    quantity = models.FloatField('Количество')
-    price = models.FloatField('Цена')
     additional_information = models.CharField(
         'Допълнителна информация', max_length=500, null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)

@@ -256,10 +256,6 @@ class CourseInvoiceModelForm(forms.ModelForm):
         model = models.CourseInvoice
         exclude = ('creator',)
         widgets = {
-            'quantity': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Количество'}),
-            'price': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Цена'}),
             'additional_information': forms.Textarea(
                 attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'})
         }
