@@ -1,9 +1,9 @@
-from enum import unique
 import os
 import shutil
 import secrets
 from openpyxl import load_workbook
 from num2cyrillic import NumberToWords
+from deep_translator import GoogleTranslator
 from django.conf import settings
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
@@ -442,7 +442,7 @@ def update_course(request, pk):
                             f.save()
 
                 formset.save()
-                return redirect('main:update-course', pk=pk)
+                return redirect('main:courses-list')
         else:
             form = forms.CourseModelForm(instance=course)
             formset = forms.CourseAddressUpdateFormset(instance=course)
@@ -1021,27 +1021,34 @@ def course_invoice_xlsx(request, pk):
             settings.BASE_DIR, 'main/xlsx_files/course_invoice.xlsx')
 
         original_unique_xlsx_path = os.path.join(
-            unique_dir_path, f'course_invoice_original.xlsx')
+            unique_dir_path, 'course_invoice_original.xlsx')
 
         copy_unique_xlsx_path = os.path.join(
-            unique_dir_path, f'course_invoice_copy.xlsx')
+            unique_dir_path, 'course_invoice_copy.xlsx')
 
         shutil.copy(original_xlsx_path, original_unique_xlsx_path)
 
-        contractor = course_invoice.course.contractor
-        bank = course_invoice.course.bank
-        company = course_invoice.course.company
+        course = course_invoice.course
+        contractor = course.contractor
+        bank = course.bank
+        company = course.company
 
-        price_sum = round(course_invoice.price * course_invoice.quantity, 2)
+        currency = course.currency
+        price = round(course.price, 2)
+        vat_price = round(course.price * 0.2, 2)
 
         if course_invoice.tax_type == 'Стандартна фактура':
-            calculated_price = round(price_sum + price_sum * 0.2, 2)
+            calculated_price = price + vat_price
         else:
-            calculated_price = price_sum
+            calculated_price = price
 
         whole_part = int(calculated_price)
         fractional_part = int(((calculated_price - whole_part) * 100))
         price_in_words = NumberToWords()
+
+        price = f'{price} {currency}'
+        vat_price = f'{vat_price} {currency}'
+        calculated_price = f'{calculated_price} {currency}'
 
         wb = load_workbook(filename=original_unique_xlsx_path)
         ws = wb.active
@@ -1070,30 +1077,24 @@ def course_invoice_xlsx(request, pk):
         ws['R16'] = company.mol
         ws['R17'] = company.phone_number
 
-        ws['M21'] = course_invoice.measure_type
-        ws['Q21'] = course_invoice.quantity
-        ws['T21'] = round(course_invoice.price, 2)
-        ws['X21'] = price_sum
+        ws['T21'] = price
 
         if course_invoice.tax_type == 'Стандартна фактура':
-            ws['X24'] = price_sum
-            ws['X25'] = round(price_sum * 0.2, 2)
-        else:
-            ws['X24'] = None
-            ws['X25'] = None
+            ws['X24'] = price
+            ws['X25'] = vat_price
 
         ws['X26'] = calculated_price
         ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
 
-        from_destination = course_invoice.course.from_to.split(' ')[0]
-        to_destination = course_invoice.course.from_to.split(' ')[2]
+        from_destination = course.from_to.split(' ')[0]
+        to_destination = course.from_to.split(' ')[2]
         from_to = f'Транспорт от {from_destination} до {to_destination} с камион'
 
         ws['H27'] = course_invoice.additional_information
 
         ws['C21'] = from_to
-        ws['I22'] = course_invoice.course.car.number_plate
-        ws['H23'] = course_invoice.course.request_number
+        ws['I22'] = course.car.number_plate
+        ws['H23'] = course.request_number
 
         ws['J28'] = course_invoice.creation_date
         ws['J29'] = course_invoice.tax_transaction_basis.__str__()
@@ -1103,7 +1104,7 @@ def course_invoice_xlsx(request, pk):
         ws['R31'] = bank.name
         ws['R33'] = bank.bank_code
 
-        ws['I35'] = course_invoice.course.contact_person
+        ws['I35'] = course.contact_person
         ws['S35'] = course_invoice.creator.__str__()
 
         wb.save(original_unique_xlsx_path)
@@ -1116,6 +1117,52 @@ def course_invoice_xlsx(request, pk):
         ws['L3'] = 'Копие'
 
         wb.save(copy_unique_xlsx_path)
+
+        if course.export:
+
+            translated_xlsx_path = os.path.join(
+                settings.BASE_DIR, 'main/xlsx_files/translated_course_invoice.xlsx')
+
+            unique_translated_xlsx_path = os.path.join(
+                unique_dir_path, 'translated_course_invoice.xlsx')
+
+            shutil.copy(translated_xlsx_path, unique_translated_xlsx_path)
+
+            wb = load_workbook(filename=unique_translated_xlsx_path)
+            ws = wb.active
+
+            translator = GoogleTranslator(source='bg', target='en')
+
+            ws['B2'] = translator.translate(company.name)
+            ws['Q2'] = str(course_invoice.id).zfill(10)
+            ws['C3'] = company.bulstat
+            ws['B4'] = translator.translate(company.address)
+            ws['B5'] = translator.translate(company.city)
+
+            ws['C17'] = contractor.name
+            ws['C18'] = contractor.address
+            ws['C19'] = contractor.bulstat
+
+            ws['O17'] = course_invoice.creation_date
+            ws['O18'] = course.car.number_plate
+
+            ws['D41'] = translator.translate(course.from_to)
+            ws['E42'] = course.car.number_plate
+            ws['N40'] = price
+
+            if course_invoice.tax_type == 'Стандартна фактура':
+                ws['P52'] = vat_price
+
+            ws['P53'] = calculated_price
+
+            ws['D73'] = course_invoice.creation_date
+
+            ws['C82'] = translator.translate(course_invoice.payment_type)
+            ws['B83'] = translator.translate(bank.name)
+            ws['C84'] = bank.iban
+            ws['C85'] = bank.bank_code
+
+            wb.save(unique_translated_xlsx_path)
 
         shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
 
