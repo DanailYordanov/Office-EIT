@@ -16,6 +16,15 @@
 
     {% for field in form %}
     <div class="col-12 col-md-8 col-xl-6">
+        {% if field.field.widget.input_type == 'checkbox' %}
+
+        <label class="form-check-label" for="{{ field.id_for_label }}">
+            {{ field.label_tag }}
+        </label>
+        {{ field }}
+
+        {% else %}
+
         <div class="field-label">
             {{ field.label_tag }}
         </div>
@@ -23,6 +32,8 @@
             {{ field }}
         </div>
         {{ field.errors }}
+
+        {% endif %}
     </div>
     {% endfor %}
 
@@ -34,14 +45,10 @@
         <div class="col-12 col-md-8 col-xl-6 address-field">
             {% if f.field.widget.input_type == 'checkbox' %}
 
-            {{ f }}
             <label class="form-check-label" for="{{ f.id_for_label }}">
-                {% if f.name == 'save' %}
-                Запази
-                {% else %}
-                Изтрий
-                {% endif %}
+                {{ f.label_tag }}
             </label>
+            {{ f }}
 
             {% else %}
 

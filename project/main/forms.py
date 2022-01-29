@@ -111,6 +111,7 @@ class CourseModelForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
             'price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена'}),
             'cargo_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид и тегло на товара'}),
+            'export': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Лице за контакт'}),
             'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'})
         }
