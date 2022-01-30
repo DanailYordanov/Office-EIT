@@ -29,7 +29,7 @@ def cars_list(request):
         'page_heading': 'Автомобили'
     }
 
-    return render(request, 'main/cars_list.html', context)
+    return render(request, 'main/lists/cars_list.html', context)
 
 
 @login_required
@@ -101,7 +101,7 @@ def reminders_list(request):
         'page_heading': 'Напомняния'
     }
 
-    return render(request, 'main/reminders_list.html', context)
+    return render(request, 'main/lists/reminders_list.html', context)
 
 
 @login_required
@@ -173,7 +173,7 @@ def services_list(request):
         'page_heading': 'Технически обслужвания'
     }
 
-    return render(request, 'main/services_list.html', context)
+    return render(request, 'main/lists/services_list.html', context)
 
 
 @login_required
@@ -245,7 +245,7 @@ def users_details_list(request):
         'page_heading': 'Документи на шофьори'
     }
 
-    return render(request, 'main/users_details_list.html', context)
+    return render(request, 'main/lists/users_details_list.html', context)
 
 
 @login_required
@@ -273,7 +273,7 @@ def contractors_list(request):
         'page_heading': 'Контрагенти'
     }
 
-    return render(request, 'main/contractors_list.html', context)
+    return render(request, 'main/lists/contractors_list.html', context)
 
 
 @login_required
@@ -347,7 +347,7 @@ def courses_list(request):
         'page_heading': 'Курсове'
     }
 
-    return render(request, 'main/courses_list.html', context)
+    return render(request, 'main/lists/courses_list.html', context)
 
 
 @login_required
@@ -532,7 +532,7 @@ def addresses_list(request):
         'page_heading': 'Адреси'
     }
 
-    return render(request, 'main/addresses_list.html', context)
+    return render(request, 'main/lists/addresses_list.html', context)
 
 
 @login_required
@@ -657,7 +657,7 @@ def trip_orders_list(request):
         'page_heading': 'Командировъчни заповеди'
     }
 
-    return render(request, 'main/trip_orders_list.html', context)
+    return render(request, 'main/lists/trip_orders_list.html', context)
 
 
 @login_required
@@ -825,7 +825,7 @@ def expense_orders_list(request):
         'page_heading': 'Разходни ордери'
     }
 
-    return render(request, 'main/expense_orders_list.html', context)
+    return render(request, 'main/lists/expense_orders_list.html', context)
 
 
 @login_required
@@ -946,7 +946,7 @@ def course_invoices_list(request):
         'page_heading': 'Фактури за курсове'
     }
 
-    return render(request, 'main/course_invoices_list.html', context)
+    return render(request, 'main/lists/course_invoices_list.html', context)
 
 
 @login_required
@@ -1194,7 +1194,7 @@ def companies_list(request):
         'page_heading': 'Фирми'
     }
 
-    return render(request, 'main/companies_list.html', context)
+    return render(request, 'main/lists/companies_list.html', context)
 
 
 @login_required
@@ -1264,7 +1264,7 @@ def banks_list(request):
         'page_heading': 'Банки'
     }
 
-    return render(request, 'main/banks_list.html', context)
+    return render(request, 'main/lists/banks_list.html', context)
 
 
 @login_required
@@ -1334,7 +1334,7 @@ def instructions_list(request):
         'page_heading': 'Инструкции'
     }
 
-    return render(request, 'main/instructions_list.html', context)
+    return render(request, 'main/lists/instructions_list.html', context)
 
 
 @login_required
