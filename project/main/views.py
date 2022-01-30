@@ -769,7 +769,8 @@ def load_course_options(request):
         driver_id = request.POST.get('driver_id')
 
         if driver_id != '':
-            courses = models.Course.objects.filter(driver__id=int(driver_id))
+            courses = models.Course.objects.filter(
+                driver__id=int(driver_id), export=True)
         else:
             courses = models.Course.objects.none()
 

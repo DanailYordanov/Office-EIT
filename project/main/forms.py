@@ -223,8 +223,7 @@ class TripOrderModelForm(forms.ModelForm):
             try:
                 driver_id = int(self.data.get('driver'))
                 self.fields['course'].queryset = models.Course.objects.filter(
-                    driver__id=driver_id)
-                print(self.fields['course'].queryset)
+                    driver__id=driver_id, export=True)
             except (ValueError, TypeError):
                 pass
         elif self.instance.pk:
