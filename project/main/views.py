@@ -733,7 +733,7 @@ def trip_order_xlsx(request, pk):
 
         duration_time = (trip_order.to_date - trip_order.from_date).days
         company = trip_order.course.company
-        heading = f'"{company.name}", {company.city}, ЕИК {company.bulstat}'
+        heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
 
         wb = load_workbook(filename=unique_xlsx_path)
         ws = wb.active
@@ -747,7 +747,7 @@ def trip_order_xlsx(request, pk):
         ws['E13'] = trip_order.to_date
         ws['I13'] = duration_time
         ws['F15'] = trip_order.course.car.number_plate
-        ws['F18'] = f'"{company.name}"'
+        ws['F18'] = f'{company.name}'
         ws['A29'] = trip_order.driver.__str__()
         ws['F29'] = trip_order.creator.__str__()
 
@@ -904,7 +904,7 @@ def expense_order_xlsx(request, pk):
         shutil.copy(xlsx_path, unique_xlsx_path)
 
         company = expense_order.trip_order.course.company
-        heading = f'"{company.name}", {company.city}, ЕИК {company.bulstat}'
+        heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
 
         wb = load_workbook(filename=unique_xlsx_path)
         ws = wb.active
