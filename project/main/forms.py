@@ -295,3 +295,18 @@ class BankModelForm(forms.ModelForm):
             'iban': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'IBAN'})
         }
+
+
+class InstructionModelForm(forms.ModelForm):
+    driver = forms.ModelChoiceField(
+        get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
+    company = forms.ModelChoiceField(
+        models.Company.objects.all(), label='Фирма', empty_label='Избери')
+
+    class Meta:
+        model = models.Instruction
+        exclude = ('creator',)
+        widgets = {
+            'city': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Град'})
+        }

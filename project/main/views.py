@@ -1319,3 +1319,73 @@ class BankDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def instructions_list(request):
+    if request.user.is_staff:
+        instructions = models.Instruction.objects.all()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'instructions': instructions,
+        'page_heading': 'Инструкции'
+    }
+
+    return render(request, 'main/instructions_list.html', context)
+
+
+@login_required
+def add_instruction(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.InstructionModelForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                return redirect('main:instructions-list')
+        else:
+            form = forms.InstructionModelForm()
+    else:
+        raise PermissionDenied
+
+    context = {
+        'form': form,
+        'url': reverse('main:add-instruction'),
+        'page_heading': 'Добавяне на инструкция'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+@login_required
+def update_instruction(request, pk):
+    instruction = get_object_or_404(models.Instruction, id=pk)
+
+    if request.method == 'POST':
+        form = forms.InstructionModelForm(
+            request.POST, instance=instruction)
+
+        if form.is_valid():
+            form.save()
+            return redirect('main:instructions-list')
+    else:
+        form = forms.InstructionModelForm(instance=instruction)
+
+    context = {
+        'form': form,
+        'url': reverse('main:update-instruction', args=(pk,)),
+        'page_heading': 'Редактиране на инструкция'
+    }
+
+    return render(request, 'main/add_update_form.html', context)
+
+
+class InstructionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+    model = models.Instruction
+    success_url = reverse_lazy('main:instructions-list')
+
+    def test_func(self):
+        return self.request.user.is_staff

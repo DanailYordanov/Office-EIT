@@ -93,5 +93,13 @@ urlpatterns = [
     path('update-bank/<int:pk>/',
          views.update_bank, name='update-bank'),
     path('delete-bank/<int:pk>/',
-         views.BankDeleteView.as_view(), name='delete-bank')
+         views.BankDeleteView.as_view(), name='delete-bank'),
+    path('instructions-list/', views.instructions_list,
+         name='instructions-list'),
+    path('add-instruction/', views.add_instruction,
+         name='add-instruction'),
+    path('update-instruction/<int:pk>/',
+         views.update_instruction, name='update-instruction'),
+    path('delete-instruction/<int:pk>/',
+         views.InstructionDeleteView.as_view(), name='delete-instruction')
 ]
