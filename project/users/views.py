@@ -19,13 +19,13 @@ def profile_details(request, pk=None):
         message = f'Редактиране на вашата информация'
 
     if request.method == 'POST':
-        form = ProfileDetailsForm(request.POST, instance=user)
+        form = ProfileDetailsForm(request.user, request.POST, instance=user)
 
         if form.is_valid():
             form.save()
             return redirect(redirect_url)
     else:
-        form = ProfileDetailsForm(instance=user)
+        form = ProfileDetailsForm(user=request.user, instance=user)
 
     context = {
         'form': form,

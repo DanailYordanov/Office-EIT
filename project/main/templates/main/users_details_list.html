@@ -11,14 +11,8 @@
     <table class="table table-striped table-bordered align-middle">
         <thead>
             <tr>
-                <th class="col-2">Шофьор</th>
-                <th class="col-1">Лична карта</th>
-                <th class="col-1">Шофьорска книжка</th>
-                <th class="col-1">Професионална компетентност</th>
-                <th class="col-1">ADR</th>
-                <th class="col-1">Дигитална карта</th>
-                <th class="col-1">Психотест</th>
-                <th class="col-1">Паспорт</th>
+                <th class="col-3">Шофьор</th>
+                <th class="col-2">ЕГН</th>
                 <th class="col-1">Действия</th>
             </tr>
         </thead>
@@ -49,25 +43,9 @@
             </div>
             <tr>
                 <th class="searchable">{{ user }}</th>
-                <td>{% if user.id_card_expiration %}{{ user.id_card_expiration }}{% else %}-{% endif %}</td>
                 <td>
-                    {% if user.drivers_license_expiration %}{{ user.drivers_license_expiration }}{% else %}-{% endif %}
+                    {% if user.personal_id %}{{ user.personal_id }}{% endif %}
                 </td>
-                <td>
-                    {% if user.professional_competence %}{{ user.professional_competence }}{% else %}-{% endif %}
-                </td>
-                <td>
-                    {% if user.adr_expiration %}{{ user.adr_expiration }}{% else %}-{% endif %}
-                </td>
-                <td>{% if user.digital_card_expiration %}{{ user.digital_card_expiration }}{% else %}-{% endif %}</td>
-                <td>
-                    {% if user.psychological_test_expiration %}
-                    {{ user.psychological_test_expiration }}
-                    {% else %}
-                    -
-                    {% endif %}
-                </td>
-                <td>{% if user.pasport_expiration %}{{ user.pasport_expiration }}{% else %}-{% endif %}</td>
                 <td class="text-center">
                     <a href="{% url 'profile-details' pk=user.id %}" class="btn btn-primary table-action-button"><i
                             class="fas fa-edit"></i></a>

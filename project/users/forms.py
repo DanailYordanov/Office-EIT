@@ -98,6 +98,7 @@ class ProfileDetailsForm(forms.ModelForm):
     class Meta:
         model = get_user_model()
         fields = [
+            'personal_id',
             'id_card_expiration',
             'drivers_license_expiration',
             'professional_competence',
@@ -110,6 +111,7 @@ class ProfileDetailsForm(forms.ModelForm):
             'phone_number'
         ]
         widgets = {
+            'personal_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ЕГН'}),
             'id_card_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
             'drivers_license_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
             'professional_competence': forms.TextInput(attrs={'class': 'form-control date-picker'}),
@@ -117,6 +119,12 @@ class ProfileDetailsForm(forms.ModelForm):
             'digital_card_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
             'psychological_test_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
             'pasport_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
-            'debit_card_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control'})
+            'debit_card_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на дебитна карта'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'})
         }
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not user.is_staff:
+            del self.fields['bank']
+            del self.fields['debit_card_number']

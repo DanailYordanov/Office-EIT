@@ -4,6 +4,7 @@ from main.models import Bank
 
 
 class CustomUser(AbstractUser):
+    personal_id = models.CharField('ЕГН', max_length=15, null=True, blank=True)
     id_card_expiration = models.DateField(
         'Изтичане на лична карта', null=True, blank=True)
     drivers_license_expiration = models.DateField(
