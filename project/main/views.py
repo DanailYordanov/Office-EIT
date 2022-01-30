@@ -363,6 +363,10 @@ def add_course(request):
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
 
+                models.CourseService.objects.create(course=form_instance)
+                models.CourseMedicalExmaination.objects.create(
+                    course=form_instance)
+
                 for f in formset:
                     if f.is_valid():
                         f.instance.course = form_instance

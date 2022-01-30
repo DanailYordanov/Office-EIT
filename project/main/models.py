@@ -335,3 +335,19 @@ class Instruction(models.Model):
 
     def __str__(self):
         return f'Инструкция на {self.driver} № - {self.id}'
+
+
+class CourseService(models.Model):
+    course = models.ForeignKey(
+        Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return f'Технически преглед към курс № - {self.course.id}'
+
+
+class CourseMedicalExmaination(models.Model):
+    course = models.ForeignKey(
+        Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return f'Медицински преглед към курс № - {self.course.id}'
