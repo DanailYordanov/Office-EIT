@@ -328,6 +328,8 @@ class Instruction(models.Model):
         Company, verbose_name='Фирма', null=True, on_delete=models.SET_NULL)
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='instruction_driver', null=True, on_delete=models.SET_NULL)
+    car = models.ForeignKey(
+        Car, verbose_name='Автомобил', null=True, on_delete=models.SET_NULL)
     city = models.CharField('Град', max_length=100, null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 

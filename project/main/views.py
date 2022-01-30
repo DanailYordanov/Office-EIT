@@ -1343,7 +1343,9 @@ def add_instruction(request):
             form = forms.InstructionModelForm(request.POST)
 
             if form.is_valid():
+                form.instance.creator = request.user
                 form.save()
+
                 return redirect('main:instructions-list')
         else:
             form = forms.InstructionModelForm()
@@ -1389,3 +1391,59 @@ class InstructionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def instruction_xlsx(request, pk):
+    if request.user.is_staff:
+        instruction = get_object_or_404(models.Instruction, id=pk)
+
+        unique_token = secrets.token_hex(32)
+
+        xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/instruction.xlsx')
+
+        unique_xlsx_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/instruction-{unique_token}.xlsx')
+
+        shutil.copy(xlsx_path, unique_xlsx_path)
+
+        company = instruction.company
+
+        wb = load_workbook(filename=unique_xlsx_path)
+        ws = wb.active
+
+        ws['A2'] = company.name
+        ws['A3'] = f'{company.city}, {company.address}'
+        ws['A4'] = company.bulstat
+        ws['E7'] = instruction.id
+        ws['B9'] = instruction.driver.__str__()
+        ws['G9'] = instruction.driver.personal_id
+        ws['B11'] = instruction.car.number_plate
+        ws['G18'] = instruction.driver.__str__()
+        ws['G21'] = instruction.creator.__str__()
+        ws['B20'] = instruction.creation_date
+        ws['A21'] = instruction.city
+
+        ws['A25'] = company.name
+        ws['A26'] = f'{company.city}, {company.address}'
+        ws['A27'] = company.bulstat
+        ws['E30'] = instruction.id
+        ws['B32'] = instruction.driver.__str__()
+        ws['G32'] = instruction.driver.personal_id
+        ws['B34'] = instruction.car.number_plate
+        ws['G41'] = instruction.driver.__str__()
+        ws['G44'] = instruction.creator.__str__()
+        ws['B43'] = instruction.creation_date
+        ws['A44'] = instruction.city
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Instruction {instruction.id}.xlsx"'
+
+        wb.save(response)
+
+        os.remove(unique_xlsx_path)
+
+        return response
+    else:
+        raise PermissionDenied

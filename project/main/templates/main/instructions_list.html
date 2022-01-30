@@ -9,7 +9,7 @@
     <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
     <label for="tableSearch">Потърси:</label>
     <div id="tableSearchHelp" class="form-text">
-        Потърсете по номер на инструкция или име на шофьор
+        Потърсете по номер на инструкция, автомобил или име на шофьор
     </div>
 </div>
 <div class="table-responsive">
@@ -18,6 +18,7 @@
             <tr>
                 <th class="col-1">№</th>
                 <th class="col-3">Шофьор</th>
+                <th class="col-3">Автомобил</th>
                 <th class="col-2">Действия</th>
             </tr>
         </thead>
@@ -49,6 +50,7 @@
             <tr>
                 <td class="searchable">{{ instruction.id }}</td>
                 <td class="searchable">{{ instruction.driver }}</td>
+                <td class="searchable">{{ instruction.car }}</td>
                 <td class="text-center">
                     <a href="{% url 'main:update-instruction' pk=instruction.id %}"
                         class="btn btn-primary table-action-button">
@@ -58,7 +60,8 @@
                         data-bs-target="#deleteInstruction{{ instruction.id }}">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                    <a href="#" class="btn btn-success table-action-button">
+                    <a href="{% url 'main:instruction-xlsx' pk=instruction.id %}"
+                        class="btn btn-success table-action-button">
                         <i class="fa fa-download" aria-hidden="true"></i>
                     </a>
                 </td>

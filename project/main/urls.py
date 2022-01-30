@@ -101,5 +101,7 @@ urlpatterns = [
     path('update-instruction/<int:pk>/',
          views.update_instruction, name='update-instruction'),
     path('delete-instruction/<int:pk>/',
-         views.InstructionDeleteView.as_view(), name='delete-instruction')
+         views.InstructionDeleteView.as_view(), name='delete-instruction'),
+    path('download/instruction/<int:pk>/',
+         views.instruction_xlsx, name='instruction-xlsx')
 ]
