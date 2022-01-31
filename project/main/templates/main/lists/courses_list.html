@@ -66,7 +66,7 @@
                 <td class="searchable">{{ course.car }}</td>
                 <td class="searchable">{{ course.driver }}</td>
                 <td class="searchable">{{ course.contractor }}</td>
-                <td class="searchable">{{ course.create_date }}</td>
+                <td class="searchable">{{ course.creation_date }}</td>
                 {% if request.user.is_staff %}
                 <td class="text-center">
                     <a href="{% url 'main:update-course' pk=course.id %}" class="btn btn-primary table-action-button">

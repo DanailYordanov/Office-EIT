@@ -208,7 +208,7 @@ class Course(models.Model):
         'Лице за контакт', max_length=50, null=True, blank=True)
     other_conditions = models.CharField(
         'Други условия', max_length=1000, null=True, blank=True)
-    create_date = models.DateField('Дата на създаване', auto_now_add=True)
+    creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
         return f'№{self.pk} - {self.driver} - {self.contractor} - {self.from_to}'
@@ -339,15 +339,15 @@ class Instruction(models.Model):
 
 class CourseService(models.Model):
     course = models.ForeignKey(
-        Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
+        Course, verbose_name='Курс', related_name='course_service', null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return f'Технически преглед към курс № - {self.course.id}'
 
 
-class CourseMedicalExmaination(models.Model):
+class CourseMedicalExamination(models.Model):
     course = models.ForeignKey(
-        Course, verbose_name='Курс', null=True, on_delete=models.SET_NULL)
+        Course, verbose_name='Курс', related_name='course_medical_examination', null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return f'Медицински преглед към курс № - {self.course.id}'
