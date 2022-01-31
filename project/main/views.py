@@ -363,9 +363,10 @@ def add_course(request):
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
 
-                models.CourseService.objects.create(course=form_instance)
-                models.CourseMedicalExmaination.objects.create(
-                    course=form_instance)
+                if form_instance.export:
+                    models.CourseService.objects.create(course=form_instance)
+                    models.CourseMedicalExamination.objects.create(
+                        course=form_instance)
 
                 for f in formset:
                     if f.is_valid():
@@ -1168,6 +1169,51 @@ def course_invoice_xlsx(request, pk):
             ws['C85'] = bank.bank_code
 
             wb.save(unique_translated_xlsx_path)
+
+            course_service_xlsx_path = os.path.join(
+                settings.BASE_DIR, 'main/xlsx_files/course_service.xlsx')
+
+            unique_course_service_xlsx_path = os.path.join(
+                unique_dir_path, 'course_service.xlsx')
+
+            shutil.copy(course_service_xlsx_path,
+                        unique_course_service_xlsx_path)
+
+            wb = load_workbook(filename=unique_course_service_xlsx_path)
+            ws = wb.active
+
+            ws['A1'] = company.name
+            ws['A2'] = f'{company.city}, {company.address}'
+            ws['A3'] = company.bulstat
+            ws['E9'] = course.course_service.all()[0].id
+            ws['B12'] = course.car.number_plate
+            ws['B13'] = course.driver.__str__()
+            ws['B18'] = course.creation_date
+
+            wb.save(unique_course_service_xlsx_path)
+
+            course_medical_examination_xlsx_path = os.path.join(
+                settings.BASE_DIR, 'main/xlsx_files/course_medical_examination.xlsx')
+
+            unique_course_medical_examination_xlsx_path = os.path.join(
+                unique_dir_path, 'course_medical_examination.xlsx')
+
+            shutil.copy(course_medical_examination_xlsx_path,
+                        unique_course_medical_examination_xlsx_path)
+
+            wb = load_workbook(
+                filename=unique_course_medical_examination_xlsx_path)
+            ws = wb.active
+
+            ws['A1'] = company.name
+            ws['A2'] = f'{company.city}, {company.address}'
+            ws['A3'] = company.bulstat
+            ws['E9'] = course.course_medical_examination.all()[0].id
+            ws['A12'] = course.driver.__str__()
+            ws['B13'] = course.car.number_plate
+            ws['B20'] = course.creation_date
+
+            wb.save(unique_course_medical_examination_xlsx_path)
 
         shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
 
