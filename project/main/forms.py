@@ -53,41 +53,37 @@ class ServiceModelForm(forms.ModelForm):
 
 
 class ContractorsModelForm(forms.ModelForm):
-    client_type = forms.ChoiceField(
-        label='Тип клиент', choices=models.CLIENT_TYPE_CHOICES)
-    name = forms.CharField(label='Име', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Име'}))
-    bulstat = forms.CharField(label='Булстат', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Булстат'}), required=False)
-    mol = forms.CharField(label='МОЛ', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'МОЛ'}), required=False)
-    country = forms.CharField(label='Държава', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Държава'}), required=False)
-    city = forms.CharField(label='Град', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Град'}), required=False)
-    address = forms.CharField(label='Адрес', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Адрес'}), required=False)
-    correspondence_address = forms.CharField(label='Адрес за кореспонденция', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Адрес за кореспонденция'}), required=False)
-    phone_number = forms.CharField(label='Телефонен номер', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}), required=False)
-    email = forms.CharField(label='E-mail', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'E-mail'}), required=False)
-    maturity_date = forms.CharField(label='Дата на падеж', widget=forms.TextInput(
-        attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}), required=False)
-    charging_vat = forms.ChoiceField(
-        label='Основание за неначисление на ДДС', choices=models.CHARGING_VAT_CHOICES, required=False)
-    cmr_photo = forms.FileField(
-        label='Прикачи ЧМР', widget=forms.ClearableFileInput(attrs={'class': 'form-control'}), required=False)
-    license_photo = forms.FileField(
-        label='Прикачи лиценз или друг документ', widget=forms.ClearableFileInput(attrs={'class': 'form-control'}), required=False)
-    expiration_date = forms.DateField(label='Дата на изтичане', widget=forms.TextInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}), required=False)
-
     class Meta:
         model = models.Contractor
-        fields = ['client_type', 'name', 'bulstat', 'mol', 'country', 'city', 'address', 'correspondence_address',
-                  'phone_number', 'email', 'maturity_date', 'charging_vat', 'cmr_photo', 'license_photo', 'expiration_date']
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Име'}),
+            'bulstat': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Булстат'}),
+            'mol': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'МОЛ'}),
+            'country': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Държава'}),
+            'city': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Град'}),
+            'address': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
+            'postal_code': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Пощенски код'}),
+            'correspondence_address': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес за кореспонденция'}),
+            'phone_number': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}),
+            'email': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
+            'maturity_date': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}),
+            'cmr_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'license_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'expiration_date': forms.TextInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'})
+        }
 
 
 class CourseModelForm(forms.ModelForm):
