@@ -311,3 +311,14 @@ class InstructionModelForm(forms.ModelForm):
             'city': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Град'})
         }
+
+
+class CourseDateJournalForm(forms.Form):
+    company = forms.ModelChoiceField(
+        models.Company.objects.all(), label='Фирма', empty_label='Избери')
+    from_date = forms.DateField(label='От дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
+        attrs={'class': 'form-control date-picker', 'placeholder': 'От дата'}))
+    to_date = forms.DateField(label='До дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
+        attrs={'class': 'form-control date-picker', 'placeholder': 'До дата'}))
+    journal_type = forms.ChoiceField(
+        label='Вид дневник', choices=models.COURSE_DOCUMENT_TYPE_CHOICES)

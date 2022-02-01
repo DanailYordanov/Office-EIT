@@ -1,4 +1,14 @@
 {% extends 'main/base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"
+    integrity="sha512-YdYyWQf8AS4WSB0WWdc3FbQ3Ypdm0QCWD2k4hgfqbQbRCJBEgX0iAegkl2S1Evma5ImaVXLBeUkIlP6hQ1eYKQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css"
+    integrity="sha512-CruCP+TD3yXzlvvijET8wV5WxxEh5H8P4cmz0RFbKK6FlZ2sYl3AEsKlLPHbniXKSrDdFewhbmBK5skbdsASbQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock head %}
+
 {% block content_main %}
 
 {% if request.user.is_staff %}
@@ -6,6 +16,35 @@
     <a href="{% url 'main:add-course' %}" class="text-decoration-none">
         Добавяне на курс
         <i class="fas fa-plus ms-1"></i></a>
+</div>
+{% endif %}
+
+{% if request.user.is_staff %}
+<p>
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForm"
+        aria-expanded="false" aria-controls="collapseExample">
+        Сваляне на дневник
+    </button>
+</p>
+<div class="collapse" id="collapseForm">
+    <p class="text-center fw-light fs-4">Сваляне на дневник</p>
+    <form action="{% url 'main:courses-list' %}" class="form-flex mb-5" method="post" autocomplete="off"
+        enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="col-12 col-md-8 col-xl-6">
+            <div class="field-label">
+                {{ field.label_tag }}
+            </div>
+            <div class="field">
+                {{ field }}
+            </div>
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Свали</button>
+    </form>
 </div>
 {% endif %}
 
@@ -88,3 +127,20 @@
     </table>
 </div>
 {% endblock content_main %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"
+    integrity="sha512-NqYds8su6jivy1/WLoW8x1tZMRD7/1ZfhWG/jcRQLOzV1k1rIODCpMgoBnar5QXshKJGV7vi0LXLNXPoFsM5Zg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"
+    integrity="sha512-RCgrAvvoLpP7KVgTkTctrUdv7C6t7Un3p1iaoPr1++3pybCyCsCZZN7QEHMZTcJTmcJ7jzexTO+eFpHk4OCFAg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(function () {
+        $('select').niceSelect();
+        $(".date-picker").datepicker({
+            format: 'yyyy-mm-dd',
+        });
+    });
+</script>
+{% endblock scripts %}

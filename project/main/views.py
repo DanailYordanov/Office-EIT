@@ -338,11 +338,97 @@ class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 def courses_list(request):
     if request.user.is_staff:
         courses = models.Course.objects.all().order_by('-pk')
+
+        if request.method == 'POST':
+            form = forms.CourseDateJournalForm(request.POST)
+
+            if form.is_valid():
+                journal_type = form.cleaned_data['journal_type']
+                from_date = form.cleaned_data['from_date']
+                to_date = form.cleaned_data['to_date']
+                company = form.cleaned_data['company']
+
+                if journal_type == 'service_examination':
+                    service_examinations = models.CourseServiceExamination.objects.filter(
+                        creation_date__range=[from_date, to_date]
+                    )
+
+                    unique_token = secrets.token_hex(32)
+
+                    xlsx_path = os.path.join(
+                        settings.BASE_DIR, 'main/xlsx_files/course_services_journal.xlsx')
+
+                    unique_xlsx_path = os.path.join(
+                        settings.BASE_DIR, f'main/xlsx_files/course_services_journal_{unique_token}.xlsx')
+
+                    shutil.copy(xlsx_path, unique_xlsx_path)
+
+                    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
+
+                    wb = load_workbook(filename=unique_xlsx_path)
+                    ws = wb.active
+
+                    ws['A2'] = heading
+
+                    for i in range(0, len(service_examinations)):
+                        ws[f'A{i + 6}'] = service_examinations[i].id
+                        ws[f'B{i + 6}'] = service_examinations[i].course.car.__str__()
+                        ws[f'C{i + 6}'] = service_examinations[i].creation_date
+
+                    response = HttpResponse(
+                        content_type='application/vnd.ms-excel')
+                    response['Content-Disposition'] = f'attachment; filename="Services Journal.xlsx"'
+
+                    wb.save(response)
+
+                    os.remove(unique_xlsx_path)
+
+                elif journal_type == 'medical_examination':
+                    medical_examinations = models.CourseMedicalExamination.objects.filter(
+                        creation_date__range=[from_date, to_date]
+                    )
+
+                    unique_token = secrets.token_hex(32)
+
+                    xlsx_path = os.path.join(
+                        settings.BASE_DIR, 'main/xlsx_files/course_medical_journal.xlsx')
+
+                    unique_xlsx_path = os.path.join(
+                        settings.BASE_DIR, f'main/xlsx_files/course_medical_journal_{unique_token}.xlsx')
+
+                    shutil.copy(xlsx_path, unique_xlsx_path)
+
+                    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
+
+                    wb = load_workbook(filename=unique_xlsx_path)
+                    ws = wb.active
+
+                    ws['A2'] = heading
+
+                    for i in range(0, len(medical_examinations)):
+                        ws[f'A{i + 6}'] = medical_examinations[i].id
+                        ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
+                        ws[f'C{i + 6}'] = medical_examinations[i].creation_date
+
+                    response = HttpResponse(
+                        content_type='application/vnd.ms-excel')
+                    response['Content-Disposition'] = f'attachment; filename="Medical Journal.xlsx"'
+
+                    wb.save(response)
+
+                    os.remove(unique_xlsx_path)
+
+                return response
+        else:
+            form = forms.CourseDateJournalForm()
+
     else:
         courses = models.Course.objects.filter(
             user=request.user).order_by('-pk')
+        form = None
 
     context = {
+        'form': form,
         'courses': courses,
         'page_heading': 'Курсове'
     }
@@ -364,7 +450,8 @@ def add_course(request):
                 form_instance = form.save()
 
                 if form_instance.export:
-                    models.CourseService.objects.create(course=form_instance)
+                    models.CourseServiceExamination.objects.create(
+                        course=form_instance)
                     models.CourseMedicalExamination.objects.create(
                         course=form_instance)
 

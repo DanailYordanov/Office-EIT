@@ -63,6 +63,13 @@ TAX_TYPE_CHOICES = [
 ]
 
 
+COURSE_DOCUMENT_TYPE_CHOICES = [
+    ('', 'Избери'),
+    ('medical_examination', 'Медицински прегледи'),
+    ('service_examination', 'Технически прегледи')
+]
+
+
 class CarType(models.Model):
     car_type = models.CharField('Вид автомобил', max_length=50)
 
@@ -337,9 +344,10 @@ class Instruction(models.Model):
         return f'Инструкция на {self.driver} № - {self.id}'
 
 
-class CourseService(models.Model):
+class CourseServiceExamination(models.Model):
     course = models.ForeignKey(
-        Course, verbose_name='Курс', related_name='course_service', null=True, on_delete=models.SET_NULL)
+        Course, verbose_name='Курс', related_name='course_service', null=True, on_delete=models.CASCADE)
+    creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
         return f'Технически преглед към курс № - {self.course.id}'
@@ -347,7 +355,8 @@ class CourseService(models.Model):
 
 class CourseMedicalExamination(models.Model):
     course = models.ForeignKey(
-        Course, verbose_name='Курс', related_name='course_medical_examination', null=True, on_delete=models.SET_NULL)
+        Course, verbose_name='Курс', related_name='course_medical_examination', null=True, on_delete=models.CASCADE)
+    creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
         return f'Медицински преглед към курс № - {self.course.id}'
