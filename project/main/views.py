@@ -450,10 +450,15 @@ def add_course(request):
                 form_instance = form.save()
 
                 if form_instance.export:
+                    service_examination_perpetrator = form.cleaned_data[
+                        'service_examination_perpetrator']
+                    medical_examination_perpetrator = form.cleaned_data[
+                        'medical_examination_perpetrator']
+
                     models.CourseServiceExamination.objects.create(
-                        course=form_instance)
+                        course=form_instance, perpetrator=service_examination_perpetrator)
                     models.CourseMedicalExamination.objects.create(
-                        course=form_instance)
+                        course=form_instance, perpetrator=medical_examination_perpetrator)
 
                 for f in formset:
                     if f.is_valid():

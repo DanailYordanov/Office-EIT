@@ -349,6 +349,8 @@ class Instruction(models.Model):
 class CourseServiceExamination(models.Model):
     course = models.ForeignKey(
         Course, verbose_name='Курс', related_name='course_service', null=True, on_delete=models.CASCADE)
+    perpetrator = models.CharField(
+        'Извършител', max_length=100, null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):
@@ -358,6 +360,8 @@ class CourseServiceExamination(models.Model):
 class CourseMedicalExamination(models.Model):
     course = models.ForeignKey(
         Course, verbose_name='Курс', related_name='course_medical_examination', null=True, on_delete=models.CASCADE)
+    perpetrator = models.CharField(
+        'Извършител', max_length=100, null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     def __str__(self):

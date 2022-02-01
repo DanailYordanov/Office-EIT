@@ -97,6 +97,12 @@ class CourseModelForm(forms.ModelForm):
         models.Contractor.objects.all(), label='Контрагент', empty_label='Избери')
     bank = forms.ModelChoiceField(
         models.Bank.objects.all(), label='Банка', empty_label='Избери')
+    medical_examination_perpetrator = forms.CharField(
+        label='Извършител на медицински преглед', max_length=100, required=False, widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Извършител на медицински преглед'}))
+    service_examination_perpetrator = forms.CharField(
+        label='Извършител на технически преглед', max_length=100, required=False, widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Извършител на технически преглед'}))
 
     class Meta:
         model = models.Course
