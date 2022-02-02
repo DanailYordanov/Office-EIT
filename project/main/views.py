@@ -374,6 +374,7 @@ def courses_list(request):
                         ws[f'A{i + 6}'] = service_examinations[i].id
                         ws[f'B{i + 6}'] = service_examinations[i].course.car.__str__()
                         ws[f'C{i + 6}'] = service_examinations[i].creation_date
+                        ws[f'F{i + 6}'] = service_examinations[i].perpetrator
 
                     response = HttpResponse(
                         content_type='application/vnd.ms-excel')
@@ -409,6 +410,7 @@ def courses_list(request):
                         ws[f'A{i + 6}'] = medical_examinations[i].id
                         ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
                         ws[f'C{i + 6}'] = medical_examinations[i].creation_date
+                        ws[f'F{i + 6}'] = medical_examinations[i].perpetrator
 
                     response = HttpResponse(
                         content_type='application/vnd.ms-excel')
@@ -1218,15 +1220,16 @@ def course_invoice_xlsx(request, pk):
 
         if course.export:
 
-            translated_xlsx_path = os.path.join(
-                settings.BASE_DIR, 'main/xlsx_files/translated_course_invoice.xlsx')
+            translated_invoice_xlsx_path = os.path.join(
+                settings.BASE_DIR, 'main/xlsx_files/course_translated_invoice.xlsx')
 
-            unique_translated_xlsx_path = os.path.join(
-                unique_dir_path, 'translated_course_invoice.xlsx')
+            unique_translated_invoice_xlsx_path = os.path.join(
+                unique_dir_path, 'course_translated_invoice.xlsx')
 
-            shutil.copy(translated_xlsx_path, unique_translated_xlsx_path)
+            shutil.copy(translated_invoice_xlsx_path,
+                        unique_translated_invoice_xlsx_path)
 
-            wb = load_workbook(filename=unique_translated_xlsx_path)
+            wb = load_workbook(filename=unique_translated_invoice_xlsx_path)
             ws = wb.active
 
             translator = GoogleTranslator(source='bg', target='en')
@@ -1260,29 +1263,31 @@ def course_invoice_xlsx(request, pk):
             ws['C84'] = bank.iban
             ws['C85'] = bank.bank_code
 
-            wb.save(unique_translated_xlsx_path)
+            wb.save(unique_translated_invoice_xlsx_path)
 
-            course_service_xlsx_path = os.path.join(
-                settings.BASE_DIR, 'main/xlsx_files/course_service.xlsx')
+            course_service_examination_xlsx_path = os.path.join(
+                settings.BASE_DIR, 'main/xlsx_files/course_service_examination.xlsx')
 
-            unique_course_service_xlsx_path = os.path.join(
-                unique_dir_path, 'course_service.xlsx')
+            unique_course_service_examination_xlsx_path = os.path.join(
+                unique_dir_path, 'course_service_examination.xlsx')
 
-            shutil.copy(course_service_xlsx_path,
-                        unique_course_service_xlsx_path)
+            shutil.copy(course_service_examination_xlsx_path,
+                        unique_course_service_examination_xlsx_path)
 
-            wb = load_workbook(filename=unique_course_service_xlsx_path)
+            wb = load_workbook(
+                filename=unique_course_service_examination_xlsx_path)
             ws = wb.active
 
             ws['A1'] = company.name
             ws['A2'] = f'{company.city}, {company.address}'
             ws['A3'] = company.bulstat
-            ws['E9'] = course.course_service.all()[0].id
+            ws['E9'] = course.service_examination.id
             ws['B12'] = course.car.number_plate
             ws['B13'] = course.driver.__str__()
+            ws['C15'] = course.service_examination.perpetrator
             ws['B18'] = course.creation_date
 
-            wb.save(unique_course_service_xlsx_path)
+            wb.save(unique_course_service_examination_xlsx_path)
 
             course_medical_examination_xlsx_path = os.path.join(
                 settings.BASE_DIR, 'main/xlsx_files/course_medical_examination.xlsx')
@@ -1300,9 +1305,10 @@ def course_invoice_xlsx(request, pk):
             ws['A1'] = company.name
             ws['A2'] = f'{company.city}, {company.address}'
             ws['A3'] = company.bulstat
-            ws['E9'] = course.course_medical_examination.all()[0].id
+            ws['E9'] = course.medical_examination.id
             ws['A12'] = course.driver.__str__()
             ws['B13'] = course.car.number_plate
+            ws['C17'] = course.medical_examination.perpetrator
             ws['B20'] = course.creation_date
 
             wb.save(unique_course_medical_examination_xlsx_path)
