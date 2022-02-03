@@ -343,8 +343,8 @@ class Expense(models.Model):
 class TripOrder(models.Model):
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='triporder_creator', null=True, on_delete=models.SET_NULL)
-    course = models.ForeignKey(
-        Course, verbose_name='Курс', null=True, on_delete=models.CASCADE)
+    course = models.OneToOneField(
+        Course, verbose_name='Курс', related_name='trip_order', null=True, on_delete=models.CASCADE)
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='triporder_driver', null=True, on_delete=models.SET_NULL)
     destination = models.CharField('Дестинация', max_length=100)
@@ -363,8 +363,8 @@ class TripOrder(models.Model):
 class ExpenseOrder(models.Model):
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
-    trip_order = models.ForeignKey(
-        TripOrder, verbose_name='Командировъчна заповед', null=True, on_delete=models.CASCADE)
+    trip_order = models.OneToOneField(
+        TripOrder, verbose_name='Командировъчна заповед', related_name='expense_order', null=True, on_delete=models.CASCADE)
     BGN_amount = models.FloatField('Сума в лева', null=True, blank=True)
     EUR_amount = models.FloatField('Сума в евро', null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)

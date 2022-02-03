@@ -578,7 +578,7 @@ def course_information(request, pk):
 def course_expenses_xlsx(request, pk):
     if request.user.is_staff:
         course = get_object_or_404(models.Course, id=pk)
-        trip_order = course.triporder_set.all()[0]
+        trip_order = course.trip_order
 
         unique_token = secrets.token_hex(32)
 
