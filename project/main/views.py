@@ -574,42 +574,6 @@ def course_information(request, pk):
     return render(request, 'main/course_information.html', context)
 
 
-@login_required
-def course_expenses_xlsx(request, pk):
-    if request.user.is_staff:
-        course = get_object_or_404(models.Course, id=pk)
-        trip_order = course.trip_order
-
-        unique_token = secrets.token_hex(32)
-
-        xlsx_path = os.path.join(
-            settings.BASE_DIR, 'main/xlsx_files/course_expenses.xlsx')
-
-        unique_xlsx_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/course_expenses_{unique_token}.xlsx')
-
-        shutil.copy(xlsx_path, unique_xlsx_path)
-
-        wb = load_workbook(filename=unique_xlsx_path)
-        ws = wb.active
-        ws['B1'] = trip_order.id
-        ws['E1'] = trip_order.from_date
-        ws['B2'] = course.car.number_plate
-        ws['G2'] = course.driver.__str__()
-        ws['G17'] = course.driver.debit_card_number
-
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename="Course {course.id} Expenses.xlsx"'
-
-        wb.save(response)
-
-        os.remove(unique_xlsx_path)
-
-        return response
-    else:
-        raise PermissionDenied
-
-
 class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     model = models.Course
@@ -822,19 +786,24 @@ def trip_order_xlsx(request, pk):
 
         unique_token = secrets.token_hex(32)
 
-        xlsx_path = os.path.join(
+        unique_dir_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/{unique_token}')
+
+        os.mkdir(unique_dir_path)
+
+        trip_order_xlsx_path = os.path.join(
             settings.BASE_DIR, 'main/xlsx_files/trip_order.xlsx')
 
-        unique_xlsx_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/trip_order_{unique_token}.xlsx')
+        unique_trip_order_xlsx_path = os.path.join(
+            unique_dir_path, 'trip_order.xlsx')
 
-        shutil.copy(xlsx_path, unique_xlsx_path)
+        shutil.copy(trip_order_xlsx_path, unique_trip_order_xlsx_path)
 
         duration_time = (trip_order.to_date - trip_order.from_date).days
         company = trip_order.course.company
         heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
 
-        wb = load_workbook(filename=unique_xlsx_path)
+        wb = load_workbook(filename=unique_trip_order_xlsx_path)
         ws = wb.active
 
         ws['A1'] = heading
@@ -850,12 +819,41 @@ def trip_order_xlsx(request, pk):
         ws['A29'] = trip_order.driver.__str__()
         ws['F29'] = trip_order.creator.__str__()
 
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.id}.xlsx"'
+        wb.save(unique_trip_order_xlsx_path)
 
-        wb.save(response)
+        course = trip_order.course
 
-        os.remove(unique_xlsx_path)
+        course_expenses_xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/course_expenses.xlsx')
+
+        unique_course_expenses_xlsx_path = os.path.join(
+            unique_dir_path, 'course_expenses.xlsx')
+
+        shutil.copy(course_expenses_xlsx_path,
+                    unique_course_expenses_xlsx_path)
+
+        wb = load_workbook(filename=unique_course_expenses_xlsx_path)
+        ws = wb.active
+
+        ws['B1'] = trip_order.id
+        ws['E1'] = trip_order.from_date
+        ws['B2'] = course.car.number_plate
+        ws['G2'] = course.driver.__str__()
+        ws['G17'] = course.driver.debit_card_number
+
+        wb.save(unique_course_expenses_xlsx_path)
+
+        shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
+
+        zip_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/{unique_token}.zip')
+
+        response = HttpResponse(open(zip_path, 'rb'))
+        response['Content-Type'] = 'application/zip'
+        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.id}.zip"'
+
+        os.remove(zip_path)
+        shutil.rmtree(unique_dir_path, ignore_errors=True)
 
         return response
     else:
