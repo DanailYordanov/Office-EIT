@@ -1,10 +1,20 @@
 {% extends 'main/base.html' %}
 {% block content_main %}
-<div class="col-12 text-center mb-4">
+<div class="col-12 text-center mb-2">
     <a href="{% url 'main:add-expense' pk=course.id %}" class="text-decoration-none">
         Добавяне на разход
-        <i class="fas fa-plus ms-1"></i></a>
+        <i class="fas fa-plus ms-1"></i>
+    </a>
 </div>
+
+{% if request.user.is_staff %}
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:update-course' pk=course.id %}" class="text-decoration-none">
+        Редактиране на курса
+        <i class="fas fa-pencil-alt"></i>
+    </a>
+</div>
+{% endif %}
 
 <div class="col-12 col-md-8 col-lg-6 m-auto text-center fw-light fs-5 mb-5">
     <p>
