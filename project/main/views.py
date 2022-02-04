@@ -996,7 +996,7 @@ def expense_order_xlsx(request, pk):
             settings.BASE_DIR, 'main/xlsx_files/expense_order.xlsx')
 
         unique_xlsx_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/expense_order-{unique_token}.xlsx')
+            settings.BASE_DIR, f'main/xlsx_files/expense_order_{unique_token}.xlsx')
 
         shutil.copy(xlsx_path, unique_xlsx_path)
 
@@ -1555,7 +1555,7 @@ def instruction_xlsx(request, pk):
             settings.BASE_DIR, 'main/xlsx_files/instruction.xlsx')
 
         unique_xlsx_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/instruction-{unique_token}.xlsx')
+            settings.BASE_DIR, f'main/xlsx_files/instruction_{unique_token}.xlsx')
 
         shutil.copy(xlsx_path, unique_xlsx_path)
 
