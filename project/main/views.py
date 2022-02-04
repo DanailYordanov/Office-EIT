@@ -1182,7 +1182,11 @@ def course_invoice_xlsx(request, pk):
             ws['X25'] = vat_price
 
         ws['X26'] = calculated_price
-        ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
+
+        if fractional_part != 0:
+            ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
+        else:
+            ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева'
 
         from_destination = course.from_to.split(' ')[0]
         to_destination = course.from_to.split(' ')[2]
