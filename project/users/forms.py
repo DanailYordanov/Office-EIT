@@ -13,7 +13,7 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm):
         model = CustomUser
-        fields = ['username', 'email', 'first_name', 'last_name']
+        fields = ['username', 'first_name', 'last_name']
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -24,35 +24,38 @@ class CustomUserChangeForm(UserChangeForm):
 
 
 class CustomSignupForm(SignupForm):
-    first_name = forms.CharField(max_length=30)
-    last_name = forms.CharField(max_length=30)
+    first_name = forms.CharField(label='Име', max_length=30, required=True)
+    last_name = forms.CharField(label='Фамилия', max_length=30, required=True)
 
     class Meta:
-        fields = ['email', 'first_name', 'last_name', 'password1', 'password2']
+        fields = ['username', 'email', 'first_name',
+                  'last_name', 'password1', 'password2']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields['username'].widget = forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Потребителско име'})
         self.fields['email'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
-        self.fields['first_name'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
-        self.fields['last_name'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'E-mail'})
+        self.fields['first_name'].widget = forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Име'})
+        self.fields['last_name'].widget = forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Фамилия'})
         self.fields['password1'].widget = forms.PasswordInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Парола'})
         self.fields['password2'].widget = forms.PasswordInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Парола отново'})
 
 
 class CustomLoginForm(LoginForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['login'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
+        self.fields['login'].widget = forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Потребителско име'})
         self.fields['password'].widget = forms.PasswordInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Парола'})
 
 
 class CustomResetPasswordForm(ResetPasswordForm):
@@ -60,7 +63,7 @@ class CustomResetPasswordForm(ResetPasswordForm):
         super().__init__(*args, **kwargs)
 
         self.fields['email'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'E-mail'})
 
 
 class CustomChangePasswordForm(ChangePasswordForm):
@@ -68,27 +71,27 @@ class CustomChangePasswordForm(ChangePasswordForm):
         super().__init__(*args, **kwargs)
 
         self.fields['oldpassword'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Стара парола'})
         self.fields['password1'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Парола'})
         self.fields['password2'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Парола отново'})
 
 
 class CustomAddEmailFormForm(AddEmailForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['email'].widget = forms.EmailInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'E-mail'})
 
 
 class CustomResetPasswordKeyForm(ResetPasswordKeyForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['password1'].widget = forms.PasswordInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Парола'})
         self.fields['password2'].widget = forms.PasswordInput(
-            attrs={'class': 'form-control'})
+            attrs={'class': 'form-control', 'placeholder': 'Парола отново'})
 
 
 class ProfileDetailsForm(forms.ModelForm):

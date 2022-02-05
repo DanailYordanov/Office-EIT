@@ -152,11 +152,11 @@ ACCOUNT_FORMS = {
     'reset_password_from_key': 'users.forms.CustomResetPasswordKeyForm',
 }
 
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = None
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+LOGIN_REDIRECT_URL = 'main:courses-list'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

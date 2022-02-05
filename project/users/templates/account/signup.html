@@ -9,6 +9,15 @@
   <form class="signup form-flex" id="signup_form" method="post" action="{% url 'account_signup' %}" novalidate
     autocomplete="off">
     {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+    <div class="col-12 text-center mb-2">
+      <p class="error-message"><i class="fa fa-exclamation"></i> {{ error }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
     {% for field in form %}
     <div class="col-12 col-md-8 col-xl-6">
       {{ field.label_tag }}

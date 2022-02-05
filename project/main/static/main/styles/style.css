@@ -114,6 +114,11 @@ textarea
     color: #dc3545;
 }   
 
+.error-message
+{
+    color: #dc3545;
+}
+
 .table-action-button
 {
     margin: 0.1rem;
