@@ -1220,6 +1220,76 @@ def course_invoice_xlsx(request, pk):
 
         wb.save(copy_unique_xlsx_path)
 
+        receipt_xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/receipt.xlsx')
+
+        unique_receipt_xlsx_path = os.path.join(
+            unique_dir_path, 'receipt.xlsx')
+
+        shutil.copy(receipt_xlsx_path, unique_receipt_xlsx_path)
+
+        wb = load_workbook(filename=unique_receipt_xlsx_path)
+        ws = wb.active
+
+        ws['C8'] = contractor.name
+        ws['E10'] = contractor.correspondence_address
+
+        if contractor.postal_code:
+            ws['C12'] = contractor.postal_code[0]
+            ws['D12'] = contractor.postal_code[1]
+            ws['E12'] = contractor.postal_code[2]
+            ws['F12'] = contractor.postal_code[3]
+
+        ws['J12'] = contractor.city
+        ws['D15'] = course.contact_person
+
+        ws['AC20'] = company.name
+        ws['AE21'] = company.correspondence_address
+        ws['AE23'] = company.province
+
+        if company.postal_code:
+            ws['AC25'] = company.postal_code[0]
+            ws['AD25'] = company.postal_code[1]
+            ws['AE25'] = company.postal_code[2]
+            ws['AF25'] = company.postal_code[3]
+
+        ws['AJ25'] = company.city
+
+        wb.save(unique_receipt_xlsx_path)
+
+        letter_xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/letter.xlsx')
+
+        unique_letter_xlsx_path = os.path.join(
+            unique_dir_path, 'letter.xlsx')
+
+        shutil.copy(letter_xlsx_path, unique_letter_xlsx_path)
+
+        wb = load_workbook(filename=unique_letter_xlsx_path)
+        ws = wb.active
+
+        ws['A2'] = company.name
+        ws['A3'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
+        ws['B4'] = company.phone_number
+        ws['B5'] = company.email
+
+        ws['G18'] = contractor.name
+        ws['G19'] = contractor.correspondence_address
+        ws['G20'] = f'{contractor.postal_code} {contractor.city}'
+        ws['H21'] = contractor.phone_number
+
+        ws['A26'] = company.name
+        ws['A27'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
+        ws['B28'] = company.phone_number
+        ws['B29'] = company.email
+
+        ws['G42'] = contractor.name
+        ws['G43'] = contractor.correspondence_address
+        ws['G44'] = f'{contractor.postal_code} {contractor.city}'
+        ws['H45'] = contractor.phone_number
+
+        wb.save(unique_letter_xlsx_path)
+
         if course.export:
 
             translated_invoice_xlsx_path = os.path.join(
