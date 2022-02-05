@@ -207,11 +207,14 @@ class Company(models.Model):
         'Булстат', max_length=100, null=True, blank=True)
     mol = models.CharField('МОЛ', max_length=100, null=True, blank=True)
     city = models.CharField('Град', max_length=100, null=True, blank=True)
+    postal_code = models.CharField(
+        'Пощенски код', max_length=20, null=True, blank=True)
     address = models.CharField('Адрес', max_length=100, null=True, blank=True)
     correspondence_address = models.CharField(
         'Адрес за кореспонденция', max_length=100, null=True, blank=True)
     phone_number = models.CharField(
         'Телефонен номер', max_length=100, null=True, blank=True)
+    email = models.EmailField('E-mail', max_length=100, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Компания'

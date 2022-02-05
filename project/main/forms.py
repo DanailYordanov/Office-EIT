@@ -275,12 +275,16 @@ class CompanyModelForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'placeholder': 'МОЛ'}),
             'city': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Град'}),
+            'postal_code': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Пощенски код'}),
             'address': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
             'correspondence_address': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Адрес за кореспонденция'}),
             'phone_number': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'})
+                attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}),
+            'email': forms.EmailInput(
+                attrs={'class': 'form-control', 'placeholder': 'E-mail'})
         }
 
 
