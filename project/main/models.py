@@ -209,6 +209,8 @@ class Company(models.Model):
     city = models.CharField('Град', max_length=100, null=True, blank=True)
     postal_code = models.CharField(
         'Пощенски код', max_length=20, null=True, blank=True)
+    province = models.CharField(
+        'Област', max_length=50, null=True, blank=True)
     address = models.CharField('Адрес', max_length=100, null=True, blank=True)
     correspondence_address = models.CharField(
         'Адрес за кореспонденция', max_length=100, null=True, blank=True)

@@ -277,6 +277,8 @@ class CompanyModelForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'placeholder': 'Град'}),
             'postal_code': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Пощенски код'}),
+            'province': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Област'}),
             'address': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
             'correspondence_address': forms.TextInput(
