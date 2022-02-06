@@ -2,3 +2,6 @@ Django==2.2.24
 django-allauth==0.45.0
 python-decouple==3.5
 Pillow==8.4.0
+num2cyrillic==1.0.0
+deep-translator==1.6.1
+openpyxl==3.0.9
