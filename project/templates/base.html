@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>TrackSpedition</title>
+    <title>Office EIT</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -33,7 +33,7 @@
                 {% if request.user.is_authenticated %}
                 <div class="collapse navbar-collapse ms-lg-3" id="navBarCollapse">
                     <ul class="navbar-nav me-auto">
-                        <a class="navbar-brand" href="{% url 'main:courses-list' %}">TrackSpedition</a>
+                        <a class="navbar-brand" href="{% url 'main:courses-list' %}">Office EIT</a>
                         {% if request.user.is_staff %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarCarsDropdown" role="button"
@@ -190,7 +190,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 {% else %}
-                <a class="navbar-brand ms-lg-3" href="#">TrackSpedition</a>
+                <a class="navbar-brand ms-lg-3" href="#">Office EIT</a>
                 {% endif %}
                 <ul class="navbar-nav flex-row ms-auto me-lg-3">
                     {% if request.user.is_authenticated and request.user.is_staff %}
