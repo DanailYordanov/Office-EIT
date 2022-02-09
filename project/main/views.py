@@ -1015,7 +1015,11 @@ def expense_order_xlsx(request, pk):
         ws['F10'] = expense_order.trip_order.id
         ws['H10'] = expense_order.trip_order.from_date
         ws['G12'] = expense_order.trip_order.driver.debit_card_number
-        ws['E13'] = expense_order.trip_order.driver.bank.iban
+
+        if expense_order.trip_order.driver.bank:
+            ws['E13'] = expense_order.trip_order.driver.bank.iban
+            
+        ws['B15'] = expense_order.creation_date
         ws['A19'] = expense_order.trip_order.driver.__str__()
         ws['F19'] = expense_order.creator.__str__()
 
