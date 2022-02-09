@@ -426,7 +426,7 @@ def courses_list(request):
 
     else:
         courses = models.Course.objects.filter(
-            user=request.user).order_by('-pk')
+            driver=request.user).order_by('-pk')
         form = None
 
     context = {
