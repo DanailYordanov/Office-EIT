@@ -17,13 +17,20 @@
 <body class="d-flex flex-column min-vh-100">
     {% if request.user.is_authenticated %}
     <div class="offcanvas offcanvas-end" id="notificationsOffCanvas">
-        <div class="offcanvas-header">
-            <h1 class="offcanvas-title">Heading</h1>
+        <div class="offcanvas-header bg-light border-bottom">
+            <p class="offcanvas-title fw-light fs-4">Известия ({{ notifications.count }})</p>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
-            <p>Some text lorem ipsum.</p>
-            <p>Some text lorem ipsum.</p>
+            {% for notification in notifications %}
+            <div class="notification border-bottom">
+                <p>
+                    <span class="fw-bold">{{ notification.reminder_type }}:</span>
+                    изтича на {{ notification.expiration_date }}
+                    за автомобил {{ notification.car }}
+                </p>
+            </div>
+            {% endfor %}
         </div>
     </div>
     {% endif %}
@@ -197,7 +204,7 @@
                     <li class="nav-item me-3">
                         <button class="notifications-button nav-link" data-bs-toggle="offcanvas"
                             data-bs-target="#notificationsOffCanvas">
-                            <span class="fa-stack" data-count="123">
+                            <span class="fa-stack" data-count="{{ notifications.count }}">
                                 <i class="fas fa-bell"></i>
                             </span>
                         </button>
