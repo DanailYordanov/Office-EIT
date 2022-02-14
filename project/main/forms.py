@@ -109,7 +109,7 @@ class CourseModelForm(forms.ModelForm):
         exclude = ('create_date',)
         widgets = {
             'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на заявка'}),
-            'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация'}),
+            'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация', 'list': 'datalistFromTo'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
             'price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена'}),
             'cargo_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид и тегло на товара'}),

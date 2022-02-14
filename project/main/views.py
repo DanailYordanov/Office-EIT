@@ -443,6 +443,7 @@ def add_course(request):
     if request.user.is_staff:
 
         addresses = models.Address.objects.all()
+        from_to_list = models.FromTo.objects.all()
 
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST)
@@ -450,6 +451,14 @@ def add_course(request):
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
+
+                from_to = form.cleaned_data['from_to']
+
+                for i in from_to_list:
+                    if i.from_to == from_to:
+                        break
+                else:
+                    models.FromTo.objects.create(from_to=from_to)
 
                 if form_instance.export:
                     technical_inspection_perpetrator = form.cleaned_data[
@@ -495,19 +504,21 @@ def add_course(request):
         'form': form,
         'formset': formset,
         'addresses': addresses,
+        'from_to_list': from_to_list,
         'url': reverse('main:add-course'),
         'page_heading': 'Добавяне на курс'
     }
 
-    return render(request, 'main/add_course.html', context)
+    return render(request, 'main/add_update_course.html', context)
 
 
 @login_required
 def update_course(request, pk):
     if request.user.is_staff:
 
-        addresses = models.Address.objects.all()
         course = get_object_or_404(models.Course, id=pk)
+        addresses = models.Address.objects.all()
+        from_to_list = models.FromTo.objects.all()
 
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST, instance=course)
@@ -516,6 +527,14 @@ def update_course(request, pk):
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
+
+                from_to = form.cleaned_data['from_to']
+
+                for i in from_to_list:
+                    if i.from_to == from_to:
+                        break
+                else:
+                    models.FromTo.objects.create(from_to=from_to)
 
                 for f in formset:
                     if f.is_valid():
@@ -550,11 +569,12 @@ def update_course(request, pk):
             'form': form,
             'formset': formset,
             'addresses': addresses,
+            'from_to_list': from_to_list,
             'url': reverse('main:update-course', args=(pk,)),
             'page_heading': 'Редактиране на курс'
         }
 
-        return render(request, 'main/add_course.html', context)
+        return render(request, 'main/add_update_course.html', context)
 
     else:
         raise PermissionDenied

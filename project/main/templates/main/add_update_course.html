@@ -13,6 +13,7 @@
 <form action="{{ url }}" class="form-flex" method="post" autocomplete="off" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
     {{ formset.management_form }}
+    <input autocomplete="false" name="hidden" type="text" style="display:none;">
 
     {% for field in form %}
     <div class="col-12 col-md-8 col-xl-6">
@@ -30,6 +31,15 @@
         </div>
         <div class="field">
             {{ field }}
+
+            {% if field.name == 'from_to' %}
+            <datalist id="datalistFromTo">
+                {% for from_to in from_to_list %}
+                <option value="{{ from_to }}"></option>
+                {% endfor %}
+            </datalist>
+            {% endif %}
+
         </div>
         {{ field.errors }}
 

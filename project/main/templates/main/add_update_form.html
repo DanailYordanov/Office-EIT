@@ -12,6 +12,8 @@
 {% block content_main %}
 <form action="{{ url }}" class="form-flex" method="post" autocomplete="off" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
+    <input autocomplete="false" name="hidden" type="text" style="display:none;">
+
     {% for field in form %}
     <div class="col-12 col-md-8 col-xl-6">
         <div class="field-label">

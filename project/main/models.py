@@ -275,6 +275,17 @@ class Course(models.Model):
         return reverse('main:course-information', kwargs={
             'pk': self.id,
         })
+        
+
+class FromTo(models.Model):
+    from_to = models.CharField('Релация', max_length=100)
+
+    class Meta:
+        verbose_name = 'Релация'
+        verbose_name_plural = 'Релации'
+
+    def __str__(self):
+        return self.from_to
 
 
 class Address(models.Model):
