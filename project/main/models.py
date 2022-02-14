@@ -66,7 +66,7 @@ TAX_TYPE_CHOICES = [
 COURSE_DOCUMENT_TYPE_CHOICES = [
     ('', 'Избери'),
     ('medical_examination', 'Медицински прегледи'),
-    ('service_examination', 'Технически прегледи')
+    ('technical_inspection', 'Технически прегледи')
 ]
 
 
@@ -400,8 +400,8 @@ class CourseInvoice(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Технически преглед'
-        verbose_name_plural = 'Технически прегледи'
+        verbose_name = 'Фактура за курс'
+        verbose_name_plural = 'Фактури за курсове'
 
     def __str__(self):
         return f'Фактура за курс № - {self.id}'
@@ -427,9 +427,9 @@ class Instruction(models.Model):
         return f'Инструкция на {self.driver} № - {self.id}'
 
 
-class CourseServiceExamination(models.Model):
+class CourseTechnicalInspection(models.Model):
     course = models.OneToOneField(
-        Course, verbose_name='Курс', related_name='service_examination', null=True, on_delete=models.CASCADE)
+        Course, verbose_name='Курс', related_name='technical_inspection', null=True, on_delete=models.CASCADE)
     perpetrator = models.CharField(
         'Извършител', max_length=100, null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)

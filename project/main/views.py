@@ -348,18 +348,18 @@ def courses_list(request):
                 to_date = form.cleaned_data['to_date']
                 company = form.cleaned_data['company']
 
-                if journal_type == 'service_examination':
-                    service_examinations = models.CourseServiceExamination.objects.filter(
+                if journal_type == 'technical_inspection':
+                    technical_inspections = models.CourseTechnicalInspection.objects.filter(
                         creation_date__range=[from_date, to_date]
                     )
 
                     unique_token = secrets.token_hex(32)
 
                     xlsx_path = os.path.join(
-                        settings.BASE_DIR, 'main/xlsx_files/course_services_journal.xlsx')
+                        settings.BASE_DIR, 'main/xlsx_files/course_technical_inspection_journal.xlsx')
 
                     unique_xlsx_path = os.path.join(
-                        settings.BASE_DIR, f'main/xlsx_files/course_services_journal_{unique_token}.xlsx')
+                        settings.BASE_DIR, f'main/xlsx_files/course_technical_inspection_journal_{unique_token}.xlsx')
 
                     shutil.copy(xlsx_path, unique_xlsx_path)
 
@@ -370,15 +370,15 @@ def courses_list(request):
 
                     ws['A2'] = heading
 
-                    for i in range(0, len(service_examinations)):
-                        ws[f'A{i + 6}'] = service_examinations[i].id
-                        ws[f'B{i + 6}'] = service_examinations[i].course.car.__str__()
-                        ws[f'C{i + 6}'] = service_examinations[i].creation_date
-                        ws[f'F{i + 6}'] = service_examinations[i].perpetrator
+                    for i in range(0, len(technical_inspections)):
+                        ws[f'A{i + 6}'] = technical_inspections[i].id
+                        ws[f'B{i + 6}'] = technical_inspections[i].course.car.__str__()
+                        ws[f'C{i + 6}'] = technical_inspections[i].creation_date
+                        ws[f'F{i + 6}'] = technical_inspections[i].perpetrator
 
                     response = HttpResponse(
                         content_type='application/vnd.ms-excel')
-                    response['Content-Disposition'] = f'attachment; filename="Services Journal.xlsx"'
+                    response['Content-Disposition'] = f'attachment; filename="Technical Inspections Journal.xlsx"'
 
                     wb.save(response)
 
@@ -452,13 +452,13 @@ def add_course(request):
                 form_instance = form.save()
 
                 if form_instance.export:
-                    service_examination_perpetrator = form.cleaned_data[
-                        'service_examination_perpetrator']
+                    technical_inspection_perpetrator = form.cleaned_data[
+                        'technical_inspection_perpetrator']
                     medical_examination_perpetrator = form.cleaned_data[
                         'medical_examination_perpetrator']
 
-                    models.CourseServiceExamination.objects.create(
-                        course=form_instance, perpetrator=service_examination_perpetrator)
+                    models.CourseTechnicalInspection.objects.create(
+                        course=form_instance, perpetrator=technical_inspection_perpetrator)
                     models.CourseMedicalExamination.objects.create(
                         course=form_instance, perpetrator=medical_examination_perpetrator)
 
@@ -1341,29 +1341,29 @@ def course_invoice_xlsx(request, pk):
 
             wb.save(unique_translated_invoice_xlsx_path)
 
-            course_service_examination_xlsx_path = os.path.join(
-                settings.BASE_DIR, 'main/xlsx_files/course_service_examination.xlsx')
+            course_technical_inspection_xlsx_path = os.path.join(
+                settings.BASE_DIR, 'main/xlsx_files/course_technical_inspection.xlsx')
 
-            unique_course_service_examination_xlsx_path = os.path.join(
-                unique_dir_path, 'course_service_examination.xlsx')
+            unique_course_technical_inspection_xlsx_path = os.path.join(
+                unique_dir_path, 'course_technical_inspection.xlsx')
 
-            shutil.copy(course_service_examination_xlsx_path,
-                        unique_course_service_examination_xlsx_path)
+            shutil.copy(course_technical_inspection_xlsx_path,
+                        unique_course_technical_inspection_xlsx_path)
 
             wb = load_workbook(
-                filename=unique_course_service_examination_xlsx_path)
+                filename=unique_course_technical_inspection_xlsx_path)
             ws = wb.active
 
             ws['A1'] = company.name
             ws['A2'] = f'{company.city}, {company.address}'
             ws['A3'] = company.bulstat
-            ws['E9'] = course.service_examination.id
+            ws['E9'] = course.technical_inspection.id
             ws['B12'] = course.car.number_plate
             ws['B13'] = course.driver.__str__()
-            ws['C15'] = course.service_examination.perpetrator
+            ws['C15'] = course.technical_inspection.perpetrator
             ws['B18'] = course.creation_date
 
-            wb.save(unique_course_service_examination_xlsx_path)
+            wb.save(unique_course_technical_inspection_xlsx_path)
 
             course_medical_examination_xlsx_path = os.path.join(
                 settings.BASE_DIR, 'main/xlsx_files/course_medical_examination.xlsx')
