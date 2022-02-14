@@ -65,7 +65,7 @@ def update_car(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:update-car', pk=pk)
+                return redirect('main:cars-list')
         else:
             form = forms.CarModelForm(instance=car)
     else:
@@ -137,7 +137,7 @@ def update_reminder(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:update-reminder', pk=pk)
+                return redirect('main:reminders-list')
         else:
             form = forms.ReminderModelForm(instance=reminder)
     else:
@@ -209,7 +209,7 @@ def update_service(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:update-service', pk=pk)
+                return redirect('main:services-list')
         else:
             form = forms.ServiceModelForm(instance=service)
     else:
@@ -310,7 +310,7 @@ def update_contractor(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:update-contractor', pk=pk)
+                return redirect('main:contractors-list')
         else:
             form = forms.ContractorsModelForm(instance=contractor)
     else:
@@ -631,7 +631,7 @@ def update_address(request, pk):
 
             if form.is_valid():
                 form.save()
-                return redirect('main:update-address', pk=pk)
+                return redirect('main:addresses-list')
         else:
             form = forms.AddressModelForm(instance=address)
     else:

@@ -1,10 +1,15 @@
+jQuery.expr[':'].icontains = function (a, i, m) {
+    return jQuery(a).text().toUpperCase()
+        .indexOf(m[3].toUpperCase()) >= 0;
+};
+
 $(document).ready(function () {
     $("#tableSearch").keyup(function () {
         var rows = $(".table-body").find("tr").hide();
         if (this.value.length) {
             var data = this.value.split(" ");
             $.each(data, function (i, v) {
-                rows.find('.searchable').filter(":contains('" + v + "')").parent().show();
+                rows.find('.searchable').filter(":icontains('" + v + "')").parent().show();
             });
         } else rows.show();
     });
