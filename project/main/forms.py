@@ -119,6 +119,67 @@ class CourseModelForm(forms.ModelForm):
         }
 
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            if self.instance.export:
+                self.fields['medical_examination_perpetrator'].required = True
+                self.fields['technical_inspection_perpetrator'].required = True
+                self.fields['medical_examination_perpetrator'].initial = self.instance.medical_examination.perpetrator.perpetrator
+                self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
+
+        if self.data:
+            if self.data['export'] == 'on':
+                self.fields['medical_examination_perpetrator'].required = True
+                self.fields['technical_inspection_perpetrator'].required = True
+
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            instance.save()
+
+            if self.cleaned_data['export']:
+                
+                if 'technical_inspection_perpetrator' in self.changed_data:
+
+                    technical_inspection_perpetrator = (self.cleaned_data['technical_inspection_perpetrator']).strip()
+                    try:
+                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.get(perpetrator=technical_inspection_perpetrator)
+                    except models.TechnicalInspectionPerpetrator.DoesNotExist:
+                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.create(perpetrator=technical_inspection_perpetrator)
+                    finally:
+
+                        try:
+                            techincal_inspection_instance = models.CourseTechnicalInspection.objects.get(course=instance)
+                        except models.CourseTechnicalInspection.DoesNotExist:
+                            models.CourseTechnicalInspection.objects.create(course=instance, perpetrator=perpetrator_instance)
+                        else:
+                            techincal_inspection_instance.perpetrator = perpetrator_instance
+                            techincal_inspection_instance.save()
+
+                if 'medical_examination_perpetrator' in self.changed_data:
+
+                    medical_examination_perpetrator = (self.cleaned_data['medical_examination_perpetrator']).strip()
+                    try:
+                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.get(perpetrator=medical_examination_perpetrator)
+                    except models.MedicalExaminationPerpetrator.DoesNotExist:
+                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.create(perpetrator=medical_examination_perpetrator)
+                    finally:
+
+                        try:
+                            medical_examination_instance = models.CourseMedicalExamination.objects.get(course=instance)
+                        except models.CourseMedicalExamination.DoesNotExist:
+                            models.CourseMedicalExamination.objects.create(course=instance, perpetrator=perpetrator_instance)
+                        else:
+                            medical_examination_instance.perpetrator = perpetrator_instance
+                            medical_examination_instance.save()
+
+            self.save_m2m()
+        return instance
+
+
 class CourseAddresModelForm(forms.ModelForm):
     load_type = forms.ChoiceField(
         label='Вид на товарене', choices=models.LOADING_TYPE_CHOICES, required=False)

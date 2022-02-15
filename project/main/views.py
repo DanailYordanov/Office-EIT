@@ -460,17 +460,6 @@ def add_course(request):
                 else:
                     models.FromTo.objects.create(from_to=from_to)
 
-                if form_instance.export:
-                    technical_inspection_perpetrator = form.cleaned_data[
-                        'technical_inspection_perpetrator']
-                    medical_examination_perpetrator = form.cleaned_data[
-                        'medical_examination_perpetrator']
-
-                    models.CourseTechnicalInspection.objects.create(
-                        course=form_instance, perpetrator=technical_inspection_perpetrator)
-                    models.CourseMedicalExamination.objects.create(
-                        course=form_instance, perpetrator=medical_examination_perpetrator)
-
                 for f in formset:
                     if f.is_valid():
                         f.instance.course = form_instance

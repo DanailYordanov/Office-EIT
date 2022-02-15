@@ -438,11 +438,21 @@ class Instruction(models.Model):
         return f'Инструкция на {self.driver} № - {self.id}'
 
 
+class TechnicalInspectionPerpetrator(models.Model):
+    perpetrator = models.CharField('Извършител', max_length=100)
+
+    class Meta:
+        verbose_name = 'Извършител на технически преглед'
+        verbose_name_plural = 'Извършители на технически прегледи'
+
+    def __str__(self):
+        return self.perpetrator
+
+
 class CourseTechnicalInspection(models.Model):
     course = models.OneToOneField(
-        Course, verbose_name='Курс', related_name='technical_inspection', null=True, on_delete=models.CASCADE)
-    perpetrator = models.CharField(
-        'Извършител', max_length=100, null=True, blank=True)
+        Course, verbose_name='Курс', related_name='technical_inspection', on_delete=models.CASCADE)
+    perpetrator = models.ForeignKey(TechnicalInspectionPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
@@ -453,11 +463,21 @@ class CourseTechnicalInspection(models.Model):
         return f'Технически преглед към курс № - {self.course.id}'
 
 
+class MedicalExaminationPerpetrator(models.Model):
+    perpetrator = models.CharField('Извършител', max_length=100)
+
+    class Meta:
+        verbose_name = 'Извършител на медицински преглед'
+        verbose_name_plural = 'Извършители на медицински прегледи'
+
+    def __str__(self):
+        return self.perpetrator
+
+
 class CourseMedicalExamination(models.Model):
     course = models.OneToOneField(
-        Course, verbose_name='Курс', related_name='medical_examination', null=True, on_delete=models.CASCADE)
-    perpetrator = models.CharField(
-        'Извършител', max_length=100, null=True, blank=True)
+        Course, verbose_name='Курс', related_name='medical_examination', on_delete=models.CASCADE)
+    perpetrator = models.ForeignKey(MedicalExaminationPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
