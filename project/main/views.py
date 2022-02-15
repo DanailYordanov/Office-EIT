@@ -374,7 +374,7 @@ def courses_list(request):
                         ws[f'A{i + 6}'] = technical_inspections[i].id
                         ws[f'B{i + 6}'] = technical_inspections[i].course.car.__str__()
                         ws[f'C{i + 6}'] = technical_inspections[i].creation_date
-                        ws[f'F{i + 6}'] = technical_inspections[i].perpetrator
+                        ws[f'F{i + 6}'] = technical_inspections[i].perpetrator.perpetrator
 
                     response = HttpResponse(
                         content_type='application/vnd.ms-excel')
@@ -410,7 +410,7 @@ def courses_list(request):
                         ws[f'A{i + 6}'] = medical_examinations[i].id
                         ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
                         ws[f'C{i + 6}'] = medical_examinations[i].creation_date
-                        ws[f'F{i + 6}'] = medical_examinations[i].perpetrator
+                        ws[f'F{i + 6}'] = medical_examinations[i].perpetrator.perpetrator
 
                     response = HttpResponse(
                         content_type='application/vnd.ms-excel')
@@ -444,6 +444,8 @@ def add_course(request):
 
         addresses = models.Address.objects.all()
         from_to_list = models.FromTo.objects.all()
+        medical_examination_perpetrators_list = models.MedicalExaminationPerpetrator.objects.all()
+        technical_inspection_perpetrators_list = models.TechnicalInspectionPerpetrator.objects.all()
 
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST)
@@ -494,6 +496,8 @@ def add_course(request):
         'formset': formset,
         'addresses': addresses,
         'from_to_list': from_to_list,
+        'medical_examination_perpetrators_list': medical_examination_perpetrators_list,
+        'technical_inspection_perpetrators_list': technical_inspection_perpetrators_list,
         'url': reverse('main:add-course'),
         'page_heading': 'Добавяне на курс'
     }
@@ -508,6 +512,8 @@ def update_course(request, pk):
         course = get_object_or_404(models.Course, id=pk)
         addresses = models.Address.objects.all()
         from_to_list = models.FromTo.objects.all()
+        medical_examination_perpetrators_list = models.MedicalExaminationPerpetrator.objects.all()
+        technical_inspection_perpetrators_list = models.TechnicalInspectionPerpetrator.objects.all()
 
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST, instance=course)
@@ -559,6 +565,8 @@ def update_course(request, pk):
             'formset': formset,
             'addresses': addresses,
             'from_to_list': from_to_list,
+            'medical_examination_perpetrators_list': medical_examination_perpetrators_list,
+            'technical_inspection_perpetrators_list': technical_inspection_perpetrators_list,
             'url': reverse('main:update-course', args=(pk,)),
             'page_heading': 'Редактиране на курс'
         }
@@ -1369,7 +1377,7 @@ def course_invoice_xlsx(request, pk):
             ws['E9'] = course.technical_inspection.id
             ws['B12'] = course.car.number_plate
             ws['B13'] = course.driver.__str__()
-            ws['C15'] = course.technical_inspection.perpetrator
+            ws['C15'] = course.technical_inspection.perpetrator.perpetrator
             ws['B18'] = course.creation_date
 
             wb.save(unique_course_technical_inspection_xlsx_path)
@@ -1393,7 +1401,7 @@ def course_invoice_xlsx(request, pk):
             ws['E9'] = course.medical_examination.id
             ws['A12'] = course.driver.__str__()
             ws['B13'] = course.car.number_plate
-            ws['C17'] = course.medical_examination.perpetrator
+            ws['C17'] = course.medical_examination.perpetrator.perpetrator
             ws['B20'] = course.creation_date
 
             wb.save(unique_course_medical_examination_xlsx_path)

@@ -99,10 +99,10 @@ class CourseModelForm(forms.ModelForm):
         models.Bank.objects.all(), label='Банка', empty_label='Избери')
     medical_examination_perpetrator = forms.CharField(
         label='Извършител на медицински преглед', max_length=100, required=False, widget=forms.TextInput(
-            attrs={'class': 'form-control', 'placeholder': 'Извършител на медицински преглед'}))
+            attrs={'class': 'form-control', 'placeholder': 'Извършител на медицински преглед', 'list': 'datalistMedicalExaminationPerpetrator'}))
     technical_inspection_perpetrator = forms.CharField(
         label='Извършител на технически преглед', max_length=100, required=False, widget=forms.TextInput(
-            attrs={'class': 'form-control', 'placeholder': 'Извършител на технически преглед'}))
+            attrs={'class': 'form-control', 'placeholder': 'Извършител на технически преглед', 'list': 'datalistTechnicalInspectionPerpetrator'}))
 
     class Meta:
         model = models.Course

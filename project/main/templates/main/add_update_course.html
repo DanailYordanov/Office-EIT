@@ -38,6 +38,18 @@
                 <option value="{{ from_to }}"></option>
                 {% endfor %}
             </datalist>
+            {% elif field.name == 'medical_examination_perpetrator' %}
+            <datalist id="datalistMedicalExaminationPerpetrator">
+                {% for perpetrator in medical_examination_perpetrators_list %}
+                <option value="{{ perpetrator }}"></option>
+                {% endfor %}
+            </datalist>
+            {% elif field.name == 'technical_inspection_perpetrator' %}
+            <datalist id="datalistTechnicalInspectionPerpetrator">
+                {% for perpetrator in technical_inspection_perpetrators_list %}
+                <option value="{{ perpetrator }}"></option>
+                {% endfor %}
+            </datalist>
             {% endif %}
 
         </div>
