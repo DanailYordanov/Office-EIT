@@ -68,6 +68,50 @@
     {% endif %}
 </div>
 
+{% for address in addresses %}
+<p class="fw-light text-center fs-4">{{ address.load_type }}</p>
+
+<div class="col-12 col-md-8 col-lg-6 m-auto text-center fw-light fs-5 mb-5">
+    <p>
+        <span class="fw-normal">Дата:</span> {{ address.date }}
+    </p>
+
+    {% if address.address_input %}
+    <p>
+        <span class="fw-normal">Адрес:</span> {{ address.address_input }}
+    </p>
+    {% endif %}
+
+    {% if address.address_obj %}
+
+    {% if address.address_obj.contact_person %}
+    <p>
+        <span class="fw-normal">Лице за контакт:</span> {{ address.address_obj.contact_person }}
+    </p>
+    {% endif %}
+
+    {% if address.address_obj.contact_phone %}
+    <p>
+        <span class="fw-normal">Телефон за връзка:</span> {{ address.address_obj.contact_phone }}
+    </p>
+    {% endif %}
+
+    {% if address.address_obj.gps_coordinates %}
+    <p>
+        <span class="fw-normal">GPS координати:</span> {{ address.address_obj.gps_coordinates }}
+    </p>
+    {% endif %}
+
+    {% if address.address_obj.email %}
+    <p>
+        <span class="fw-normal">E-mail:</span> {{ address.address_obj.email }}
+    </p>
+    {% endif %}
+
+    {% endif %}
+</div>
+{% endfor %}
+
 <p class="fw-light text-center fs-4">Разходи на курса</p>
 
 <div class="form-floating mb-4 mt-5 col-12 col-md-6 col-xl-4 gx-1">

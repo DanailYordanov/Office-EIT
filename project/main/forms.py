@@ -183,7 +183,7 @@ class CourseModelForm(forms.ModelForm):
 
 class CourseAddresModelForm(forms.ModelForm):
     load_type = forms.ChoiceField(
-        label='Вид на товарене', choices=models.LOADING_TYPE_CHOICES, required=False)
+        label='Товарен/Разтоварен/Митница', choices=models.LOADING_TYPE_CHOICES, required=False)
     save = forms.BooleanField(label='Запази', widget=forms.CheckboxInput(
         attrs={'class': 'form-check-input'}), required=False)
 
@@ -215,8 +215,7 @@ CourseAddressAddFormset = forms.inlineformset_factory(models.Course,
 class AddressModelForm(forms.ModelForm):
     class Meta:
         model = models.Address
-        fields = ['address', 'contact_person',
-                  'contact_phone', 'gps_coordinates']
+        fields = '__all__'
         widgets = {
             'address': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
@@ -225,7 +224,9 @@ class AddressModelForm(forms.ModelForm):
             'contact_phone': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Телефон за връзка'}),
             'gps_coordinates': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'GPS координати'})
+                attrs={'class': 'form-control', 'placeholder': 'GPS координати'}),
+            'email': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
         }
 
 

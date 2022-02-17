@@ -15,6 +15,7 @@
                 <th class="col-2">Лице за контакт</th>
                 <th class="col-2">Телефон за връзка</th>
                 <th class="col-2">GPS координати</th>
+                <th class="col-2">E-mail</th>
                 <th class="col-1">Действия</th>
             </tr>
         </thead>
@@ -46,13 +47,16 @@
             <tr>
                 <td class="searchable">{{ address.address }}</td>
                 <td class="searchable">
-                    {% if address.contact_person %}{{ address.contact_person }}{% else %}-{% endif %}
+                    {% if address.contact_person %}{{ address.contact_person }}{% endif %}
                 </td>
                 <td class="searchable">
-                    {% if address.contact_phone %}{{ address.contact_phone }}{% else %}-{% endif %}
+                    {% if address.contact_phone %}{{ address.contact_phone }}{% endif %}
                 </td>
                 <td class="searchable">
-                    {% if address.gps_coordinates %}{{ address.gps_coordinates }}{% else %}-{% endif %}
+                    {% if address.gps_coordinates %}{{ address.gps_coordinates }}{% endif %}
+                </td>
+                <td class="searchable">
+                    {% if address.email %}{{ address.email }}{% endif %}
                 </td>
                 <td class="text-center">
                     <a href="{% url 'main:update-address' pk=address.id %}" class="btn btn-primary table-action-button">

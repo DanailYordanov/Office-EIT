@@ -26,8 +26,9 @@ CURRENCY_CHOICES = [
 
 LOADING_TYPE_CHOICES = [
     ('', 'Избери'),
-    ('loading_address', 'Адрес на товарене'),
-    ('unloading_address', 'Адрес на разтоварване')
+    ('Адрес на товарене', 'Адрес на товарене'),
+    ('Адрес на разтоварване', 'Адрес на разтоварване'),
+    ('Адрес на митница', 'Адрес на митница')
 ]
 
 PAYMENT_TYPE_CHOICES = [
@@ -297,6 +298,7 @@ class Address(models.Model):
         'Телефон за връзка', max_length=30, null=True, blank=True)
     gps_coordinates = models.CharField(
         'GPS координати', max_length=100, null=True, blank=True)
+    email = models.EmailField('E-mail', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Адрес'
@@ -313,7 +315,7 @@ class CourseAddress(models.Model):
         Address, verbose_name='Свързан адрес', null=True, blank=True, on_delete=models.SET_NULL)
     address_input = models.CharField(
         'Въведен адрес', max_length=200, null=True, blank=True)
-    load_type = models.CharField('Вид на товарене',
+    load_type = models.CharField('Товарен/Разтоварен/Митница',
                                  choices=LOADING_TYPE_CHOICES, max_length=30)
     date = models.DateField('Дата', null=True, blank=True)
 

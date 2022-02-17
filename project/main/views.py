@@ -581,10 +581,12 @@ def update_course(request, pk):
 def course_information(request, pk):
     course = get_object_or_404(models.Course, id=pk)
     expenses = models.Expense.objects.filter(course=course)
+    addresses = models.CourseAddress.objects.filter(course=course)
 
     context = {
         'course': course,
         'expenses': expenses,
+        'addresses': addresses,
         'page_heading': 'Информация за курс'
     }
 
@@ -912,9 +914,9 @@ def load_dates(request):
                 course__id=int(course_id))
 
             from_date = course_addresses.filter(
-                load_type='loading_address').order_by('date')
+                load_type='Адрес на товарене').order_by('date')
             to_date = course_addresses.filter(
-                load_type='unloading_address').order_by('date')
+                load_type='Адрес на разтоварване').order_by('date')
 
             if (from_date):
                 data['from_date'] = from_date.first().date
