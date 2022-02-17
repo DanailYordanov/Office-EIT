@@ -33,13 +33,17 @@
         <span class="fw-normal">Вид и тегло на товара:</span> {{ course.cargo_type }}
     </p>
 
+    <p>
+        <span class="fw-normal">Заплащане:</span> {{ course.driver_salary }} {{ course.currency }}
+    </p>
+
     {% if request.user.is_staff %}
     <p>
         <span class="fw-normal">Шофьор:</span> {{ course.driver }}
     </p>
 
     <p>
-        <span class="fw-normal">Цена:</span> {{ course.price }} {{ course.currency }}
+        <span class="fw-normal">Цена:</span> {{ course.course_price }} {{ course.currency }}
     </p>
 
     <p>

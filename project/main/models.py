@@ -253,7 +253,8 @@ class Course(models.Model):
     from_to = models.CharField('Релация', max_length=100)
     description = models.CharField(
         'Описание', max_length=1000, null=True, blank=True)
-    price = models.FloatField('Цена')
+    course_price = models.FloatField('Цена за курс')
+    driver_salary = models.FloatField('Цена за командировка')
     currency = models.CharField(
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
     cargo_type = models.CharField('Вид и тегло на товара', max_length=100)

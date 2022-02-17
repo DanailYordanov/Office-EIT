@@ -1153,8 +1153,8 @@ def course_invoice_xlsx(request, pk):
         company = course.company
 
         currency = course.currency
-        price = round(course.price, 2)
-        vat_price = round(course.price * 0.2, 2)
+        price = round(course.course_price, 2)
+        vat_price = round(course.course_price * 0.2, 2)
 
         if course_invoice.tax_type == 'Стандартна фактура':
             calculated_price = price + vat_price
