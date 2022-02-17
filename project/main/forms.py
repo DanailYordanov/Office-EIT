@@ -115,6 +115,7 @@ class CourseModelForm(forms.ModelForm):
             'driver_salary': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за командировка'}),
             'cargo_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид и тегло на товара'}),
             'export': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'mileage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Километраж'}),
             'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Лице за контакт'}),
             'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'})
         }

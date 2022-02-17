@@ -260,6 +260,7 @@ class Course(models.Model):
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
     cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
     export = models.BooleanField('За износ', default=False)
+    mileage = models.IntegerField('Километраж')
     contact_person = models.CharField(
         'Лице за контакт', max_length=50, null=True, blank=True)
     other_conditions = models.CharField(
