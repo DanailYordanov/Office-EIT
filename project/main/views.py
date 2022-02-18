@@ -819,7 +819,7 @@ def trip_order_xlsx(request, pk):
         shutil.copy(trip_order_xlsx_path, unique_trip_order_xlsx_path)
 
         duration_time = (trip_order.to_date - trip_order.from_date).days
-        company = trip_order.course.company
+        company = trip_order.course_export.company
         heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
 
         wb = load_workbook(filename=unique_trip_order_xlsx_path)
@@ -833,14 +833,14 @@ def trip_order_xlsx(request, pk):
         ws['C13'] = trip_order.from_date
         ws['E13'] = trip_order.to_date
         ws['I13'] = duration_time
-        ws['F15'] = trip_order.course.car.number_plate
+        ws['F15'] = trip_order.course_export.car.number_plate
         ws['F18'] = f'{company.name}'
         ws['A29'] = trip_order.driver.__str__()
         ws['F29'] = trip_order.creator.__str__()
 
         wb.save(unique_trip_order_xlsx_path)
 
-        course = trip_order.course
+        course = trip_order.course_export
 
         course_expenses_xlsx_path = os.path.join(
             settings.BASE_DIR, 'main/xlsx_files/course_expenses.xlsx')
@@ -883,10 +883,10 @@ def trip_order_xlsx(request, pk):
 def load_course_options(request):
     if request.method == 'POST':
         driver_id = request.POST.get('driver_id')
+        export = request.POST.get('export')
 
         if driver_id != '':
-            courses = models.Course.objects.filter(
-                driver__id=int(driver_id), export=True)
+            courses = models.Course.objects.filter(driver__id=int(driver_id), export=bool(export))
         else:
             courses = models.Course.objects.none()
 
@@ -902,20 +902,23 @@ def load_course_options(request):
 @login_required
 def load_dates(request):
     if request.method == 'POST':
-        course_id = request.POST.get('course_id')
+        course_export_id = request.POST.get('course_export_id')
+        course_import_id = request.POST.get('course_import_id')
 
         data = {
             'from_date': None,
             'to_date': None
         }
 
-        if course_id != '':
-            course_addresses = models.CourseAddress.objects.filter(
-                course__id=int(course_id))
+        if course_export_id != '' and course_import_id != '':
+            course_export_addresses = models.CourseAddress.objects.filter(
+                course__id=int(course_export_id))
+            course_import_addresses = models.CourseAddress.objects.filter(
+                course__id=int(course_import_id))
 
-            from_date = course_addresses.filter(
+            from_date = course_export_addresses.filter(
                 load_type='Адрес на товарене').order_by('date')
-            to_date = course_addresses.filter(
+            to_date = course_import_addresses.filter(
                 load_type='Адрес на разтоварване').order_by('date')
 
             if (from_date):

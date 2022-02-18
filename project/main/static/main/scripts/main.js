@@ -18,7 +18,9 @@ $(document).ready(function () {
 
     $('#driverTripOrderID').change(courseOptionsLoad);
 
-    $('#courseTripOrderID').change(datesLoad);
+    $('#courseExportTripOrderID').change(datesLoad);
+
+    $('#courseImportTripOrderID').change(datesLoad);
 });
 
 
@@ -56,14 +58,34 @@ function courseOptionsLoad() {
         url: loadCoursesURL,
         type: 'POST',
         data: {
-            'driver_id': driver_id
+            'driver_id': driver_id,
+            'export': 'True'
         },
         headers: {
             'X-CSRFToken': csrf_token
         },
         success: function (data) {
-            $('#courseTripOrderID').html(data);
-            $('#courseTripOrderID').niceSelect('update');
+            $('#courseExportTripOrderID').html(data);
+            $('#courseExportTripOrderID').niceSelect('update');
+        },
+        error: function (response) {
+            alert('Нещо се обърка. Опитайте отново!');
+        }
+    });
+
+    $.ajax({
+        url: loadCoursesURL,
+        type: 'POST',
+        data: {
+            'driver_id': driver_id,
+            'export': ''
+        },
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function (data) {
+            $('#courseImportTripOrderID').html(data);
+            $('#courseImportTripOrderID').niceSelect('update');
         },
         error: function (response) {
             alert('Нещо се обърка. Опитайте отново!');
@@ -73,7 +95,8 @@ function courseOptionsLoad() {
 
 
 function datesLoad() {
-    var course_id = $(this).val();
+    var course_export_id = $('#courseExportTripOrderID').val();
+    var course_import_id = $('#courseImportTripOrderID').val();
     var loadDatesURL = $(this).attr('data-load-dates-url');
     var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
 
@@ -81,7 +104,8 @@ function datesLoad() {
         url: loadDatesURL,
         type: 'POST',
         data: {
-            'course_id': course_id
+            'course_export_id': course_export_id,
+            'course_import_id': course_import_id
         },
         headers: {
             'X-CSRFToken': csrf_token

@@ -16,8 +16,9 @@
     <table class="table table-striped table-bordered align-middle">
         <thead>
             <tr>
-                <th class="col-1">Запоед №</th>
-                <th class="col-1">Курс №</th>
+                <th class="col-1">Заповед №</th>
+                <th class="col-1">Курс за износ №</th>
+                <th class="col-1">Курс за внос №</th>
                 <th class="col-3">Шофьор</th>
                 <th class="col-3">Дестинация</th>
                 <th class="col-2">Действия</th>
@@ -51,8 +52,15 @@
             <tr>
                 <td class="searchable">{{ trip_order.id }}</td>
                 <td class="searchable">
-                    <a href="{% url 'main:course-information' pk=trip_order.course.id %}" class="text-decoration-none">
-                        {{ trip_order.course.id }}
+                    <a href="{% url 'main:course-information' pk=trip_order.course_export.id %}"
+                        class="text-decoration-none">
+                        {{ trip_order.course_export.id }}
+                    </a>
+                </td>
+                <td class="searchable">
+                    <a href="{% url 'main:course-information' pk=trip_order.course_import.id %}"
+                        class="text-decoration-none">
+                        {{ trip_order.course_import.id }}
                     </a>
                 </td>
                 <td class="searchable">{{ trip_order.driver }}</td>
