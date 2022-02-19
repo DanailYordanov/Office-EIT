@@ -174,10 +174,12 @@ class Contractor(models.Model):
     charging_vat = models.CharField('Основание за неначисление на ДДС',
                                     max_length=100, choices=CHARGING_VAT_CHOICES, null=True, blank=True)
     cmr_photo = models.FileField(
-        'Прикачи ЧМР', upload_to='cmr_photos', null=True, blank=True)
+        'Прикачи ЧМР Застраховка', upload_to='cmr_photos', null=True, blank=True)
+    cmr_expiration_date = models.DateField(
+        'Дата на изтичане', null=True, blank=True)
     license_photo = models.FileField(
         'Прикачи лиценз или друг документ', upload_to='license_photos', null=True, blank=True)
-    expiration_date = models.DateField(
+    license_expiration_date = models.DateField(
         'Дата на изтичане', null=True, blank=True)
 
     class Meta:

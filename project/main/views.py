@@ -5,6 +5,7 @@ from openpyxl import load_workbook
 from num2cyrillic import NumberToWords
 from deep_translator import GoogleTranslator
 from django.conf import settings
+from django.utils import timezone
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
@@ -602,6 +603,30 @@ class CourseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user.is_staff
 
 
+def load_contractor_reminder(request):
+    if request.method == 'POST':
+        contractor_id = request.POST.get('contractor_id')
+
+        data = {
+            'cmr_reminder': None,
+            'license_reminder': None
+        }
+
+        if contractor_id != '':
+            contractor = get_object_or_404(
+                models.Contractor, id=int(contractor_id))
+
+            if contractor.cmr_expiration_date <= (timezone.now().date() + timezone.timedelta(days=5)):
+                data['cmr_reminder'] = f'ЧМР Застраховката изтича на {contractor.cmr_expiration_date}'
+
+            if contractor.license_expiration_date <= (timezone.now().date() + timezone.timedelta(days=5)):
+                data['license_reminder'] = f'Лиценза изтича на {contractor.license_expiration_date}'
+
+        return JsonResponse(data)
+    else:
+        raise PermissionDenied
+
+
 @login_required
 def addresses_list(request):
     if request.user.is_staff:
@@ -886,7 +911,8 @@ def load_course_options(request):
         export = request.POST.get('export')
 
         if driver_id != '':
-            courses = models.Course.objects.filter(driver__id=int(driver_id), export=bool(export))
+            courses = models.Course.objects.filter(
+                driver__id=int(driver_id), export=bool(export))
         else:
             courses = models.Course.objects.none()
 
@@ -1040,7 +1066,7 @@ def expense_order_xlsx(request, pk):
 
         if expense_order.trip_order.driver.bank:
             ws['E13'] = expense_order.trip_order.driver.bank.iban
-            
+
         ws['B15'] = expense_order.creation_date
         ws['A19'] = expense_order.trip_order.driver.__str__()
         ws['F19'] = expense_order.creator.__str__()

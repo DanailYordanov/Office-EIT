@@ -21,6 +21,8 @@ $(document).ready(function () {
     $('#courseExportTripOrderID').change(datesLoad);
 
     $('#courseImportTripOrderID').change(datesLoad);
+
+    $('#contractorID').change(contractorReminder);
 });
 
 
@@ -113,6 +115,58 @@ function datesLoad() {
         success: function (data) {
             $('#id_from_date').val(data['from_date']);
             $('#id_to_date').val(data['to_date']);
+        },
+        error: function (response) {
+            alert('Нещо се обърка. Опитайте отново!');
+        }
+    });
+}
+
+
+function contractorReminder() {
+    var contractor_id = $(this).val();
+    var loadContractorReminderURL = $(this).attr('data-load-contractor-reminder-url');
+    var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
+
+    $.ajax({
+        url: loadContractorReminderURL,
+        type: 'POST',
+        data: {
+            'contractor_id': contractor_id,
+        },
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function (data) {
+            if (data['cmr_reminder']) {
+                var errorlist = $('#contractorID').parent().parent().find('.errorlist');
+                var element = `<li class="contractor-cmr-reminder">${data['cmr_reminder']}</li>`;
+
+                if (errorlist.length > 0) {
+                    errorlist.append(element);
+                }
+                else {
+                    $('#contractorID').parent().parent().append(`<ul class="errorlist">${element}</ul>`);
+                }
+            }
+            else {
+                $('.contractor-cmr-reminder').remove();
+            }
+
+            if (data['license_reminder']) {
+                var errorlist = $('#contractorID').parent().parent().find('.errorlist');
+                var element = `<li class="contractor-license-reminder">${data['license_reminder']}</li>`;
+
+                if (errorlist.length > 0) {
+                    errorlist.append(element);
+                }
+                else {
+                    $('#contractorID').parent().parent().append(`<ul class="errorlist">${element}</ul>`);
+                }
+            }
+            else {
+                $('.contractor-license-reminder').remove();
+            }
         },
         error: function (response) {
             alert('Нещо се обърка. Опитайте отново!');

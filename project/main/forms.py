@@ -80,8 +80,10 @@ class ContractorsModelForm(forms.ModelForm):
             'maturity_date': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}),
             'cmr_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'cmr_expiration_date': forms.TextInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}),
             'license_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'expiration_date': forms.TextInput(
+            'license_expiration_date': forms.TextInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'})
         }
 
@@ -94,7 +96,15 @@ class CourseModelForm(forms.ModelForm):
     company = forms.ModelChoiceField(
         models.Company.objects.all(), label='Фирма', empty_label='Избери')
     contractor = forms.ModelChoiceField(
-        models.Contractor.objects.all(), label='Контрагент', empty_label='Избери')
+        models.Contractor.objects.all(),
+        label='Контрагент',
+        empty_label='Избери',
+        widget=forms.Select(
+            attrs={
+                'data-load-contractor-reminder-url': reverse_lazy('main:load-contractor-reminder'),
+                'id': 'contractorID'
+            })
+    )
     bank = forms.ModelChoiceField(
         models.Bank.objects.all(), label='Банка', empty_label='Избери')
     medical_examination_perpetrator = forms.CharField(
@@ -120,7 +130,6 @@ class CourseModelForm(forms.ModelForm):
             'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'})
         }
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -136,44 +145,53 @@ class CourseModelForm(forms.ModelForm):
                 self.fields['medical_examination_perpetrator'].required = True
                 self.fields['technical_inspection_perpetrator'].required = True
 
-
     def save(self, commit=True):
         instance = super().save(commit=False)
         if commit:
             instance.save()
 
             if self.cleaned_data['export']:
-                
+
                 if 'technical_inspection_perpetrator' in self.changed_data:
 
-                    technical_inspection_perpetrator = (self.cleaned_data['technical_inspection_perpetrator']).strip()
+                    technical_inspection_perpetrator = (
+                        self.cleaned_data['technical_inspection_perpetrator']).strip()
                     try:
-                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.get(perpetrator=technical_inspection_perpetrator)
+                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.get(
+                            perpetrator=technical_inspection_perpetrator)
                     except models.TechnicalInspectionPerpetrator.DoesNotExist:
-                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.create(perpetrator=technical_inspection_perpetrator)
+                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.create(
+                            perpetrator=technical_inspection_perpetrator)
                     finally:
 
                         try:
-                            techincal_inspection_instance = models.CourseTechnicalInspection.objects.get(course=instance)
+                            techincal_inspection_instance = models.CourseTechnicalInspection.objects.get(
+                                course=instance)
                         except models.CourseTechnicalInspection.DoesNotExist:
-                            models.CourseTechnicalInspection.objects.create(course=instance, perpetrator=perpetrator_instance)
+                            models.CourseTechnicalInspection.objects.create(
+                                course=instance, perpetrator=perpetrator_instance)
                         else:
                             techincal_inspection_instance.perpetrator = perpetrator_instance
                             techincal_inspection_instance.save()
 
                 if 'medical_examination_perpetrator' in self.changed_data:
 
-                    medical_examination_perpetrator = (self.cleaned_data['medical_examination_perpetrator']).strip()
+                    medical_examination_perpetrator = (
+                        self.cleaned_data['medical_examination_perpetrator']).strip()
                     try:
-                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.get(perpetrator=medical_examination_perpetrator)
+                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.get(
+                            perpetrator=medical_examination_perpetrator)
                     except models.MedicalExaminationPerpetrator.DoesNotExist:
-                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.create(perpetrator=medical_examination_perpetrator)
+                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.create(
+                            perpetrator=medical_examination_perpetrator)
                     finally:
 
                         try:
-                            medical_examination_instance = models.CourseMedicalExamination.objects.get(course=instance)
+                            medical_examination_instance = models.CourseMedicalExamination.objects.get(
+                                course=instance)
                         except models.CourseMedicalExamination.DoesNotExist:
-                            models.CourseMedicalExamination.objects.create(course=instance, perpetrator=perpetrator_instance)
+                            models.CourseMedicalExamination.objects.create(
+                                course=instance, perpetrator=perpetrator_instance)
                         else:
                             medical_examination_instance.perpetrator = perpetrator_instance
                             medical_examination_instance.save()
@@ -281,7 +299,8 @@ class TripOrderModelForm(forms.ModelForm):
 
     class Meta:
         model = models.TripOrder
-        fields = ['driver', 'course_export', 'course_import', 'destination', 'from_date', 'to_date']
+        fields = ['driver', 'course_export', 'course_import',
+                  'destination', 'from_date', 'to_date']
         widgets = {
             'destination': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Дестинация'}),
