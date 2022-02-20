@@ -440,8 +440,38 @@ def courses_list(request):
 
 
 @login_required
-def add_course(request):
+def add_course(request, pk=None):
     if request.user.is_staff:
+
+        initial_form = dict()
+        initial_formset = list()
+
+        if pk:
+            initial_course = get_object_or_404(models.Course, id=pk)
+
+            initial_form['driver'] = initial_course.driver
+            initial_form['car'] = initial_course.car
+            initial_form['company'] = initial_course.company
+            initial_form['contractor'] = initial_course.contractor
+            initial_form['bank'] = initial_course.bank
+            initial_form['from_to'] = initial_course.from_to
+            initial_form['currency'] = initial_course.currency
+            initial_form['cargo_type'] = initial_course.cargo_type
+            initial_form['export'] = initial_course.export
+            initial_form['contact_person'] = initial_course.contact_person
+            initial_form['other_conditions'] = initial_course.other_conditions
+            initial_form['medical_examination_perpetrator'] = initial_course.medical_examination.perpetrator
+            initial_form['technical_inspection_perpetrator'] = initial_course.technical_inspection.perpetrator
+
+            for address in initial_course.addresses.all():
+                initial_formset.append(
+                    {
+                        'load_type': address.load_type,
+                        'address_input': address.address_input
+                    }
+                )
+
+            forms.CourseAddressAddFormset.extra = len(initial_formset)
 
         addresses = models.Address.objects.all()
         from_to_list = models.FromTo.objects.all()
@@ -449,8 +479,9 @@ def add_course(request):
         technical_inspection_perpetrators_list = models.TechnicalInspectionPerpetrator.objects.all()
 
         if request.method == 'POST':
-            form = forms.CourseModelForm(request.POST)
-            formset = forms.CourseAddressAddFormset(request.POST)
+            form = forms.CourseModelForm(request.POST, initial=initial_form)
+            formset = forms.CourseAddressAddFormset(
+                request.POST, initial=initial_formset)
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
@@ -487,8 +518,8 @@ def add_course(request):
 
                 return redirect('main:courses-list')
         else:
-            form = forms.CourseModelForm()
-            formset = forms.CourseAddressAddFormset()
+            form = forms.CourseModelForm(initial=initial_form)
+            formset = forms.CourseAddressAddFormset(initial=initial_formset)
     else:
         raise PermissionDenied
 
