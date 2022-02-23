@@ -280,7 +280,7 @@ class Course(models.Model):
         return reverse('main:course-information', kwargs={
             'pk': self.id,
         })
-        
+
 
 class FromTo(models.Model):
     from_to = models.CharField('Релация', max_length=100)
@@ -313,7 +313,7 @@ class Address(models.Model):
 
 class CourseAddress(models.Model):
     course = models.ForeignKey(
-        Course, verbose_name='Курс', on_delete=models.CASCADE)
+        Course, verbose_name='Курс', related_name='addresses', on_delete=models.CASCADE)
     address_obj = models.ForeignKey(
         Address, verbose_name='Свързан адрес', null=True, blank=True, on_delete=models.SET_NULL)
     address_input = models.CharField(
@@ -460,7 +460,8 @@ class TechnicalInspectionPerpetrator(models.Model):
 class CourseTechnicalInspection(models.Model):
     course = models.OneToOneField(
         Course, verbose_name='Курс', related_name='technical_inspection', on_delete=models.CASCADE)
-    perpetrator = models.ForeignKey(TechnicalInspectionPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
+    perpetrator = models.ForeignKey(
+        TechnicalInspectionPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
@@ -485,7 +486,8 @@ class MedicalExaminationPerpetrator(models.Model):
 class CourseMedicalExamination(models.Model):
     course = models.OneToOneField(
         Course, verbose_name='Курс', related_name='medical_examination', on_delete=models.CASCADE)
-    perpetrator = models.ForeignKey(MedicalExaminationPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
+    perpetrator = models.ForeignKey(
+        MedicalExaminationPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:

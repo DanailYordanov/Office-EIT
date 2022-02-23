@@ -29,6 +29,7 @@ urlpatterns = [
          views.ContractorDeleteView.as_view(), name='delete-contractor'),
     path('', views.courses_list, name='courses-list'),
     path('add-course/', views.add_course, name='add-course'),
+    path('add-course/<int:pk>/', views.add_course, name='add-course'),
     path('update-course/<int:pk>/',
          views.update_course, name='update-course'),
     path('delete-course/<int:pk>/',

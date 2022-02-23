@@ -8,10 +8,16 @@
 </div>
 
 {% if request.user.is_staff %}
-<div class="col-12 text-center mb-4">
+<div class="col-12 text-center mb-2">
     <a href="{% url 'main:update-course' pk=course.id %}" class="text-decoration-none">
         Редактиране на курса
         <i class="fas fa-pencil-alt"></i>
+    </a>
+</div>
+<div class="col-12 text-center mb-4">
+    <a href="{% url 'main:add-course' pk=course.id %}" class="text-decoration-none">
+        Създаване на курс копие
+        <i class="fas fa-copy"></i>
     </a>
 </div>
 {% endif %}
