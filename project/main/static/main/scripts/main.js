@@ -29,22 +29,16 @@ $(document).ready(function () {
 function addAddressField(e) {
     e.preventDefault();
 
-    var totalForms = $('input[name="courseaddress_set-TOTAL_FORMS"]');
-    var formsNum = $('.adress-form').length;
-    var formRegex = RegExp(`courseaddress_set-(\\d){1}-`, 'g')
-    var copiedForm = $($('.adress-form')[0]).clone();
+    var formsNum = $('.adress-form').length - 1;
+    var copiedForm = $('#emptyFormsetForm').clone();
+    var totalForms = $('#id_addresses-TOTAL_FORMS');
 
-    copiedForm.find('.address-field input[type="text"]').removeAttr('value');
-    copiedForm.find('.address-field select option').removeAttr('selected');
-    copiedForm.find('.address-field select option[value=""]').attr('seleted', '');
-    copiedForm.find('.address-field select').niceSelect('update');
-    copiedForm.find('.address-field input[type="checkbox"]').removeAttr('checked');
-    copiedForm.find('input[type="hidden"][name$="id"]').removeAttr('value');
-    copiedForm = copiedForm.html().replace(formRegex, `courseaddress_set-${formsNum}-`);
+    totalForms.val(formsNum + 1);
+    copiedForm.removeAttr('id');
+    copiedForm.removeClass('d-none');
+    copiedForm.html(copiedForm.html().replace(/__prefix__/g, formsNum));
 
     $('#addCourseBtn').before(copiedForm);
-    totalForms.attr('value', formsNum + 1);
-
     $(".date-picker").datepicker({
         format: 'yyyy-mm-dd',
     });

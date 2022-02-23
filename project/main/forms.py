@@ -225,7 +225,7 @@ class CustomBaseInlineFormSet(forms.BaseInlineFormSet):
 
 
 CourseAddressUpdateFormset = forms.inlineformset_factory(models.Course,
-                                                         models.CourseAddress, formset=CustomBaseInlineFormSet, form=CourseAddresModelForm, extra=1)
+                                                         models.CourseAddress, formset=CustomBaseInlineFormSet, form=CourseAddresModelForm, extra=0)
 
 CourseAddressAddFormset = forms.inlineformset_factory(models.Course,
                                                       models.CourseAddress, form=CourseAddresModelForm, can_delete=False, extra=2)
