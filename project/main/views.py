@@ -616,11 +616,13 @@ def load_contractor_reminder(request):
             contractor = get_object_or_404(
                 models.Contractor, id=int(contractor_id))
 
-            if contractor.cmr_expiration_date <= (timezone.now().date() + timezone.timedelta(days=5)):
-                data['cmr_reminder'] = f'ЧМР Застраховката изтича на {contractor.cmr_expiration_date}'
+            if contractor.cmr_expiration_date:
+                if contractor.cmr_expiration_date <= (timezone.now().date() + timezone.timedelta(days=5)):
+                    data['cmr_reminder'] = f'ЧМР Застраховката изтича на {contractor.cmr_expiration_date}'
 
-            if contractor.license_expiration_date <= (timezone.now().date() + timezone.timedelta(days=5)):
-                data['license_reminder'] = f'Лиценза изтича на {contractor.license_expiration_date}'
+            if contractor.license_expiration_date:
+                if contractor.license_expiration_date <= (timezone.now().date() + timezone.timedelta(days=5)):
+                    data['license_reminder'] = f'Лиценза изтича на {contractor.license_expiration_date}'
 
         return JsonResponse(data)
     else:
