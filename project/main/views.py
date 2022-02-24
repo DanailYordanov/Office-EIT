@@ -5,12 +5,12 @@ from openpyxl import load_workbook
 from num2cyrillic import NumberToWords
 from deep_translator import GoogleTranslator
 from django.conf import settings
-from django.utils import timezone
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone, dateformat, formats
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -374,7 +374,8 @@ def courses_list(request):
                     for i in range(0, len(technical_inspections)):
                         ws[f'A{i + 6}'] = technical_inspections[i].id
                         ws[f'B{i + 6}'] = technical_inspections[i].course.car.__str__()
-                        ws[f'C{i + 6}'] = technical_inspections[i].creation_date
+                        ws[f'C{i + 6}'] = dateformat.format(
+                            technical_inspections[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
                         ws[f'F{i + 6}'] = technical_inspections[i].perpetrator.perpetrator
 
                     response = HttpResponse(
@@ -410,7 +411,8 @@ def courses_list(request):
                     for i in range(0, len(medical_examinations)):
                         ws[f'A{i + 6}'] = medical_examinations[i].id
                         ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
-                        ws[f'C{i + 6}'] = medical_examinations[i].creation_date
+                        ws[f'C{i + 6}'] = dateformat.format(
+                            medical_examinations[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
                         ws[f'F{i + 6}'] = medical_examinations[i].perpetrator.perpetrator
 
                     response = HttpResponse(
@@ -885,11 +887,14 @@ def trip_order_xlsx(request, pk):
 
         ws['A1'] = heading
         ws['E3'] = trip_order.id
-        ws['G3'] = trip_order.creation_date
+        ws['G3'] = dateformat.format(
+            trip_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['A8'] = trip_order.driver.__str__()
         ws['B12'] = trip_order.destination
-        ws['C13'] = trip_order.from_date
-        ws['E13'] = trip_order.to_date
+        ws['C13'] = dateformat.format(
+            trip_order.from_date, formats.get_format('SHORT_DATE_FORMAT'))
+        ws['E13'] = dateformat.format(
+            trip_order.to_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['I13'] = duration_time
         ws['F15'] = trip_order.course_export.car.number_plate
         ws['F18'] = f'{company.name}'
@@ -1089,18 +1094,21 @@ def expense_order_xlsx(request, pk):
 
         ws['A1'] = heading
         ws['E3'] = expense_order.id
-        ws['G3'] = expense_order.creation_date
+        ws['G3'] = dateformat.format(
+            expense_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['D5'] = expense_order.trip_order.driver.__str__()
         ws['B7'] = expense_order.BGN_amount
         ws['E7'] = expense_order.EUR_amount
         ws['F10'] = expense_order.trip_order.id
-        ws['H10'] = expense_order.trip_order.from_date
+        ws['H10'] = dateformat.format(
+            expense_order.trip_order.from_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['G12'] = expense_order.trip_order.driver.debit_card_number
 
         if expense_order.trip_order.driver.bank:
             ws['E13'] = expense_order.trip_order.driver.bank.iban
 
-        ws['B15'] = expense_order.creation_date
+        ws['B15'] = dateformat.format(
+            expense_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['A19'] = expense_order.trip_order.driver.__str__()
         ws['F19'] = expense_order.creator.__str__()
 
@@ -1237,7 +1245,8 @@ def course_invoice_xlsx(request, pk):
         ws = wb.active
 
         ws['V5'] = str(course_invoice.id).zfill(10)
-        ws['V6'] = course_invoice.creation_date
+        ws['V6'] = dateformat.format(
+            course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
         ws['G9'] = contractor.name
         ws['G11'] = contractor.bulstat
@@ -1401,7 +1410,8 @@ def course_invoice_xlsx(request, pk):
             ws['C18'] = contractor.address
             ws['C19'] = contractor.bulstat
 
-            ws['O17'] = course_invoice.creation_date
+            ws['O17'] = dateformat.format(
+                course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
             ws['O18'] = course.car.number_plate
 
             ws['D41'] = translator.translate(course.from_to)
@@ -1413,7 +1423,8 @@ def course_invoice_xlsx(request, pk):
 
             ws['P53'] = calculated_price
 
-            ws['D73'] = course_invoice.creation_date
+            ws['D73'] = dateformat.format(
+                course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
             ws['C82'] = translator.translate(course_invoice.payment_type)
             ws['B83'] = translator.translate(bank.name)
@@ -1442,7 +1453,8 @@ def course_invoice_xlsx(request, pk):
             ws['B12'] = course.car.number_plate
             ws['B13'] = course.driver.__str__()
             ws['C15'] = course.technical_inspection.perpetrator.perpetrator
-            ws['B18'] = course.creation_date
+            ws['B18'] = dateformat.format(
+                course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
             wb.save(unique_course_technical_inspection_xlsx_path)
 
@@ -1466,7 +1478,8 @@ def course_invoice_xlsx(request, pk):
             ws['A12'] = course.driver.__str__()
             ws['B13'] = course.car.number_plate
             ws['C17'] = course.medical_examination.perpetrator.perpetrator
-            ws['B20'] = course.creation_date
+            ws['B20'] = dateformat.format(
+                course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
             wb.save(unique_course_medical_examination_xlsx_path)
 
@@ -1728,7 +1741,8 @@ def instruction_xlsx(request, pk):
         ws['B11'] = instruction.car.number_plate
         ws['G18'] = instruction.driver.__str__()
         ws['G21'] = instruction.creator.__str__()
-        ws['B20'] = instruction.creation_date
+        ws['B20'] = dateformat.format(
+            instruction.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['A21'] = instruction.city
 
         ws['A25'] = company.name
@@ -1740,7 +1754,8 @@ def instruction_xlsx(request, pk):
         ws['B34'] = instruction.car.number_plate
         ws['G41'] = instruction.driver.__str__()
         ws['G44'] = instruction.creator.__str__()
-        ws['B43'] = instruction.creation_date
+        ws['B43'] = dateformat.format(
+            instruction.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['A44'] = instruction.city
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
