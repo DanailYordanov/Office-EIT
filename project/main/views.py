@@ -1,6 +1,7 @@
 import os
 import shutil
 import secrets
+from pyVies import api
 from openpyxl import load_workbook
 from num2cyrillic import NumberToWords
 from deep_translator import GoogleTranslator
@@ -333,6 +334,35 @@ class ContractorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+
+@login_required
+def populate_vat_info(request):
+    if request.method == 'POST':
+        bulstat = request.POST.get('bulstat')
+
+        data = {
+            'name': None,
+            'city': None,
+            'address': None,
+            'postal_code': None
+        }
+
+        if bulstat != '':
+            try:
+                vies = api.Vies()
+                result = vies.request(bulstat, extended_info=True)
+
+                data['name'] = result['traderName']
+                data['city'] = result['traderCity']
+                data['address'] = result['traderAddress']
+                data['postal_code'] = result['traderPostcode']
+            except Exception:
+                pass
+
+        return JsonResponse(data)
+    else:
+        raise PermissionDenied
 
 
 @login_required

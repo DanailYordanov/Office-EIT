@@ -14,6 +14,13 @@ $(document).ready(function () {
         } else rows.show();
     });
 
+    if ($('#id_bulstat').length > 0) {
+        let vat_button_html = "<button type='button' class='btn btn-outline-primary mt-2' id='vatPopulateBtn'>Попълни</button>";
+        $('#id_bulstat').after(vat_button_html);
+        let vat_button = $('#vatPopulateBtn');
+        vat_button.hide();
+    }
+
     $('#addCourseBtn').click(addAddressField);
 
     $('#driverTripOrderID').change(courseOptionsLoad);
@@ -23,6 +30,10 @@ $(document).ready(function () {
     $('#courseImportTripOrderID').change(datesLoad);
 
     $('#contractorID').change(contractorReminder);
+
+    $('#id_bulstat').keyup(showVatPopulateButton);
+
+    $('#vatPopulateBtn').click(populateVatFields);
 });
 
 
@@ -161,6 +172,73 @@ function contractorReminder() {
             else {
                 $('.contractor-license-reminder').remove();
             }
+        },
+        error: function (response) {
+            alert('Нещо се обърка. Опитайте отново!');
+        }
+    });
+}
+
+
+function vatRegexCheck(input) {
+    return [
+        /^\d{8}$/gi,
+        /^\d{8,10}$/gi,
+        /^\d{8}[a-z]$/gi,
+        /^\d{9}$/gi,
+        /^\d{9,10}$/gi,
+        /^\d{9}B\d{2,3}$/gi,
+        /^\d{10}$/gi,
+        /^\d{2,10}$/gi,
+        /^\d{11}$/gi,
+        /^\d{12}$/gi,
+        /^((\d{9})|(\d{12}))$/gi,
+        /^[\da-z]\d{7}[\da-z]$/gi,
+        /^[\da-hj-np-z]{2}\d{9}$/gi,
+        /^((\d{9})|(\d{12})|(GD\d{3})|(HA\d{3}))$/gi,
+        /^((\d{7}[a-z])|(\d[a-z]\d{5}[a-z])|(\d{6,7}[a-z]{2}))$/gi
+    ].some(function (regexp) {
+        return regexp.test(input);
+    });
+}
+
+
+function showVatPopulateButton() {
+    var bulstat_input = $(this).val();
+    var button_element = $('#vatPopulateBtn');
+
+    if (vatRegexCheck(bulstat_input)) {
+        if (button_element.length > 0) {
+            button_element.show();
+        }
+    }
+    else {
+        if (button_element.length > 0) {
+            button_element.hide();
+        }
+    }
+}
+
+
+function populateVatFields() {
+    var bulstat = $('#id_bulstat').val();
+    var url = $('#id_bulstat').attr('data-populate-vat-info-url');
+    var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            'bulstat': bulstat,
+        },
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        success: function (data) {
+            $('#id_name').val(data['name']);
+            $('#id_city').val(data['city']);
+            $('#id_address').val(data['address']);
+            $('#id_postal_code').val(data['postal_code']);
         },
         error: function (response) {
             alert('Нещо се обърка. Опитайте отново!');

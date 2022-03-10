@@ -60,7 +60,11 @@ class ContractorsModelForm(forms.ModelForm):
             'name': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Име'}),
             'bulstat': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Булстат'}),
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Булстат',
+                    'data-populate-vat-info-url': reverse_lazy('main:populate-vat-info')
+                }),
             'mol': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'МОЛ'}),
             'country': forms.TextInput(
