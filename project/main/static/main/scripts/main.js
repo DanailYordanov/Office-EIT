@@ -33,6 +33,8 @@ $(document).ready(function () {
 
     $('#id_bulstat').keyup(showVatPopulateButton);
 
+    $('#id_bulstat').change(showVatPopulateButton);
+
     $('#vatPopulateBtn').click(populateVatFields);
 });
 
