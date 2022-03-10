@@ -6,3 +6,4 @@ Pillow==9.0.1
 num2cyrillic==1.0.0
 deep-translator==1.7.0
 openpyxl==3.0.9
+pyvieser==0.0.4
