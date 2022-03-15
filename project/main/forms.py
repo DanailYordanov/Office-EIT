@@ -272,7 +272,7 @@ class ExpenseModelForm(forms.ModelForm):
 class TripOrderModelForm(forms.ModelForm):
     driver = forms.ModelChoiceField(
         get_user_model().objects.filter(is_active=True, is_staff=False),
-        label='Шорфьор',
+        label='Шофьор',
         empty_label='Избери',
         widget=forms.Select(
             attrs={
@@ -340,7 +340,7 @@ class ExpenseOrderModelForm(forms.ModelForm):
 
     class Meta:
         model = models.ExpenseOrder
-        exclude = ('creator',)
+        exclude = ('number', 'creator')
         widgets = {
             'BGN_amount': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Сума в лева'}),
@@ -357,7 +357,7 @@ class CourseInvoiceModelForm(forms.ModelForm):
 
     class Meta:
         model = models.CourseInvoice
-        exclude = ('creator',)
+        exclude = ('number', 'creator')
         widgets = {
             'additional_information': forms.Textarea(
                 attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'})
@@ -388,7 +388,19 @@ class CompanyModelForm(forms.ModelForm):
             'phone_number': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}),
             'email': forms.EmailInput(
-                attrs={'class': 'form-control', 'placeholder': 'E-mail'})
+                attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
+            'course_invoice_id': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Фактура №'}),
+            'trip_order_id': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Командировъчна заповед №'}),
+            'expense_order_id': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Разходен Ордер №'}),
+            'instruction_id': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Инструкция №'}),
+            'course_technical_inspection_id': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Технически преглед към курс №'}),
+            'course_medical_examination_id': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Медицински преглед към курс №'})
         }
 
 
@@ -416,7 +428,7 @@ class InstructionModelForm(forms.ModelForm):
 
     class Meta:
         model = models.Instruction
-        exclude = ('creator',)
+        exclude = ('number', 'creator')
         widgets = {
             'city': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Град'})

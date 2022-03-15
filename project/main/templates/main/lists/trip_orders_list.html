@@ -37,7 +37,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            Сигурни ли сте, че искате да изтриете командировъчна заповед № {{ trip_order.id }}?
+                            Сигурни ли сте, че искате да изтриете {{ trip_order }} ?
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
@@ -50,7 +50,7 @@
                 </div>
             </div>
             <tr>
-                <td class="searchable">{{ trip_order.id }}</td>
+                <td class="searchable">{{ trip_order.number }}</td>
                 <td class="searchable">
                     <a href="{% url 'main:course-information' pk=trip_order.course_export.id %}"
                         class="text-decoration-none">

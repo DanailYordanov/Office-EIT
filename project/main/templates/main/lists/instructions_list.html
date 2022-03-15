@@ -35,7 +35,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            Сигурни ли сте, че искате да изтриете инструкция № {{ instruction.id }}?
+                            Сигурни ли сте, че искате да изтриете {{ instruction }} ?
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затваряне</button>
@@ -48,7 +48,7 @@
                 </div>
             </div>
             <tr>
-                <td class="searchable">{{ instruction.id }}</td>
+                <td class="searchable">{{ instruction.number }}</td>
                 <td class="searchable">{{ instruction.driver }}</td>
                 <td class="searchable">{{ instruction.car }}</td>
                 <td class="text-center">

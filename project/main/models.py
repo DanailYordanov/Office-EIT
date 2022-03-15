@@ -220,6 +220,14 @@ class Company(models.Model):
     phone_number = models.CharField(
         'Телефонен номер', max_length=100, null=True, blank=True)
     email = models.EmailField('E-mail', max_length=100, null=True, blank=True)
+    course_invoice_id = models.IntegerField('Фактура №', default=1)
+    trip_order_id = models.IntegerField('Командировъчна заповед №', default=1)
+    expense_order_id = models.IntegerField('Разходен Ордер №', default=1)
+    instruction_id = models.IntegerField('Инструкция №', default=1)
+    course_technical_inspection_id = models.IntegerField(
+        'Технически преглед към курс №', default=1)
+    course_medical_examination_id = models.IntegerField(
+        'Медицински преглед към курс №', default=1)
 
     class Meta:
         verbose_name = 'Компания'
@@ -363,6 +371,7 @@ class Expense(models.Model):
 
 
 class TripOrder(models.Model):
+    number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='triporder_creator', null=True, on_delete=models.SET_NULL)
     course_export = models.OneToOneField(
@@ -381,10 +390,20 @@ class TripOrder(models.Model):
         verbose_name_plural = 'Командировъчни заповеди'
 
     def __str__(self):
-        return f'Командировъчна заповед № - {self.id}'
+        return f'Командировъчна заповед № - {self.number}'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            company = self.course_export.company
+            self.number = company.trip_order_id
+            company.trip_order_id += 1
+            company.save()
+
+        super().save(*args, **kwargs)
 
 
 class ExpenseOrder(models.Model):
+    number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
     trip_order = models.OneToOneField(
@@ -398,10 +417,20 @@ class ExpenseOrder(models.Model):
         verbose_name_plural = 'Разходни ордери'
 
     def __str__(self):
-        return f'Разходен ордер № - {self.id}'
+        return f'Разходен ордер № - {self.number}'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            company = self.trip_order.course_export.company
+            self.number = company.expense_order_id
+            company.expense_order_id += 1
+            company.save()
+
+        super().save(*args, **kwargs)
 
 
 class CourseInvoice(models.Model):
+    number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
     course = models.ForeignKey(
@@ -423,10 +452,20 @@ class CourseInvoice(models.Model):
         verbose_name_plural = 'Фактури за курсове'
 
     def __str__(self):
-        return f'Фактура за курс № - {self.id}'
+        return f'Фактура за курс № - {self.number}'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            company = self.course.company
+            self.number = company.course_invoice_id
+            company.course_invoice_id += 1
+            company.save()
+
+        super().save(*args, **kwargs)
 
 
 class Instruction(models.Model):
+    number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='instruction_creator', null=True, on_delete=models.SET_NULL)
     company = models.ForeignKey(
@@ -443,7 +482,15 @@ class Instruction(models.Model):
         verbose_name_plural = 'Инструкции'
 
     def __str__(self):
-        return f'Инструкция на {self.driver} № - {self.id}'
+        return f'Инструкция на {self.driver} № - {self.number}'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.number = self.company.instruction_id
+            self.company.instruction_id += 1
+            self.company.save()
+
+        super().save(*args, **kwargs)
 
 
 class TechnicalInspectionPerpetrator(models.Model):
@@ -458,6 +505,7 @@ class TechnicalInspectionPerpetrator(models.Model):
 
 
 class CourseTechnicalInspection(models.Model):
+    number = models.IntegerField('№')
     course = models.OneToOneField(
         Course, verbose_name='Курс', related_name='technical_inspection', on_delete=models.CASCADE)
     perpetrator = models.ForeignKey(
@@ -469,7 +517,16 @@ class CourseTechnicalInspection(models.Model):
         verbose_name_plural = 'Технически прегледи'
 
     def __str__(self):
-        return f'Технически преглед към курс № - {self.course.id}'
+        return f'Технически преглед № - {self.number}'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            company = self.course.company
+            self.number = company.course_technical_inspection_id
+            company.course_technical_inspection_id += 1
+            company.save()
+
+        super().save(*args, **kwargs)
 
 
 class MedicalExaminationPerpetrator(models.Model):
@@ -484,6 +541,7 @@ class MedicalExaminationPerpetrator(models.Model):
 
 
 class CourseMedicalExamination(models.Model):
+    number = models.IntegerField('№')
     course = models.OneToOneField(
         Course, verbose_name='Курс', related_name='medical_examination', on_delete=models.CASCADE)
     perpetrator = models.ForeignKey(
@@ -495,4 +553,13 @@ class CourseMedicalExamination(models.Model):
         verbose_name_plural = 'Медицински прегледи'
 
     def __str__(self):
-        return f'Медицински преглед към курс № - {self.course.id}'
+        return f'Медицински преглед № - {self.number}'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            company = self.course.company
+            self.number = company.course_medical_examination_id
+            company.course_medical_examination_id += 1
+            company.save()
+
+        super().save(*args, **kwargs)

@@ -402,7 +402,7 @@ def courses_list(request):
                     ws['A2'] = heading
 
                     for i in range(0, len(technical_inspections)):
-                        ws[f'A{i + 6}'] = technical_inspections[i].id
+                        ws[f'A{i + 6}'] = technical_inspections[i].number
                         ws[f'B{i + 6}'] = technical_inspections[i].course.car.__str__()
                         ws[f'C{i + 6}'] = dateformat.format(
                             technical_inspections[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
@@ -439,7 +439,7 @@ def courses_list(request):
                     ws['A2'] = heading
 
                     for i in range(0, len(medical_examinations)):
-                        ws[f'A{i + 6}'] = medical_examinations[i].id
+                        ws[f'A{i + 6}'] = medical_examinations[i].number
                         ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
                         ws[f'C{i + 6}'] = dateformat.format(
                             medical_examinations[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
@@ -916,7 +916,7 @@ def trip_order_xlsx(request, pk):
         ws = wb.active
 
         ws['A1'] = heading
-        ws['E3'] = trip_order.id
+        ws['E3'] = trip_order.number
         ws['G3'] = dateformat.format(
             trip_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['A8'] = trip_order.driver.__str__()
@@ -947,7 +947,7 @@ def trip_order_xlsx(request, pk):
         wb = load_workbook(filename=unique_course_expenses_xlsx_path)
         ws = wb.active
 
-        ws['B1'] = trip_order.id
+        ws['B1'] = trip_order.number
         ws['E1'] = trip_order.from_date
         ws['B2'] = course.car.number_plate
         ws['G2'] = course.driver.__str__()
@@ -962,7 +962,7 @@ def trip_order_xlsx(request, pk):
 
         response = HttpResponse(open(zip_path, 'rb'))
         response['Content-Type'] = 'application/zip'
-        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.id}.zip"'
+        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.number}.zip"'
 
         os.remove(zip_path)
         shutil.rmtree(unique_dir_path, ignore_errors=True)
@@ -1123,13 +1123,13 @@ def expense_order_xlsx(request, pk):
         ws = wb.active
 
         ws['A1'] = heading
-        ws['E3'] = expense_order.id
+        ws['E3'] = expense_order.number
         ws['G3'] = dateformat.format(
             expense_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['D5'] = expense_order.trip_order.driver.__str__()
         ws['B7'] = expense_order.BGN_amount
         ws['E7'] = expense_order.EUR_amount
-        ws['F10'] = expense_order.trip_order.id
+        ws['F10'] = expense_order.trip_order.number
         ws['H10'] = dateformat.format(
             expense_order.trip_order.from_date, formats.get_format('SHORT_DATE_FORMAT'))
         ws['G12'] = expense_order.trip_order.driver.debit_card_number
@@ -1143,7 +1143,7 @@ def expense_order_xlsx(request, pk):
         ws['F19'] = expense_order.creator.__str__()
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename="Expense Order {expense_order.id}.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="Expense Order {expense_order.number}.xlsx"'
 
         wb.save(response)
 
@@ -1274,7 +1274,7 @@ def course_invoice_xlsx(request, pk):
         wb = load_workbook(filename=original_unique_xlsx_path)
         ws = wb.active
 
-        ws['V5'] = str(course_invoice.id).zfill(10)
+        ws['V5'] = str(course_invoice.number).zfill(10)
         ws['V6'] = dateformat.format(
             course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
@@ -1431,7 +1431,7 @@ def course_invoice_xlsx(request, pk):
             translator = GoogleTranslator(source='bg', target='en')
 
             ws['B2'] = translator.translate(company.name)
-            ws['Q2'] = str(course_invoice.id).zfill(10)
+            ws['Q2'] = str(course_invoice.number).zfill(10)
             ws['C3'] = company.bulstat
             ws['B4'] = translator.translate(company.address)
             ws['B5'] = translator.translate(company.city)
@@ -1479,7 +1479,7 @@ def course_invoice_xlsx(request, pk):
             ws['A1'] = company.name
             ws['A2'] = f'{company.city}, {company.address}'
             ws['A3'] = company.bulstat
-            ws['E9'] = course.technical_inspection.id
+            ws['E9'] = course.technical_inspection.number
             ws['B12'] = course.car.number_plate
             ws['B13'] = course.driver.__str__()
             ws['C15'] = course.technical_inspection.perpetrator.perpetrator
@@ -1504,7 +1504,7 @@ def course_invoice_xlsx(request, pk):
             ws['A1'] = company.name
             ws['A2'] = f'{company.city}, {company.address}'
             ws['A3'] = company.bulstat
-            ws['E9'] = course.medical_examination.id
+            ws['E9'] = course.medical_examination.number
             ws['A12'] = course.driver.__str__()
             ws['B13'] = course.car.number_plate
             ws['C17'] = course.medical_examination.perpetrator.perpetrator
@@ -1520,7 +1520,7 @@ def course_invoice_xlsx(request, pk):
 
         response = HttpResponse(open(zip_path, 'rb'))
         response['Content-Type'] = 'application/zip'
-        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.id}.zip"'
+        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.number}.zip"'
 
         os.remove(zip_path)
         shutil.rmtree(unique_dir_path, ignore_errors=True)
@@ -1765,7 +1765,7 @@ def instruction_xlsx(request, pk):
         ws['A2'] = company.name
         ws['A3'] = f'{company.city}, {company.address}'
         ws['A4'] = company.bulstat
-        ws['E7'] = instruction.id
+        ws['E7'] = instruction.number
         ws['B9'] = instruction.driver.__str__()
         ws['G9'] = instruction.driver.personal_id
         ws['B11'] = instruction.car.number_plate
@@ -1778,7 +1778,7 @@ def instruction_xlsx(request, pk):
         ws['A25'] = company.name
         ws['A26'] = f'{company.city}, {company.address}'
         ws['A27'] = company.bulstat
-        ws['E30'] = instruction.id
+        ws['E30'] = instruction.number
         ws['B32'] = instruction.driver.__str__()
         ws['G32'] = instruction.driver.personal_id
         ws['B34'] = instruction.car.number_plate
@@ -1789,7 +1789,7 @@ def instruction_xlsx(request, pk):
         ws['A44'] = instruction.city
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename="Instruction {instruction.id}.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="Instruction {instruction.number}.xlsx"'
 
         wb.save(response)
 
