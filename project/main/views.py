@@ -1116,7 +1116,7 @@ def expense_order_xlsx(request, pk):
 
         shutil.copy(xlsx_path, unique_xlsx_path)
 
-        company = expense_order.trip_order.course.company
+        company = expense_order.trip_order.course_export.company
         heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
 
         wb = load_workbook(filename=unique_xlsx_path)
