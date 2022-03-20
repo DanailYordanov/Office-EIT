@@ -373,13 +373,11 @@ class Expense(models.Model):
 class TripOrder(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='triporder_creator', null=True, on_delete=models.SET_NULL)
-    course_export = models.OneToOneField(
-        Course, verbose_name='Курс за износ', related_name='trip_order_export', on_delete=models.CASCADE)
-    course_import = models.OneToOneField(
-        Course, verbose_name='Курс за внос', related_name='trip_order_import', on_delete=models.CASCADE)
+        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='trip_order_creator', null=True, on_delete=models.SET_NULL)
+    course = models.OneToOneField(
+        Course, verbose_name='Курс за износ', related_name='trip_order_course', on_delete=models.CASCADE)
     driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='triporder_driver', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='trip_order_driver', null=True, on_delete=models.SET_NULL)
     destination = models.CharField('Дестинация', max_length=100)
     from_date = models.DateField('Начална дата')
     to_date = models.DateField('Крайна дата')
@@ -394,7 +392,7 @@ class TripOrder(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            company = self.course_export.company
+            company = self.course.company
             self.number = company.trip_order_id
             company.trip_order_id += 1
             company.save()
@@ -421,7 +419,7 @@ class ExpenseOrder(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            company = self.trip_order.course_export.company
+            company = self.trip_order.course.company
             self.number = company.expense_order_id
             company.expense_order_id += 1
             company.save()

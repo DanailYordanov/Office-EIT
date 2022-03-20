@@ -25,9 +25,7 @@ $(document).ready(function () {
 
     $('#driverTripOrderID').change(courseOptionsLoad);
 
-    $('#courseExportTripOrderID').change(datesLoad);
-
-    $('#courseImportTripOrderID').change(datesLoad);
+    $('#courseTripOrderID').change(datesLoad);
 
     $('#contractorID').change(contractorReminder);
 
@@ -67,34 +65,14 @@ function courseOptionsLoad() {
         url: loadCoursesURL,
         type: 'POST',
         data: {
-            'driver_id': driver_id,
-            'export': 'True'
+            'driver_id': driver_id
         },
         headers: {
             'X-CSRFToken': csrf_token
         },
         success: function (data) {
-            $('#courseExportTripOrderID').html(data);
-            $('#courseExportTripOrderID').niceSelect('update');
-        },
-        error: function (response) {
-            alert('Нещо се обърка. Опитайте отново!');
-        }
-    });
-
-    $.ajax({
-        url: loadCoursesURL,
-        type: 'POST',
-        data: {
-            'driver_id': driver_id,
-            'export': ''
-        },
-        headers: {
-            'X-CSRFToken': csrf_token
-        },
-        success: function (data) {
-            $('#courseImportTripOrderID').html(data);
-            $('#courseImportTripOrderID').niceSelect('update');
+            $('#courseTripOrderID').html(data);
+            $('#courseTripOrderID').niceSelect('update');
         },
         error: function (response) {
             alert('Нещо се обърка. Опитайте отново!');
@@ -104,8 +82,7 @@ function courseOptionsLoad() {
 
 
 function datesLoad() {
-    var course_export_id = $('#courseExportTripOrderID').val();
-    var course_import_id = $('#courseImportTripOrderID').val();
+    var course_id = $('#courseTripOrderID').val();
     var loadDatesURL = $(this).attr('data-load-dates-url');
     var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
 
@@ -113,8 +90,7 @@ function datesLoad() {
         url: loadDatesURL,
         type: 'POST',
         data: {
-            'course_export_id': course_export_id,
-            'course_import_id': course_import_id
+            'course_id': course_id
         },
         headers: {
             'X-CSRFToken': csrf_token

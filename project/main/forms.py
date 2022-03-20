@@ -288,31 +288,20 @@ class TripOrderModelForm(forms.ModelForm):
                 'id': 'driverTripOrderID'
             })
     )
-    course_export = forms.ModelChoiceField(
+    course = forms.ModelChoiceField(
         models.Course.objects.none(),
         label='Курс за износ',
         empty_label='Избери',
         widget=forms.Select(
             attrs={
                 'data-load-dates-url': reverse_lazy('main:load-dates'),
-                'id': 'courseExportTripOrderID'
-            })
-    )
-    course_import = forms.ModelChoiceField(
-        models.Course.objects.none(),
-        label='Курс за внос',
-        empty_label='Избери',
-        widget=forms.Select(
-            attrs={
-                'data-load-dates-url': reverse_lazy('main:load-dates'),
-                'id': 'courseImportTripOrderID'
+                'id': 'courseTripOrderID'
             })
     )
 
     class Meta:
         model = models.TripOrder
-        fields = ['driver', 'course_export', 'course_import',
-                  'destination', 'from_date', 'to_date']
+        fields = ['driver', 'course', 'destination', 'from_date', 'to_date']
         widgets = {
             'destination': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Дестинация'}),
@@ -323,23 +312,18 @@ class TripOrderModelForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
 
         if 'driver' in self.data:
             try:
                 driver_id = int(self.data.get('driver'))
-                self.fields['course_export'].queryset = models.Course.objects.filter(
+                self.fields['course'].queryset = models.Course.objects.filter(
                     driver__id=driver_id, export=True)
-                self.fields['course_import'].queryset = models.Course.objects.filter(
-                    driver__id=driver_id, export=False)
             except (ValueError, TypeError):
                 pass
         elif self.instance.pk:
-            self.fields['course_export'].queryset = models.Course.objects.filter(
+            self.fields['course'].queryset = models.Course.objects.filter(
                 driver=self.instance.driver, export=True)
-            self.fields['course_import'].queryset = models.Course.objects.filter(
-                driver=self.instance.driver, export=False)
 
 
 class ExpenseOrderModelForm(forms.ModelForm):
