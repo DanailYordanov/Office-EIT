@@ -16,7 +16,7 @@ COURSE_DOCUMENTS_OPTIONS = [
 
 class CarModelForm(forms.ModelForm):
     car_type = forms.ModelChoiceField(
-        models.CarType.objects.all(), label='Вид автомобил', empty_label='Избери')
+        models.CarType.objects.all().order_by('car_type'), label='Вид автомобил', empty_label='Избери')
 
     class Meta:
         model = models.Car
@@ -29,9 +29,9 @@ class CarModelForm(forms.ModelForm):
 
 class ReminderModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
-        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
     reminder_type = forms.ModelChoiceField(
-        models.ReminderType.objects.all(), label='Вид напомняне', empty_label='Избери')
+        models.ReminderType.objects.all().order_by('reminder_type'), label='Вид напомняне', empty_label='Избери')
     expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.TextInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
 
@@ -42,9 +42,9 @@ class ReminderModelForm(forms.ModelForm):
 
 class ServiceModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
-        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
     service_type = forms.ModelChoiceField(
-        models.ServiceType.objects.all(), label='Вид обслужване', empty_label='Избери')
+        models.ServiceType.objects.all().order_by('service_type'), label='Вид обслужване', empty_label='Избери')
     date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
     additional_information = forms.CharField(label='Допълнителна информация', required=False, widget=forms.Textarea(
@@ -101,13 +101,13 @@ class ContractorsModelForm(forms.ModelForm):
 
 class CourseModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
-        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
     driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
+        get_user_model().objects.filter(is_active=True, is_staff=False).order_by('first_name'), label='Шорфьор', empty_label='Избери')
     company = forms.ModelChoiceField(
-        models.Company.objects.all(), label='Фирма', empty_label='Избери')
+        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
     contractor = forms.ModelChoiceField(
-        models.Contractor.objects.all(),
+        models.Contractor.objects.all().order_by('name'),
         label='Контрагент',
         empty_label='Избери',
         widget=forms.Select(
@@ -117,7 +117,7 @@ class CourseModelForm(forms.ModelForm):
             })
     )
     bank = forms.ModelChoiceField(
-        models.Bank.objects.all(), label='Банка', empty_label='Избери')
+        models.Bank.objects.all().order_by('name'), label='Банка', empty_label='Избери')
     medical_examination_perpetrator = forms.CharField(
         label='Извършител на медицински преглед', max_length=100, required=False, widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'Извършител на медицински преглед', 'list': 'datalistMedicalExaminationPerpetrator'}))
@@ -262,7 +262,7 @@ class AddressModelForm(forms.ModelForm):
 
 class ExpenseModelForm(forms.ModelForm):
     expense_type = forms.ModelChoiceField(
-        models.ExpenseType.objects.all(), label='Вид разход', empty_label='Избери')
+        models.ExpenseType.objects.all().order_by('expense_type'), label='Вид разход', empty_label='Избери')
 
     class Meta:
         model = models.Expense
@@ -278,7 +278,8 @@ class ExpenseModelForm(forms.ModelForm):
 
 class TripOrderModelForm(forms.ModelForm):
     driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False),
+        get_user_model().objects.filter(
+            is_active=True, is_staff=False).order_by('first_name'),
         label='Шофьор',
         empty_label='Избери',
         widget=forms.Select(
@@ -343,7 +344,7 @@ class TripOrderModelForm(forms.ModelForm):
 
 class ExpenseOrderModelForm(forms.ModelForm):
     trip_order = forms.ModelChoiceField(
-        models.TripOrder.objects.all(), label='Командировъчна заповед', empty_label='Избери')
+        models.TripOrder.objects.all().order_by('-number'), label='Командировъчна заповед', empty_label='Избери')
 
     class Meta:
         model = models.ExpenseOrder
@@ -358,7 +359,7 @@ class ExpenseOrderModelForm(forms.ModelForm):
 
 class CourseInvoiceModelForm(forms.ModelForm):
     course = forms.ModelChoiceField(
-        models.Course.objects.all(), label='Курс', empty_label='Избери')
+        models.Course.objects.all().order_by('-id'), label='Курс', empty_label='Избери')
     tax_transaction_basis = forms.ModelChoiceField(
         models.TaxTransactionBasis.objects.all(), label='Основание на сделката', empty_label='Избери')
 
@@ -427,11 +428,11 @@ class BankModelForm(forms.ModelForm):
 
 class InstructionModelForm(forms.ModelForm):
     driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
+        get_user_model().objects.filter(is_active=True, is_staff=False).order_by('first_name'), label='Шорфьор', empty_label='Избери')
     car = forms.ModelChoiceField(
-        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
     company = forms.ModelChoiceField(
-        models.Company.objects.all(), label='Фирма', empty_label='Избери')
+        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
 
     class Meta:
         model = models.Instruction
@@ -444,7 +445,7 @@ class InstructionModelForm(forms.ModelForm):
 
 class CourseDateJournalForm(forms.Form):
     company = forms.ModelChoiceField(
-        models.Company.objects.all(), label='Фирма', empty_label='Избери')
+        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
     from_date = forms.DateField(label='От дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'От дата'}))
     to_date = forms.DateField(label='До дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
@@ -455,7 +456,7 @@ class CourseDateJournalForm(forms.Form):
 
 class CourseDocumentsForm(forms.Form):
     course = forms.ModelChoiceField(
-        models.Course.objects.all(), label='Курс', empty_label='Избери')
+        models.Course.objects.all().order_by('-id'), label='Курс', empty_label='Избери')
     document_type = forms.ChoiceField(
         label='Тип документ', choices=COURSE_DOCUMENTS_OPTIONS)
 
