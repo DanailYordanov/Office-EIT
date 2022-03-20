@@ -107,5 +107,7 @@ urlpatterns = [
     path('download/instruction/<int:pk>/',
          views.instruction_xlsx, name='instruction-xlsx'),
     path('course-documents/', views.course_documents_xlsx,
-         name='course-documents-xlsx')
+         name='course-documents-xlsx'),
+    path('course-date-journals/', views.course_date_journals_xlsx,
+         name='course-date-journals-xlsx')
 ]

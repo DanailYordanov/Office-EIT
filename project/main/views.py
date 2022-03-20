@@ -369,101 +369,11 @@ def populate_vat_info(request):
 def courses_list(request):
     if request.user.is_staff:
         courses = models.Course.objects.all().order_by('-pk')
-
-        if request.method == 'POST':
-            form = forms.CourseDateJournalForm(request.POST)
-
-            if form.is_valid():
-                journal_type = form.cleaned_data['journal_type']
-                from_date = form.cleaned_data['from_date']
-                to_date = form.cleaned_data['to_date']
-                company = form.cleaned_data['company']
-
-                if journal_type == 'technical_inspection':
-                    technical_inspections = models.CourseTechnicalInspection.objects.filter(
-                        creation_date__range=[from_date, to_date]
-                    )
-
-                    unique_token = secrets.token_hex(32)
-
-                    xlsx_path = os.path.join(
-                        settings.BASE_DIR, 'main/xlsx_files/course_technical_inspection_journal.xlsx')
-
-                    unique_xlsx_path = os.path.join(
-                        settings.BASE_DIR, f'main/xlsx_files/course_technical_inspection_journal_{unique_token}.xlsx')
-
-                    shutil.copy(xlsx_path, unique_xlsx_path)
-
-                    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
-
-                    wb = load_workbook(filename=unique_xlsx_path)
-                    ws = wb.active
-
-                    ws['A2'] = heading
-
-                    for i in range(0, len(technical_inspections)):
-                        ws[f'A{i + 6}'] = technical_inspections[i].number
-                        ws[f'B{i + 6}'] = technical_inspections[i].course.car.__str__()
-                        ws[f'C{i + 6}'] = dateformat.format(
-                            technical_inspections[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-                        ws[f'F{i + 6}'] = technical_inspections[i].perpetrator.perpetrator
-
-                    response = HttpResponse(
-                        content_type='application/vnd.ms-excel')
-                    response['Content-Disposition'] = f'attachment; filename="Technical Inspections Journal.xlsx"'
-
-                    wb.save(response)
-
-                    os.remove(unique_xlsx_path)
-
-                elif journal_type == 'medical_examination':
-                    medical_examinations = models.CourseMedicalExamination.objects.filter(
-                        creation_date__range=[from_date, to_date]
-                    )
-
-                    unique_token = secrets.token_hex(32)
-
-                    xlsx_path = os.path.join(
-                        settings.BASE_DIR, 'main/xlsx_files/course_medical_journal.xlsx')
-
-                    unique_xlsx_path = os.path.join(
-                        settings.BASE_DIR, f'main/xlsx_files/course_medical_journal_{unique_token}.xlsx')
-
-                    shutil.copy(xlsx_path, unique_xlsx_path)
-
-                    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
-
-                    wb = load_workbook(filename=unique_xlsx_path)
-                    ws = wb.active
-
-                    ws['A2'] = heading
-
-                    for i in range(0, len(medical_examinations)):
-                        ws[f'A{i + 6}'] = medical_examinations[i].number
-                        ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
-                        ws[f'C{i + 6}'] = dateformat.format(
-                            medical_examinations[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-                        ws[f'F{i + 6}'] = medical_examinations[i].perpetrator.perpetrator
-
-                    response = HttpResponse(
-                        content_type='application/vnd.ms-excel')
-                    response['Content-Disposition'] = f'attachment; filename="Medical Journal.xlsx"'
-
-                    wb.save(response)
-
-                    os.remove(unique_xlsx_path)
-
-                return response
-        else:
-            form = forms.CourseDateJournalForm()
-
     else:
         courses = models.Course.objects.filter(
             driver=request.user).order_by('-pk')
-        form = None
 
     context = {
-        'form': form,
         'courses': courses,
         'page_heading': 'Курсове'
     }
@@ -1872,6 +1782,106 @@ def course_documents_xlsx(request):
         context = {
             'form': form,
             'page_heading': 'Документи за курс'
+        }
+
+        return render(request, 'main/add_update_form.html', context)
+    else:
+        raise PermissionDenied
+
+
+@login_required
+def course_date_journals_xlsx(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.CourseDateJournalForm(request.POST)
+
+            if form.is_valid():
+                journal_type = form.cleaned_data['journal_type']
+                from_date = form.cleaned_data['from_date']
+                to_date = form.cleaned_data['to_date']
+                company = form.cleaned_data['company']
+
+                if journal_type == 'technical_inspection':
+                    technical_inspections = models.CourseTechnicalInspection.objects.filter(
+                        creation_date__range=[from_date, to_date]
+                    )
+
+                    unique_token = secrets.token_hex(32)
+
+                    xlsx_path = os.path.join(
+                        settings.BASE_DIR, 'main/xlsx_files/course_technical_inspection_journal.xlsx')
+
+                    unique_xlsx_path = os.path.join(
+                        settings.BASE_DIR, f'main/xlsx_files/course_technical_inspection_journal_{unique_token}.xlsx')
+
+                    shutil.copy(xlsx_path, unique_xlsx_path)
+
+                    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
+
+                    wb = load_workbook(filename=unique_xlsx_path)
+                    ws = wb.active
+
+                    ws['A2'] = heading
+
+                    for i in range(0, len(technical_inspections)):
+                        ws[f'A{i + 6}'] = technical_inspections[i].number
+                        ws[f'B{i + 6}'] = technical_inspections[i].course.car.__str__()
+                        ws[f'C{i + 6}'] = dateformat.format(
+                            technical_inspections[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+                        ws[f'F{i + 6}'] = technical_inspections[i].perpetrator.perpetrator
+
+                    response = HttpResponse(
+                        content_type='application/vnd.ms-excel')
+                    response['Content-Disposition'] = f'attachment; filename="Technical Inspections Journal.xlsx"'
+
+                    wb.save(response)
+
+                    os.remove(unique_xlsx_path)
+
+                elif journal_type == 'medical_examination':
+                    medical_examinations = models.CourseMedicalExamination.objects.filter(
+                        creation_date__range=[from_date, to_date]
+                    )
+
+                    unique_token = secrets.token_hex(32)
+
+                    xlsx_path = os.path.join(
+                        settings.BASE_DIR, 'main/xlsx_files/course_medical_journal.xlsx')
+
+                    unique_xlsx_path = os.path.join(
+                        settings.BASE_DIR, f'main/xlsx_files/course_medical_journal_{unique_token}.xlsx')
+
+                    shutil.copy(xlsx_path, unique_xlsx_path)
+
+                    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
+
+                    wb = load_workbook(filename=unique_xlsx_path)
+                    ws = wb.active
+
+                    ws['A2'] = heading
+
+                    for i in range(0, len(medical_examinations)):
+                        ws[f'A{i + 6}'] = medical_examinations[i].number
+                        ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
+                        ws[f'C{i + 6}'] = dateformat.format(
+                            medical_examinations[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+                        ws[f'F{i + 6}'] = medical_examinations[i].perpetrator.perpetrator
+
+                    response = HttpResponse(
+                        content_type='application/vnd.ms-excel')
+                    response['Content-Disposition'] = f'attachment; filename="Medical Journal.xlsx"'
+
+                    wb.save(response)
+
+                    os.remove(unique_xlsx_path)
+
+                return response
+        else:
+            form = forms.CourseDateJournalForm()
+
+        context = {
+            'form': form,
+            'page_heading': 'Сваляне на дневник'
         }
 
         return render(request, 'main/add_update_form.html', context)

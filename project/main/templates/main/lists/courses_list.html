@@ -19,35 +19,6 @@
 </div>
 {% endif %}
 
-{% if request.user.is_staff %}
-<p>
-    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForm"
-        aria-expanded="false" aria-controls="collapseExample">
-        Сваляне на дневник
-    </button>
-</p>
-<div class="collapse" id="collapseForm">
-    <p class="text-center fw-light fs-4">Сваляне на дневник</p>
-    <form action="{% url 'main:courses-list' %}" class="form-flex mb-5" method="post" autocomplete="off"
-        enctype="multipart/form-data" novalidate>
-        {% csrf_token %}
-
-        {% for field in form %}
-        <div class="col-12 col-md-8 col-xl-6">
-            <div class="field-label">
-                {{ field.label_tag }}
-            </div>
-            <div class="field">
-                {{ field }}
-            </div>
-            {{ field.errors }}
-        </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary">Свали</button>
-    </form>
-</div>
-{% endif %}
-
 <div class="form-floating mb-4 col-12 col-md-6 col-xl-4 gx-1">
     <input type="text" class="form-control" id="tableSearch" placeholder="Търси" aria-describedby="tableSearchHelp">
     <label for="tableSearch">Потърси:</label>
