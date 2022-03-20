@@ -13,7 +13,7 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm):
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name']
+        fields = ['username', 'first_name', 'middle_name', 'last_name']
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -24,11 +24,13 @@ class CustomUserChangeForm(UserChangeForm):
 
 
 class CustomSignupForm(SignupForm):
-    first_name = forms.CharField(label='Име', max_length=30, required=True)
-    last_name = forms.CharField(label='Фамилия', max_length=30, required=True)
+    first_name = forms.CharField(label='Име', max_length=150, required=True)
+    middle_name = forms.CharField(
+        label='Презиме', max_length=150, required=False)
+    last_name = forms.CharField(label='Фамилия', max_length=150, required=True)
 
     class Meta:
-        fields = ['username', 'email', 'first_name',
+        fields = ['username', 'email', 'first_name', 'middle_name',
                   'last_name', 'password1', 'password2']
 
     def __init__(self, *args, **kwargs):
@@ -40,12 +42,21 @@ class CustomSignupForm(SignupForm):
             attrs={'class': 'form-control', 'placeholder': 'E-mail'})
         self.fields['first_name'].widget = forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'Име'})
+        self.fields['middle_name'].widget = forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Презиме'})
         self.fields['last_name'].widget = forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'Фамилия'})
         self.fields['password1'].widget = forms.PasswordInput(
             attrs={'class': 'form-control', 'placeholder': 'Парола'})
         self.fields['password2'].widget = forms.PasswordInput(
             attrs={'class': 'form-control', 'placeholder': 'Парола отново'})
+
+    def save(self, request):
+        user = super().save(request)
+        user.middle_name = self.cleaned_data.get('middle_name')
+        user.save()
+
+        return user
 
 
 class CustomLoginForm(LoginForm):

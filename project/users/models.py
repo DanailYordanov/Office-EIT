@@ -4,6 +4,8 @@ from main.models import Bank
 
 
 class CustomUser(AbstractUser):
+    middle_name = models.CharField(
+        'Презиме', max_length=150, null=True, blank=True)
     personal_id = models.CharField('ЕГН', max_length=15, null=True, blank=True)
     id_card_expiration = models.DateField(
         'Изтичане на лична карта', null=True, blank=True)
@@ -26,4 +28,17 @@ class CustomUser(AbstractUser):
         'Телефонен номер', max_length=50, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        if self.middle_name:
+            return f'{self.first_name} {self.middle_name} {self.last_name}'
+        else:
+            return f'{self.first_name} {self.last_name}'
+
+    def get_full_name(self):
+        if self.middle_name:
+            full_name = '%s %s %s' % (
+                self.first_name, self.middle_name, self.last_name)
+        else:
+            full_name = '%s %s' % (
+                self.first_name, self.last_name)
+
+        return full_name.strip()
