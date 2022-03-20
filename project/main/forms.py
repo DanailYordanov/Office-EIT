@@ -458,3 +458,13 @@ class CourseDocumentsForm(forms.Form):
         models.Course.objects.all(), label='Курс', empty_label='Избери')
     document_type = forms.ChoiceField(
         label='Тип документ', choices=COURSE_DOCUMENTS_OPTIONS)
+
+    def clean(self):
+        form_data = self.cleaned_data
+        course = form_data.get('course')
+        document_type = form_data.get('document_type')
+
+        if document_type == 'Служебни бележки' and not course.export:
+            raise forms.ValidationError('Избраният курс е за внос!')
+
+        return form_data
