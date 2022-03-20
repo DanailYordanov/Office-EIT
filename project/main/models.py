@@ -406,7 +406,7 @@ class ExpenseOrder(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
-    trip_order = models.OneToOneField(
+    trip_order = models.ForeignKey(
         TripOrder, verbose_name='Командировъчна заповед', related_name='expense_order', null=True, on_delete=models.CASCADE)
     BGN_amount = models.FloatField('Сума в лева', null=True, blank=True)
     EUR_amount = models.FloatField('Сума в евро', null=True, blank=True)
