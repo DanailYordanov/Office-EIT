@@ -6,6 +6,13 @@ from main import models
 
 DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
 
+COURSE_DOCUMENTS_OPTIONS = [
+    ('', 'Избери'),
+    ('Писмо', 'Писмо'),
+    ('Обратна разписка', 'Обратна разписка'),
+    ('Служебни бележки', 'Служебни бележки')
+]
+
 
 class CarModelForm(forms.ModelForm):
     car_type = forms.ModelChoiceField(
@@ -444,3 +451,10 @@ class CourseDateJournalForm(forms.Form):
         attrs={'class': 'form-control date-picker', 'placeholder': 'До дата'}))
     journal_type = forms.ChoiceField(
         label='Вид дневник', choices=models.COURSE_DOCUMENT_TYPE_CHOICES)
+
+
+class CourseDocumentsForm(forms.Form):
+    course = forms.ModelChoiceField(
+        models.Course.objects.all(), label='Курс', empty_label='Избери')
+    document_type = forms.ChoiceField(
+        label='Тип документ', choices=COURSE_DOCUMENTS_OPTIONS)

@@ -1344,76 +1344,6 @@ def course_invoice_xlsx(request, pk):
 
         wb.save(copy_unique_xlsx_path)
 
-        receipt_xlsx_path = os.path.join(
-            settings.BASE_DIR, 'main/xlsx_files/receipt.xlsx')
-
-        unique_receipt_xlsx_path = os.path.join(
-            unique_dir_path, 'receipt.xlsx')
-
-        shutil.copy(receipt_xlsx_path, unique_receipt_xlsx_path)
-
-        wb = load_workbook(filename=unique_receipt_xlsx_path)
-        ws = wb.active
-
-        ws['C8'] = contractor.name
-        ws['E10'] = contractor.correspondence_address
-
-        if contractor.postal_code:
-            ws['C12'] = contractor.postal_code[0]
-            ws['D12'] = contractor.postal_code[1]
-            ws['E12'] = contractor.postal_code[2]
-            ws['F12'] = contractor.postal_code[3]
-
-        ws['J12'] = contractor.city
-        ws['D15'] = course.contact_person
-
-        ws['AC20'] = company.name
-        ws['AE21'] = company.correspondence_address
-        ws['AE23'] = company.province
-
-        if company.postal_code:
-            ws['AC25'] = company.postal_code[0]
-            ws['AD25'] = company.postal_code[1]
-            ws['AE25'] = company.postal_code[2]
-            ws['AF25'] = company.postal_code[3]
-
-        ws['AJ25'] = company.city
-
-        wb.save(unique_receipt_xlsx_path)
-
-        letter_xlsx_path = os.path.join(
-            settings.BASE_DIR, 'main/xlsx_files/letter.xlsx')
-
-        unique_letter_xlsx_path = os.path.join(
-            unique_dir_path, 'letter.xlsx')
-
-        shutil.copy(letter_xlsx_path, unique_letter_xlsx_path)
-
-        wb = load_workbook(filename=unique_letter_xlsx_path)
-        ws = wb.active
-
-        ws['A2'] = company.name
-        ws['A3'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
-        ws['B4'] = company.phone_number
-        ws['B5'] = company.email
-
-        ws['G18'] = contractor.name
-        ws['G19'] = contractor.correspondence_address
-        ws['G20'] = f'{contractor.postal_code} {contractor.city}'
-        ws['H21'] = contractor.phone_number
-
-        ws['A26'] = company.name
-        ws['A27'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
-        ws['B28'] = company.phone_number
-        ws['B29'] = company.email
-
-        ws['G42'] = contractor.name
-        ws['G43'] = contractor.correspondence_address
-        ws['G44'] = f'{contractor.postal_code} {contractor.city}'
-        ws['H45'] = contractor.phone_number
-
-        wb.save(unique_letter_xlsx_path)
-
         if course.export:
 
             translated_invoice_xlsx_path = os.path.join(
@@ -1462,56 +1392,6 @@ def course_invoice_xlsx(request, pk):
             ws['C85'] = bank.bank_code
 
             wb.save(unique_translated_invoice_xlsx_path)
-
-            course_technical_inspection_xlsx_path = os.path.join(
-                settings.BASE_DIR, 'main/xlsx_files/course_technical_inspection.xlsx')
-
-            unique_course_technical_inspection_xlsx_path = os.path.join(
-                unique_dir_path, 'course_technical_inspection.xlsx')
-
-            shutil.copy(course_technical_inspection_xlsx_path,
-                        unique_course_technical_inspection_xlsx_path)
-
-            wb = load_workbook(
-                filename=unique_course_technical_inspection_xlsx_path)
-            ws = wb.active
-
-            ws['A1'] = company.name
-            ws['A2'] = f'{company.city}, {company.address}'
-            ws['A3'] = company.bulstat
-            ws['E9'] = course.technical_inspection.number
-            ws['B12'] = course.car.number_plate
-            ws['B13'] = course.driver.__str__()
-            ws['C15'] = course.technical_inspection.perpetrator.perpetrator
-            ws['B18'] = dateformat.format(
-                course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-
-            wb.save(unique_course_technical_inspection_xlsx_path)
-
-            course_medical_examination_xlsx_path = os.path.join(
-                settings.BASE_DIR, 'main/xlsx_files/course_medical_examination.xlsx')
-
-            unique_course_medical_examination_xlsx_path = os.path.join(
-                unique_dir_path, 'course_medical_examination.xlsx')
-
-            shutil.copy(course_medical_examination_xlsx_path,
-                        unique_course_medical_examination_xlsx_path)
-
-            wb = load_workbook(
-                filename=unique_course_medical_examination_xlsx_path)
-            ws = wb.active
-
-            ws['A1'] = company.name
-            ws['A2'] = f'{company.city}, {company.address}'
-            ws['A3'] = company.bulstat
-            ws['E9'] = course.medical_examination.number
-            ws['A12'] = course.driver.__str__()
-            ws['B13'] = course.car.number_plate
-            ws['C17'] = course.medical_examination.perpetrator.perpetrator
-            ws['B20'] = dateformat.format(
-                course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-
-            wb.save(unique_course_medical_examination_xlsx_path)
 
         shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
 
@@ -1796,5 +1676,208 @@ def instruction_xlsx(request, pk):
         os.remove(unique_xlsx_path)
 
         return response
+    else:
+        raise PermissionDenied
+
+
+def letter_xlsx(course):
+    company = course.company
+    contractor = course.contractor
+
+    unique_token = secrets.token_hex(32)
+
+    xlsx_path = os.path.join(
+        settings.BASE_DIR, 'main/xlsx_files/letter.xlsx')
+
+    unique_xlsx_path = os.path.join(
+        settings.BASE_DIR, f'main/xlsx_files/letter_{unique_token}.xlsx')
+
+    shutil.copy(xlsx_path, unique_xlsx_path)
+
+    wb = load_workbook(filename=unique_xlsx_path)
+    ws = wb.active
+
+    ws['A2'] = company.name
+    ws['A3'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
+    ws['B4'] = company.phone_number
+    ws['B5'] = company.email
+
+    ws['G18'] = contractor.name
+    ws['G19'] = contractor.correspondence_address
+    ws['G20'] = f'{contractor.postal_code} {contractor.city}'
+    ws['H21'] = contractor.phone_number
+
+    ws['A26'] = company.name
+    ws['A27'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
+    ws['B28'] = company.phone_number
+    ws['B29'] = company.email
+
+    ws['G42'] = contractor.name
+    ws['G43'] = contractor.correspondence_address
+    ws['G44'] = f'{contractor.postal_code} {contractor.city}'
+    ws['H45'] = contractor.phone_number
+
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = f'attachment; filename="Letter.xlsx"'
+
+    wb.save(response)
+
+    os.remove(unique_xlsx_path)
+
+    return response
+
+
+def receipt_xlsx(course):
+    company = course.company
+    contractor = course.contractor
+
+    unique_token = secrets.token_hex(32)
+
+    xlsx_path = os.path.join(
+        settings.BASE_DIR, 'main/xlsx_files/receipt.xlsx')
+
+    unique_xlsx_path = os.path.join(
+        settings.BASE_DIR, f'main/xlsx_files/receipt_{unique_token}.xlsx')
+
+    shutil.copy(xlsx_path, unique_xlsx_path)
+
+    wb = load_workbook(filename=unique_xlsx_path)
+    ws = wb.active
+
+    ws['C8'] = contractor.name
+    ws['E10'] = contractor.correspondence_address
+
+    if contractor.postal_code:
+        ws['C12'] = contractor.postal_code[0]
+        ws['D12'] = contractor.postal_code[1]
+        ws['E12'] = contractor.postal_code[2]
+        ws['F12'] = contractor.postal_code[3]
+
+    ws['J12'] = contractor.city
+    ws['D15'] = course.contact_person
+
+    ws['AC20'] = company.name
+    ws['AE21'] = company.correspondence_address
+    ws['AE23'] = company.province
+
+    if company.postal_code:
+        ws['AC25'] = company.postal_code[0]
+        ws['AD25'] = company.postal_code[1]
+        ws['AE25'] = company.postal_code[2]
+        ws['AF25'] = company.postal_code[3]
+
+    ws['AJ25'] = company.city
+
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = f'attachment; filename="Receipt.xlsx"'
+
+    wb.save(response)
+
+    os.remove(unique_xlsx_path)
+
+    return response
+
+
+def official_notices_xlsx(course):
+    company = course.company
+
+    unique_token = secrets.token_hex(32)
+
+    unique_dir_path = os.path.join(
+        settings.BASE_DIR, f'main/xlsx_files/{unique_token}')
+
+    os.mkdir(unique_dir_path)
+
+    course_technical_inspection_xlsx_path = os.path.join(
+        settings.BASE_DIR, 'main/xlsx_files/course_technical_inspection.xlsx')
+
+    unique_course_technical_inspection_xlsx_path = os.path.join(
+        unique_dir_path, 'course_technical_inspection.xlsx')
+
+    shutil.copy(course_technical_inspection_xlsx_path,
+                unique_course_technical_inspection_xlsx_path)
+
+    wb = load_workbook(
+        filename=unique_course_technical_inspection_xlsx_path)
+    ws = wb.active
+
+    ws['A1'] = company.name
+    ws['A2'] = f'{company.city}, {company.address}'
+    ws['A3'] = company.bulstat
+    ws['E9'] = course.technical_inspection.number
+    ws['B12'] = course.car.number_plate
+    ws['B13'] = course.driver.__str__()
+    ws['C15'] = course.technical_inspection.perpetrator.perpetrator
+    ws['B18'] = dateformat.format(
+        course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+    wb.save(unique_course_technical_inspection_xlsx_path)
+
+    course_medical_examination_xlsx_path = os.path.join(
+        settings.BASE_DIR, 'main/xlsx_files/course_medical_examination.xlsx')
+
+    unique_course_medical_examination_xlsx_path = os.path.join(
+        unique_dir_path, 'course_medical_examination.xlsx')
+
+    shutil.copy(course_medical_examination_xlsx_path,
+                unique_course_medical_examination_xlsx_path)
+
+    wb = load_workbook(
+        filename=unique_course_medical_examination_xlsx_path)
+    ws = wb.active
+
+    ws['A1'] = company.name
+    ws['A2'] = f'{company.city}, {company.address}'
+    ws['A3'] = company.bulstat
+    ws['E9'] = course.medical_examination.number
+    ws['A12'] = course.driver.__str__()
+    ws['B13'] = course.car.number_plate
+    ws['C17'] = course.medical_examination.perpetrator.perpetrator
+    ws['B20'] = dateformat.format(
+        course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+    wb.save(unique_course_medical_examination_xlsx_path)
+
+    shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
+
+    zip_path = os.path.join(
+        settings.BASE_DIR, f'main/xlsx_files/{unique_token}.zip')
+
+    response = HttpResponse(open(zip_path, 'rb'))
+    response['Content-Type'] = 'application/zip'
+    response['Content-Disposition'] = f'attachment; filename="Official Notices {course.medical_examination.number}.zip"'
+
+    os.remove(zip_path)
+    shutil.rmtree(unique_dir_path, ignore_errors=True)
+
+    return response
+
+
+@login_required
+def course_documents_xlsx(request):
+    if request.user.is_staff:
+        if request.method == 'POST':
+            form = forms.CourseDocumentsForm(request.POST)
+            if form.is_valid():
+                course = form.cleaned_data.get('course')
+                document_type = form.cleaned_data.get('document_type')
+
+                if document_type == 'Писмо':
+                    response = letter_xlsx(course)
+                elif document_type == 'Обратна разписка':
+                    response = receipt_xlsx(course)
+                elif document_type == 'Служебни бележки':
+                    response = official_notices_xlsx(course)
+
+                return response
+        else:
+            form = forms.CourseDocumentsForm()
+
+        context = {
+            'form': form,
+            'page_heading': 'Документи за курс'
+        }
+
+        return render(request, 'main/add_update_form.html', context)
     else:
         raise PermissionDenied

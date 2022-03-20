@@ -105,5 +105,7 @@ urlpatterns = [
     path('delete-instruction/<int:pk>/',
          views.InstructionDeleteView.as_view(), name='delete-instruction'),
     path('download/instruction/<int:pk>/',
-         views.instruction_xlsx, name='instruction-xlsx')
+         views.instruction_xlsx, name='instruction-xlsx'),
+    path('course-documents/', views.course_documents_xlsx,
+         name='course-documents-xlsx')
 ]
