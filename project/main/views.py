@@ -368,10 +368,10 @@ def populate_vat_info(request):
 @login_required
 def courses_list(request):
     if request.user.is_staff:
-        courses = models.Course.objects.all().order_by('-pk')
+        courses = models.Course.objects.all().order_by('-number')
     else:
         courses = models.Course.objects.filter(
-            driver=request.user).order_by('-pk')
+            driver=request.user).order_by('-number')
 
     context = {
         'courses': courses,
@@ -402,8 +402,12 @@ def add_course(request, pk=None):
             initial_form['export'] = initial_course.export
             initial_form['contact_person'] = initial_course.contact_person
             initial_form['other_conditions'] = initial_course.other_conditions
-            initial_form['medical_examination_perpetrator'] = initial_course.medical_examination.perpetrator
-            initial_form['technical_inspection_perpetrator'] = initial_course.technical_inspection.perpetrator
+
+            if hasattr(initial_course, 'medical_examination'):
+                initial_form['medical_examination_perpetrator'] = initial_course.medical_examination.perpetrator
+
+            if hasattr(initial_course, 'technical_inspection'):
+                initial_form['technical_inspection_perpetrator'] = initial_course.technical_inspection.perpetrator
 
             for address in initial_course.addresses.all():
                 initial_formset.append(
@@ -730,7 +734,7 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
 @login_required
 def trip_orders_list(request):
     if request.user.is_staff:
-        trip_orders = models.TripOrder.objects.all().order_by('-pk')
+        trip_orders = models.TripOrder.objects.all().order_by('-number')
     else:
         raise PermissionDenied
 
@@ -935,7 +939,7 @@ def load_dates(request):
 @login_required
 def expense_orders_list(request):
     if request.user.is_staff:
-        expense_orders = models.ExpenseOrder.objects.all().order_by('-pk')
+        expense_orders = models.ExpenseOrder.objects.all().order_by('-number')
     else:
         raise PermissionDenied
 
@@ -1063,7 +1067,7 @@ def expense_order_xlsx(request, pk):
 @login_required
 def course_invoices_list(request):
     if request.user.is_staff:
-        course_invoices = models.CourseInvoice.objects.all().order_by('-pk')
+        course_invoices = models.CourseInvoice.objects.all().order_by('-number')
     else:
         raise PermissionDenied
 

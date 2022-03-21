@@ -127,7 +127,7 @@ class CourseModelForm(forms.ModelForm):
 
     class Meta:
         model = models.Course
-        exclude = ('create_date',)
+        exclude = ('number', 'create_date')
         widgets = {
             'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на заявка'}),
             'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация', 'list': 'datalistFromTo'}),
@@ -343,7 +343,7 @@ class ExpenseOrderModelForm(forms.ModelForm):
 
 class CourseInvoiceModelForm(forms.ModelForm):
     course = forms.ModelChoiceField(
-        models.Course.objects.all().order_by('-id'), label='Курс', empty_label='Избери')
+        models.Course.objects.all().order_by('-number'), label='Курс', empty_label='Избери')
     tax_transaction_basis = forms.ModelChoiceField(
         models.TaxTransactionBasis.objects.all(), label='Основание на сделката', empty_label='Избери')
 
@@ -381,6 +381,8 @@ class CompanyModelForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}),
             'email': forms.EmailInput(
                 attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
+            'course_id': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Курс №'}),
             'course_invoice_id': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Фактура №'}),
             'trip_order_id': forms.TextInput(
@@ -440,7 +442,7 @@ class CourseDateJournalForm(forms.Form):
 
 class CourseDocumentsForm(forms.Form):
     course = forms.ModelChoiceField(
-        models.Course.objects.all().order_by('-id'), label='Курс', empty_label='Избери')
+        models.Course.objects.all().order_by('-number'), label='Курс', empty_label='Избери')
     document_type = forms.ChoiceField(
         label='Тип документ', choices=COURSE_DOCUMENTS_OPTIONS)
 

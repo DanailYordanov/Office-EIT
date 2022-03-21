@@ -220,6 +220,7 @@ class Company(models.Model):
     phone_number = models.CharField(
         'Телефонен номер', max_length=100, null=True, blank=True)
     email = models.EmailField('E-mail', max_length=100, null=True, blank=True)
+    course_id = models.IntegerField('Курс №', default=1)
     course_invoice_id = models.IntegerField('Фактура №', default=1)
     trip_order_id = models.IntegerField('Командировъчна заповед №', default=1)
     expense_order_id = models.IntegerField('Разходен Ордер №', default=1)
@@ -249,6 +250,7 @@ class TaxTransactionBasis(models.Model):
 
 
 class Course(models.Model):
+    number = models.IntegerField('№')
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
     car = models.ForeignKey(
@@ -282,7 +284,16 @@ class Course(models.Model):
         verbose_name_plural = 'Курсове'
 
     def __str__(self):
-        return f'№{self.pk} - {self.driver} - {self.contractor} - {self.from_to}'
+        return f'№{self.number} - {self.driver} - {self.contractor} - {self.from_to}'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            company = self.company
+            self.number = company.course_id
+            company.course_id += 1
+            company.save()
+
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('main:course-information', kwargs={
