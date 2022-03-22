@@ -75,6 +75,7 @@ class CarType(models.Model):
     car_type = models.CharField('Вид автомобил', max_length=50)
 
     class Meta:
+        ordering = ['car_type']
         verbose_name = 'Вид автомобил'
         verbose_name_plural = 'Видове автомобили'
 
@@ -85,10 +86,11 @@ class CarType(models.Model):
 class Car(models.Model):
     car_type = models.ForeignKey(
         CarType, verbose_name='Вид автомобил', null=True, on_delete=models.CASCADE)
-    number_plate = models.CharField('Регистрационен номер', max_length=50)
     brand = models.CharField('Марка', max_length=50)
+    number_plate = models.CharField('Регистрационен номер', max_length=50)
 
     class Meta:
+        ordering = ['brand']
         verbose_name = 'Автомобил'
         verbose_name_plural = 'Автомобили'
 
@@ -100,6 +102,7 @@ class ReminderType(models.Model):
     reminder_type = models.CharField('Вид напомняне', max_length=50)
 
     class Meta:
+        ordering = ['reminder_type']
         verbose_name = 'Вид напомняне'
         verbose_name_plural = 'Видове напомняния'
 
@@ -108,10 +111,10 @@ class ReminderType(models.Model):
 
 
 class Reminder(models.Model):
-    car = models.ForeignKey(
-        Car, verbose_name='Автомобил', on_delete=models.CASCADE)
     reminder_type = models.ForeignKey(
         ReminderType, verbose_name='Вид напомняне', null=True, on_delete=models.CASCADE)
+    car = models.ForeignKey(
+        Car, verbose_name='Автомобил', on_delete=models.CASCADE)
     expiration_date = models.DateField('Дата на изтичнане')
 
     class Meta:
@@ -126,6 +129,7 @@ class ServiceType(models.Model):
     service_type = models.CharField('Вид обслужване', max_length=100)
 
     class Meta:
+        ordering = ['service_type']
         verbose_name = 'Вид техническо обслужване'
         verbose_name_plural = 'Видове технически обслужвания'
 
@@ -138,10 +142,10 @@ class Service(models.Model):
         Car, verbose_name='Автомобил', on_delete=models.CASCADE)
     service_type = models.ForeignKey(
         ServiceType, verbose_name='Вид обслужване', null=True, on_delete=models.CASCADE)
-    additional_information = models.CharField(
-        'Допълнителна информация', max_length=500, null=True, blank=True)
     run = models.CharField('Пробег', max_length=20)
     date = models.DateField('Дата')
+    additional_information = models.CharField(
+        'Допълнителна информация', max_length=500, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Техническо обслужване'
@@ -197,6 +201,7 @@ class Bank(models.Model):
     iban = models.CharField('IBAN', max_length=50)
 
     class Meta:
+        ordering = ['name']
         verbose_name = 'Банка'
         verbose_name_plural = 'Банки'
 
@@ -231,6 +236,7 @@ class Company(models.Model):
         'Медицински преглед към курс №', default=1)
 
     class Meta:
+        ordering = ['name']
         verbose_name = 'Компания'
         verbose_name_plural = 'Комапнии'
 
@@ -242,6 +248,7 @@ class TaxTransactionBasis(models.Model):
     name = models.CharField('Име', max_length=100)
 
     class Meta:
+        ordering = ['name']
         verbose_name = 'Основание на сделка'
         verbose_name_plural = 'Основание на сделка'
 
@@ -280,6 +287,7 @@ class Course(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
+        ordering = ['-number']
         verbose_name = 'Курс'
         verbose_name_plural = 'Курсове'
 
@@ -305,6 +313,7 @@ class FromTo(models.Model):
     from_to = models.CharField('Релация', max_length=100)
 
     class Meta:
+        ordering = ['from_to']
         verbose_name = 'Релация'
         verbose_name_plural = 'Релации'
 
@@ -353,6 +362,7 @@ class ExpenseType(models.Model):
     expense_type = models.CharField('Вид разход', max_length=50)
 
     class Meta:
+        ordering = ['expense_type']
         verbose_name = 'Вид разход'
         verbose_name_plural = 'Видове разходи'
 
@@ -395,6 +405,7 @@ class TripOrder(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
+        ordering = ['-number']
         verbose_name = 'Командировъчна заповед'
         verbose_name_plural = 'Командировъчни заповеди'
 
@@ -422,6 +433,7 @@ class ExpenseOrder(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
+        ordering = ['-number']
         verbose_name = 'Разходен ордер'
         verbose_name_plural = 'Разходни ордери'
 
@@ -457,6 +469,7 @@ class CourseInvoice(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
+        ordering = ['-number']
         verbose_name = 'Фактура за курс'
         verbose_name_plural = 'Фактури за курсове'
 
@@ -487,6 +500,7 @@ class Instruction(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
+        ordering = ['-number']
         verbose_name = 'Инструкция'
         verbose_name_plural = 'Инструкции'
 
@@ -506,6 +520,7 @@ class TechnicalInspectionPerpetrator(models.Model):
     perpetrator = models.CharField('Извършител', max_length=100)
 
     class Meta:
+        ordering = ['perpetrator']
         verbose_name = 'Извършител на технически преглед'
         verbose_name_plural = 'Извършители на технически прегледи'
 
@@ -522,6 +537,7 @@ class CourseTechnicalInspection(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
+        ordering = ['-number']
         verbose_name = 'Технически преглед'
         verbose_name_plural = 'Технически прегледи'
 
@@ -542,6 +558,7 @@ class MedicalExaminationPerpetrator(models.Model):
     perpetrator = models.CharField('Извършител', max_length=100)
 
     class Meta:
+        ordering = ['perpetrator']
         verbose_name = 'Извършител на медицински преглед'
         verbose_name_plural = 'Извършители на медицински прегледи'
 
@@ -558,6 +575,7 @@ class CourseMedicalExamination(models.Model):
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
+        ordering = ['-number']
         verbose_name = 'Медицински преглед'
         verbose_name_plural = 'Медицински прегледи'
 
