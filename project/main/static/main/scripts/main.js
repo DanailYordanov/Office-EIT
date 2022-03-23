@@ -21,6 +21,10 @@ $(document).ready(function () {
         vat_button.hide();
     }
 
+    if ($('#id_export').length > 0) {
+        hidePerpetratorFields();
+    }
+
     $('#addCourseBtn').click(addAddressField);
 
     $('#driverTripOrderID').change(courseOptionsLoad);
@@ -34,6 +38,8 @@ $(document).ready(function () {
     $('#id_bulstat').change(showVatPopulateButton);
 
     $('#vatPopulateBtn').click(populateVatFields);
+
+    $('#id_export').change(hidePerpetratorFields);
 });
 
 
@@ -222,4 +228,17 @@ function populateVatFields() {
             alert('Нещо се обърка. Опитайте отново!');
         }
     });
+}
+
+
+function hidePerpetratorFields() {
+    var exportCheckbox = $('#id_export')[0];
+
+    if (exportCheckbox.checked) {
+        $('#id_medical_examination_perpetrator').parent().parent().show();
+        $('#id_technical_inspection_perpetrator').parent().parent().show();
+    } else {
+        $('#id_medical_examination_perpetrator').parent().parent().hide();
+        $('#id_technical_inspection_perpetrator').parent().parent().hide();
+    }
 }

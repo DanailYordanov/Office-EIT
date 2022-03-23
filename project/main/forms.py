@@ -147,15 +147,18 @@ class CourseModelForm(forms.ModelForm):
 
         if self.instance.pk:
             if self.instance.export:
-                self.fields['medical_examination_perpetrator'].required = True
-                self.fields['technical_inspection_perpetrator'].required = True
-                self.fields['medical_examination_perpetrator'].initial = self.instance.medical_examination.perpetrator.perpetrator
-                self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
+                if hasattr(self.instance, 'medical_examination'):
+                    self.fields['medical_examination_perpetrator'].initial = self.instance.medical_examination.perpetrator.perpetrator
+
+                if hasattr(self.instance, 'technical_inspection'):
+                    self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
 
         if self.data and 'export' in self.data:
-            if self.data['export'] == 'on':
-                self.fields['medical_examination_perpetrator'].required = True
-                self.fields['technical_inspection_perpetrator'].required = True
+            self.fields['medical_examination_perpetrator'].required = True
+            self.fields['technical_inspection_perpetrator'].required = True
+        else:
+            self.fields['medical_examination_perpetrator'].required = False
+            self.fields['technical_inspection_perpetrator'].required = False
 
     def save(self, commit=True):
         instance = super().save(commit=False)
