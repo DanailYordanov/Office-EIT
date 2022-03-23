@@ -40,7 +40,7 @@
     </p>
 
     <p>
-        <span class="fw-normal">Заплащане:</span> {{ course.driver_salary }} {{ course.currency }}
+        <span class="fw-normal">Заплащане:</span> {{ course.driver_salary }} {{ course.driver_salary_currency }}
     </p>
 
     {% if request.user.is_staff %}
@@ -49,7 +49,7 @@
     </p>
 
     <p>
-        <span class="fw-normal">Цена:</span> {{ course.course_price }} {{ course.currency }}
+        <span class="fw-normal">Цена:</span> {{ course.course_price }} {{ course.course_price_currency }}
     </p>
 
     <p>

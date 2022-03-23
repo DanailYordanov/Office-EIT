@@ -55,7 +55,7 @@
                 </a>
             </td>
             <td class="searchable">
-                {{ course_invoice.course.course_price }} {{ course_invoice.course.currency }}
+                {{ course_invoice.course.course_price }} {{ course_invoice.course.course_price_currency }}
             </td>
             <td class="text-center">
                 <a href="{% url 'main:update-course-invoice' pk=course_invoice.id %}"

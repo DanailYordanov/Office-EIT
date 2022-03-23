@@ -397,7 +397,6 @@ def add_course(request, pk=None):
             initial_form['contractor'] = initial_course.contractor
             initial_form['bank'] = initial_course.bank
             initial_form['from_to'] = initial_course.from_to
-            initial_form['currency'] = initial_course.currency
             initial_form['cargo_type'] = initial_course.cargo_type
             initial_form['export'] = initial_course.export
             initial_form['contact_person'] = initial_course.contact_person
@@ -1164,7 +1163,7 @@ def course_invoice_xlsx(request, pk):
         bank = course.bank
         company = course.company
 
-        currency = course.currency
+        currency = course.course_price_currency
         price = round(course.course_price, 2)
         vat_price = round(course.course_price * 0.2, 2)
 
