@@ -418,6 +418,13 @@ def add_course(request, pk=None):
 
             forms.CourseAddressAddFormset.extra = len(initial_formset)
 
+        else:
+            medical_examination_perpetrator = models.MedicalExaminationPerpetrator.objects.all().last()
+            initial_form['medical_examination_perpetrator'] = medical_examination_perpetrator
+
+            technical_inspection_perpetrator = models.TechnicalInspectionPerpetrator.objects.all().last()
+            initial_form['technical_inspection_perpetrator'] = technical_inspection_perpetrator
+
         addresses = models.Address.objects.all()
         from_to_list = models.FromTo.objects.all()
         medical_examination_perpetrators_list = models.MedicalExaminationPerpetrator.objects.all()
