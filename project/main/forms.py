@@ -20,10 +20,11 @@ class CarModelForm(forms.ModelForm):
 
     class Meta:
         model = models.Car
-        fields = ['car_type', 'brand', 'number_plate']
+        fields = '__all__'
         widgets = {
             'brand': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Марка'}),
             'number_plate': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Регистрационен номер'}),
+            'vin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на рама'}),
         }
 
 

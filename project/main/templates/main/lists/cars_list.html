@@ -16,8 +16,9 @@
         <thead>
             <tr>
                 <th class="col-1">№</th>
-                <th class="col-5">Номер</th>
-                <th class="col-4">Марка</th>
+                <th class="col-3">Марка</th>
+                <th class="col-4">Регистрационен номер</th>
+                <th class="col-3">Номер на рама</th>
                 <th class="col-1">Действия</th>
             </tr>
         </thead>
@@ -48,8 +49,11 @@
             </div>
             <tr>
                 <th>{{ forloop.counter }}</th>
-                <td class="searchable">{{ car.number_plate }}</td>
                 <td class="searchable">{{ car.brand }}</td>
+                <td class="searchable">{{ car.number_plate }}</td>
+                <td class="searchable">
+                    {% if car.vin %} {{ car.vin }} {% endif %}
+                </td>
                 <td class="text-center">
                     <a href="{% url 'main:update-car' pk=car.id %}" class="btn btn-primary table-action-button"><i
                             class="fas fa-edit"></i></a>

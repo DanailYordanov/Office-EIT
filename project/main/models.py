@@ -88,6 +88,8 @@ class Car(models.Model):
         CarType, verbose_name='Вид автомобил', null=True, on_delete=models.CASCADE)
     brand = models.CharField('Марка', max_length=50)
     number_plate = models.CharField('Регистрационен номер', max_length=50)
+    vin = models.CharField(
+        'Номер на рама', max_length=100, null=True, blank=True)
 
     class Meta:
         ordering = ['brand']
