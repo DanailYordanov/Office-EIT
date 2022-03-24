@@ -112,6 +112,9 @@ class ProfileDetailsForm(forms.ModelForm):
     class Meta:
         model = get_user_model()
         fields = [
+            'first_name',
+            'middle_name',
+            'last_name',
             'personal_id',
             'id_card_expiration',
             'drivers_license_expiration',
@@ -125,6 +128,9 @@ class ProfileDetailsForm(forms.ModelForm):
             'phone_number'
         ]
         widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Собствено име'}),
+            'middle_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Презиме'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Фамилно име'}),
             'personal_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ЕГН'}),
             'id_card_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
             'drivers_license_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
