@@ -53,7 +53,7 @@
             </div>
             <tr>
                 <td class="searchable">{{ bank.name }}</td>
-                <td class="searchable">{% if bank.bank_code %}{{ bank.bank_code }}{% endif %}</td>
+                <td class="searchable">{% if bank.bank_code %} {{ bank.bank_code }} {% endif %}</td>
                 <td class="searchable">{{ bank.iban }}</td>
                 <td class="text-center">
                     <a href="{% url 'main:update-bank' pk=bank.id %}" class="btn btn-primary table-action-button">

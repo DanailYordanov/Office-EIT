@@ -53,9 +53,15 @@
             <tr>
                 <td class="searchable">{{ contractor.name }}</td>
                 <td class="searchable">{{ contractor.bulstat }}</td>
-                <td class="searchable">{{ contractor.country }}</td>
-                <td class="searchable">{{ contractor.address }}</td>
-                <td class="searchable">{{ contractor.email }}</td>
+                <td class="searchable">
+                    {% if contractor.country %} {{ contractor.country }} {% endif %}
+                </td>
+                <td class="searchable">
+                    {% if contractor.address %} {{ contractor.address }} {% endif %}
+                </td>
+                <td class="searchable">
+                    {% if contractor.email %} {{ contractor.email }} {% endif %}
+                </td>
                 <td class="text-center">
                     <a href="{% url 'main:update-contractor' pk=contractor.id %}"
                         class="btn btn-primary table-action-button"><i class="fas fa-edit"></i></a>

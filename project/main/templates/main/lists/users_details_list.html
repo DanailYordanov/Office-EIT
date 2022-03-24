@@ -44,7 +44,7 @@
             <tr>
                 <th class="searchable">{{ user }}</th>
                 <td>
-                    {% if user.personal_id %}{{ user.personal_id }}{% endif %}
+                    {% if user.personal_id %} {{ user.personal_id }} {% endif %}
                 </td>
                 <td class="text-center">
                     <a href="{% url 'profile-details' pk=user.id %}" class="btn btn-primary table-action-button"><i

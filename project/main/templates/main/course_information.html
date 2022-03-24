@@ -170,7 +170,11 @@
                 <td class="searchable">{{ expense.expense_type.expense_type }}</td>
                 <td class="searchable">{{ expense.price }} {{ expense.currency }}</td>
                 <td class="searchable">{{ expense.payment_type }}</td>
-                <td class="searchable">{{ expense.additional_information }}</td>
+                <td class="searchable">
+                    {% if expense.additional_information %}
+                    {{ expense.additional_information }}
+                    {% endif %}
+                </td>
                 <td class="text-center">
                     <a href="{% url 'main:update-expense' pk=expense.id %}" class="btn btn-primary table-action-button">
                         <i class="fas fa-edit"></i>
