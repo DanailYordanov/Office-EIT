@@ -33,7 +33,7 @@ class ReminderModelForm(forms.ModelForm):
         models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
     reminder_type = forms.ModelChoiceField(
         models.ReminderType.objects.all().order_by('reminder_type'), label='Вид напомняне', empty_label='Избери')
-    expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.TextInput(
+    expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
 
     class Meta:
@@ -46,7 +46,7 @@ class ServiceModelForm(forms.ModelForm):
         models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
     service_type = forms.ModelChoiceField(
         models.ServiceType.objects.all().order_by('service_type'), label='Вид обслужване', empty_label='Избери')
-    date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
+    date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
     additional_information = forms.CharField(label='Допълнителна информация', required=False, widget=forms.Textarea(
         attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
@@ -92,10 +92,10 @@ class ContractorsModelForm(forms.ModelForm):
             'maturity_date': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}),
             'cmr_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'cmr_expiration_date': forms.TextInput(
+            'cmr_expiration_date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}),
             'license_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'license_expiration_date': forms.TextInput(
+            'license_expiration_date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'})
         }
 
@@ -227,7 +227,7 @@ class CourseAddresModelForm(forms.ModelForm):
         widgets = {
             'address_input': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Адрес', 'list': 'datalistAddresses'}),
-            'date': forms.TextInput(
+            'date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата'})
         }
 
@@ -309,9 +309,9 @@ class TripOrderModelForm(forms.ModelForm):
         widgets = {
             'destination': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Дестинация'}),
-            'from_date': forms.TextInput(
+            'from_date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Начална дата'}),
-            'to_date': forms.TextInput(
+            'to_date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Крайна дата'})
         }
 
@@ -436,9 +436,9 @@ class InstructionModelForm(forms.ModelForm):
 class CourseDateJournalForm(forms.Form):
     company = forms.ModelChoiceField(
         models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
-    from_date = forms.DateField(label='От дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
+    from_date = forms.DateField(label='От дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'От дата'}))
-    to_date = forms.DateField(label='До дата', input_formats=DATE_FORMATS, widget=forms.TextInput(
+    to_date = forms.DateField(label='До дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'До дата'}))
     journal_type = forms.ChoiceField(
         label='Вид дневник', choices=models.COURSE_DOCUMENT_TYPE_CHOICES)

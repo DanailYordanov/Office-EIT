@@ -126,13 +126,13 @@ class ProfileDetailsForm(forms.ModelForm):
         ]
         widgets = {
             'personal_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ЕГН'}),
-            'id_card_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
-            'drivers_license_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
-            'professional_competence': forms.TextInput(attrs={'class': 'form-control date-picker'}),
-            'adr_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
-            'digital_card_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
-            'psychological_test_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
-            'pasport_expiration': forms.TextInput(attrs={'class': 'form-control date-picker'}),
+            'id_card_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
+            'drivers_license_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
+            'professional_competence': forms.DateInput(attrs={'class': 'form-control date-picker'}),
+            'adr_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
+            'digital_card_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
+            'psychological_test_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
+            'pasport_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
             'debit_card_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на дебитна карта'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'})
         }

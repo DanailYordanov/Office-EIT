@@ -57,7 +57,7 @@ function addAddressField(e) {
 
     $('#addCourseBtn').before(copiedForm);
     $(".date-picker").datepicker({
-        format: 'yyyy-mm-dd',
+        format: 'dd/mm/yyyy'
     });
 }
 
