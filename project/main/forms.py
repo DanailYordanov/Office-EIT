@@ -1,6 +1,8 @@
 from django import forms
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
+from django_select2 import forms as s2forms
+from django.utils.encoding import force_text
 from main import models
 
 
@@ -100,9 +102,84 @@ class ContractorsModelForm(forms.ModelForm):
         }
 
 
+def represent_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+class FromToWidget(s2forms.ModelSelect2TagWidget):
+    queryset = models.FromTo.objects.all()
+    search_fields = ['from_to__icontains']
+
+    # def value_from_datadict(self, data, files, name):
+    #     '''Create objects for given non-pimary-key values. Return list of all names as name is the to_field_name.'''
+    #     values = set(super().value_from_datadict(data, files, name))
+    # print(values)
+    # # This may only work for Tag, if Tag has title field.
+    # # You need to implement this method yourself, to ensure proper object creation.
+    # from_to = self.queryset.filter(
+    #     **{'from_to__in': list(values)}).values_list('from_to', flat=True)
+    # cleaned_values = list(from_to)
+    # for val in values - set(list(from_to)):
+    #     cleaned_values.append(self.queryset.create(from_to=val).from_to)
+    # return cleaned_values
+
+    # def value_from_datadict(self, data, files, name):
+    #     '''Create objects for given non-pimary-key values. Return list of all primary keys.'''
+    #     values = set(super().value_from_datadict(data, files, name))
+    #     # This may only work for MyModel, if MyModel has title field.
+    #     # You need to implement this method yourself, to ensure proper object creation.
+    #     pks = self.queryset.filter(
+    #         **{'pk__in': list(values)}).values_list('pk', flat=True)
+    #     pks = set(map(str, pks))
+    #     cleaned_values = list(values)
+    #     for val in values - pks:
+    #         cleaned_values.append(self.queryset.create(from_to=val).pk)
+    #     return cleaned_values
+
+    def value_from_datadict(self, data, files, name):
+        values = super().value_from_datadict(data, files, name)
+        print(values)
+        queryset = self.get_queryset()
+        pks = queryset.filter(
+            **{'pk__in': [v for v in values if v.isdigit()]}).values_list('pk', flat=True)
+        cleaned_values = []
+        for val in values:
+            if represent_int(val) and int(val) not in pks or not represent_int(val) and force_text(val) not in pks:
+                val = queryset.create(from_to=val).pk
+            cleaned_values.append(val)
+        return cleaned_values
+
+    # def value_from_datadict(self, data, files, name):
+    #     values = set(super().value_from_datadict(data, files, name))
+    #     from_to_values = self.queryset.filter(
+    #         **{'from_to__in': list(values)}).values_list('from_to', flat=True)
+
+    #     cleaned_values = list(from_to_values)
+    #     print(f'Values - {values}')
+    #     print(f'Cleaned_values - {cleaned_values}')
+    #     print(f'Fortinaiti - {set(values) - set(list(from_to_values))}')
+    #     for val in (values - set(list(from_to_values))):
+    #         print(val)
+    #         cleaned_values.append(self.queryset.create(from_to=val).from_to)
+    #         # cleaned_values.append(
+    #         #     models.FromTo.objects.create(from_to=val).from_to)
+    #     return cleaned_values
+
+    # def optgroups(self, name, value, attrs=None):
+    #     values = value[0].split(',') if value[0] else []
+    #     selected = set(values)
+    #     subgroup = [self.create_option(
+    #         name, v, v, selected, i) for i, v in enumerate(values)]
+    #     return [(None, subgroup, 0)]
+
+
 class CourseModelForm(forms.ModelForm):
     car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери', widget=s2forms.Select2Widget)
     driver = forms.ModelChoiceField(
         get_user_model().objects.filter(is_active=True, is_staff=False).order_by('first_name'), label='Шорфьор', empty_label='Избери')
     company = forms.ModelChoiceField(
@@ -125,6 +202,8 @@ class CourseModelForm(forms.ModelForm):
     technical_inspection_perpetrator = forms.CharField(
         label='Извършител на технически преглед', max_length=100, required=False, widget=forms.TextInput(
             attrs={'class': 'form-control', 'placeholder': 'Извършител на технически преглед', 'list': 'datalistTechnicalInspectionPerpetrator'}))
+    from_to = forms.ModelChoiceField(
+        models.FromTo.objects.all(), widget=FromToWidget(model=models.FromTo))
 
     class Meta:
         model = models.Course

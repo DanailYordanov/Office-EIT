@@ -4,9 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"
     integrity="sha512-YdYyWQf8AS4WSB0WWdc3FbQ3Ypdm0QCWD2k4hgfqbQbRCJBEgX0iAegkl2S1Evma5ImaVXLBeUkIlP6hQ1eYKQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css"
-    integrity="sha512-CruCP+TD3yXzlvvijET8wV5WxxEh5H8P4cmz0RFbKK6FlZ2sYl3AEsKlLPHbniXKSrDdFewhbmBK5skbdsASbQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+{{ form.media.css }}
 {% endblock head %}
 
 {% block content_main %}
@@ -32,13 +30,7 @@
         <div class="field">
             {{ field }}
 
-            {% if field.name == 'from_to' %}
-            <datalist id="datalistFromTo">
-                {% for from_to in from_to_list %}
-                <option value="{{ from_to }}"></option>
-                {% endfor %}
-            </datalist>
-            {% elif field.name == 'medical_examination_perpetrator' %}
+            {% if field.name == 'medical_examination_perpetrator' %}
             <datalist id="datalistMedicalExaminationPerpetrator">
                 {% for perpetrator in medical_examination_perpetrators_list %}
                 <option value="{{ perpetrator }}"></option>
@@ -145,15 +137,12 @@
 {% endblock content_main %}
 
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"
-    integrity="sha512-NqYds8su6jivy1/WLoW8x1tZMRD7/1ZfhWG/jcRQLOzV1k1rIODCpMgoBnar5QXshKJGV7vi0LXLNXPoFsM5Zg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"
     integrity="sha512-RCgrAvvoLpP7KVgTkTctrUdv7C6t7Un3p1iaoPr1++3pybCyCsCZZN7QEHMZTcJTmcJ7jzexTO+eFpHk4OCFAg=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{{ form.media.js }}
 <script>
     $(function () {
-        $('select').niceSelect();
         $(".date-picker").datepicker({
             format: 'dd/mm/yyyy'
         });

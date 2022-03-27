@@ -15,6 +15,8 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'main.apps.MainConfig',
 
+    'django_select2',
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount'

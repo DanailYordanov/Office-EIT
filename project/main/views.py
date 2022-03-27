@@ -17,6 +17,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from main import models
 from main import forms
+from django_select2.views import AutoResponseView
 
 
 @login_required
@@ -426,7 +427,6 @@ def add_course(request, pk=None):
             initial_form['technical_inspection_perpetrator'] = technical_inspection_perpetrator
 
         addresses = models.Address.objects.all()
-        from_to_list = models.FromTo.objects.all()
         medical_examination_perpetrators_list = models.MedicalExaminationPerpetrator.objects.all()
         technical_inspection_perpetrators_list = models.TechnicalInspectionPerpetrator.objects.all()
 
@@ -437,14 +437,6 @@ def add_course(request, pk=None):
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
-
-                from_to = form.cleaned_data['from_to']
-
-                for i in from_to_list:
-                    if i.from_to == from_to:
-                        break
-                else:
-                    models.FromTo.objects.create(from_to=from_to)
 
                 for f in formset:
                     if f.is_valid():
@@ -479,7 +471,6 @@ def add_course(request, pk=None):
         'form': form,
         'formset': formset,
         'addresses': addresses,
-        'from_to_list': from_to_list,
         'medical_examination_perpetrators_list': medical_examination_perpetrators_list,
         'technical_inspection_perpetrators_list': technical_inspection_perpetrators_list,
         'url': reverse('main:add-course'),
@@ -1897,3 +1888,25 @@ def course_date_journals_xlsx(request):
         return render(request, 'main/add_update_form.html', context)
     else:
         raise PermissionDenied
+
+
+class FromToAutoResponseView(AutoResponseView):
+
+    def get(self, request, *args, **kwargs):
+        """
+        This method is overriden for changing id to name instead of pk.
+        """
+        self.widget = self.get_widget_or_404()
+        self.term = kwargs.get('term', request.GET.get('term', ''))
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return JsonResponse({
+            'results': [
+                {
+                    'text': self.widget.label_from_instance(obj),
+                    'id': obj.from_to,
+                }
+                for obj in context['object_list']
+            ],
+            'more': context['page_obj'].has_next()
+        })
