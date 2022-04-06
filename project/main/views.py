@@ -1,10 +1,6 @@
 import os
 import shutil
 import secrets
-from pyVies import api
-from openpyxl import load_workbook
-from num2cyrillic import NumberToWords
-from deep_translator import GoogleTranslator
 from django.conf import settings
 from django.views.generic import DeleteView
 from django.urls import reverse, reverse_lazy
@@ -15,9 +11,13 @@ from django.utils import timezone, dateformat, formats
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from pyVies import api
+from openpyxl import load_workbook
+from num2cyrillic import NumberToWords
+from deep_translator import GoogleTranslator
+from django_select2.views import AutoResponseView
 from main import models
 from main import forms
-from django_select2.views import AutoResponseView
 
 
 @login_required
@@ -404,16 +404,16 @@ def add_course(request, pk=None):
             initial_form['other_conditions'] = initial_course.other_conditions
 
             if hasattr(initial_course, 'medical_examination'):
-                initial_form['medical_examination_perpetrator'] = initial_course.medical_examination.perpetrator
+                initial_form['medical_examination_perpetrator'] = initial_course.medical_examination
 
             if hasattr(initial_course, 'technical_inspection'):
-                initial_form['technical_inspection_perpetrator'] = initial_course.technical_inspection.perpetrator
+                initial_form['technical_inspection_perpetrator'] = initial_course.technical_inspection
 
             for address in initial_course.addresses.all():
                 initial_formset.append(
                     {
                         'load_type': address.load_type,
-                        'address_input': address.address_input
+                        'address': address.address
                     }
                 )
 
@@ -426,10 +426,6 @@ def add_course(request, pk=None):
             technical_inspection_perpetrator = models.TechnicalInspectionPerpetrator.objects.all().last()
             initial_form['technical_inspection_perpetrator'] = technical_inspection_perpetrator
 
-        addresses = models.Address.objects.all()
-        medical_examination_perpetrators_list = models.MedicalExaminationPerpetrator.objects.all()
-        technical_inspection_perpetrators_list = models.TechnicalInspectionPerpetrator.objects.all()
-
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST, initial=initial_form)
             formset = forms.CourseAddressAddFormset(
@@ -441,23 +437,6 @@ def add_course(request, pk=None):
                 for f in formset:
                     if f.is_valid():
                         f.instance.course = form_instance
-
-                        address_input = f.cleaned_data.get('address_input')
-                        save = f.cleaned_data.get('save')
-
-                        address_object = models.Address.objects.filter(
-                            address=address_input)
-
-                        if not address_object:
-                            if save:
-                                address_object = models.Address.objects.create(
-                                    address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
-                            else:
-                                address_object = None
-                        else:
-                            address_object = address_object[0]
-
-                        f.instance.address_obj = address_object
                         f.save()
 
                 return redirect('main:courses-list')
@@ -470,9 +449,6 @@ def add_course(request, pk=None):
     context = {
         'form': form,
         'formset': formset,
-        'addresses': addresses,
-        'medical_examination_perpetrators_list': medical_examination_perpetrators_list,
-        'technical_inspection_perpetrators_list': technical_inspection_perpetrators_list,
         'url': reverse('main:add-course'),
         'page_heading': 'Добавяне на курс'
     }
@@ -483,12 +459,7 @@ def add_course(request, pk=None):
 @login_required
 def update_course(request, pk):
     if request.user.is_staff:
-
         course = get_object_or_404(models.Course, id=pk)
-        addresses = models.Address.objects.all()
-        from_to_list = models.FromTo.objects.all()
-        medical_examination_perpetrators_list = models.MedicalExaminationPerpetrator.objects.all()
-        technical_inspection_perpetrators_list = models.TechnicalInspectionPerpetrator.objects.all()
 
         if request.method == 'POST':
             form = forms.CourseModelForm(request.POST, instance=course)
@@ -498,36 +469,10 @@ def update_course(request, pk):
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
 
-                from_to = form.cleaned_data['from_to']
-
-                for i in from_to_list:
-                    if i.from_to == from_to:
-                        break
-                else:
-                    models.FromTo.objects.create(from_to=from_to)
-
                 for f in formset:
                     if f.is_valid():
                         f.instance.course = form_instance
-
-                        if 'address_input' in f.changed_data or 'save' in f.changed_data:
-                            address_input = f.cleaned_data.get('address_input')
-                            save = f.cleaned_data.get('save')
-
-                            address_object = models.Address.objects.filter(
-                                address=address_input)
-
-                            if not address_object:
-                                if save:
-                                    address_object = models.Address.objects.create(
-                                        address=address_input, contact_person=None, contact_phone=None, gps_coordinates=None)
-                                else:
-                                    address_object = None
-                            else:
-                                address_object = address_object[0]
-
-                            f.instance.address_obj = address_object
-                            f.save()
+                        f.save()
 
                 formset.save()
                 return redirect('main:courses-list')
@@ -538,16 +483,11 @@ def update_course(request, pk):
         context = {
             'form': form,
             'formset': formset,
-            'addresses': addresses,
-            'from_to_list': from_to_list,
-            'medical_examination_perpetrators_list': medical_examination_perpetrators_list,
-            'technical_inspection_perpetrators_list': technical_inspection_perpetrators_list,
             'url': reverse('main:update-course', args=(pk,)),
             'page_heading': 'Редактиране на курс'
         }
 
         return render(request, 'main/add_update_course.html', context)
-
     else:
         raise PermissionDenied
 
@@ -1890,21 +1830,20 @@ def course_date_journals_xlsx(request):
         raise PermissionDenied
 
 
-class FromToAutoResponseView(AutoResponseView):
-
+class TagAutoResponseView(AutoResponseView):
     def get(self, request, *args, **kwargs):
-        """
-        This method is overriden for changing id to name instead of pk.
-        """
         self.widget = self.get_widget_or_404()
         self.term = kwargs.get('term', request.GET.get('term', ''))
         self.object_list = self.get_queryset()
+
         context = self.get_context_data()
+        field_name = self.kwargs['field_name']
+
         return JsonResponse({
             'results': [
                 {
                     'text': self.widget.label_from_instance(obj),
-                    'id': obj.from_to,
+                    'id': getattr(obj, field_name),
                 }
                 for obj in context['object_list']
             ],

@@ -347,10 +347,8 @@ class Address(models.Model):
 class CourseAddress(models.Model):
     course = models.ForeignKey(
         Course, verbose_name='Курс', related_name='addresses', on_delete=models.CASCADE)
-    address_obj = models.ForeignKey(
+    address = models.ForeignKey(
         Address, verbose_name='Свързан адрес', null=True, blank=True, on_delete=models.SET_NULL)
-    address_input = models.CharField(
-        'Въведен адрес', max_length=200, null=True, blank=True)
     load_type = models.CharField('Товарен/Разтоварен/Митница',
                                  choices=LOADING_TYPE_CHOICES, max_length=30)
     date = models.DateField('Дата', null=True, blank=True)
@@ -360,7 +358,7 @@ class CourseAddress(models.Model):
         verbose_name_plural = 'Адреси към курсове'
 
     def __str__(self):
-        return f'{self.course} - {self.address_input} - {self.date}'
+        return f'{self.course} - {self.address} - {self.date}'
 
 
 class ExpenseType(models.Model):

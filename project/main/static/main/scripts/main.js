@@ -46,7 +46,9 @@ $(document).ready(function () {
 function addAddressField(e) {
     e.preventDefault();
 
-    var formsNum = $('.adress-form').length - 1;
+    $('#emptyFormsetForm').find('select').select2('destroy');
+
+    var formsNum = $('.address-form').length - 1;
     var copiedForm = $('#emptyFormsetForm').clone();
     var totalForms = $('#id_addresses-TOTAL_FORMS');
 
@@ -59,6 +61,15 @@ function addAddressField(e) {
     $(".date-picker").datepicker({
         format: 'dd/mm/yyyy'
     });
+
+    copiedForm.find('select').djangoSelect2();
+
+    copiedForm.find('.select-tag').djangoSelect2({
+        'maximumSelectionLength': 1,
+        'placeholder': 'Избери'
+    });
+
+    $('#emptyFormsetForm').find('select').djangoSelect2();
 }
 
 

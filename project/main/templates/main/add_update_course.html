@@ -1,151 +1,70 @@
-{% extends 'main/base.html' %}
+{% extends 'main/add_update_form.html' %}
+{% block content_after %}
+<div class="col-12 form-flex address-form d-none" id="emptyFormsetForm">
+    <p class="fw-light text-center fs-4">Адрес</p>
+    {% for f in formset.empty_form %}
+    {% if f.field.widget.input_type != 'hidden' %}
+    <div class="col-12 col-md-8 col-xl-6 address-field">
+        {% if f.field.widget.input_type == 'checkbox' %}
 
-{% block head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"
-    integrity="sha512-YdYyWQf8AS4WSB0WWdc3FbQ3Ypdm0QCWD2k4hgfqbQbRCJBEgX0iAegkl2S1Evma5ImaVXLBeUkIlP6hQ1eYKQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-{{ form.media.css }}
-{% endblock head %}
-
-{% block content_main %}
-<form action="{{ url }}" class="form-flex" method="post" autocomplete="off" enctype="multipart/form-data" novalidate>
-    {% csrf_token %}
-    {{ formset.management_form }}
-    <input autocomplete="false" name="hidden" type="text" style="display:none;">
-
-    {% for field in form %}
-    <div class="col-12 col-md-8 col-xl-6">
-        {% if field.field.widget.input_type == 'checkbox' %}
-
-        <label class="form-check-label" for="{{ field.id_for_label }}">
-            {{ field.label_tag }}
+        <label class="form-check-label" for="{{ f.id_for_label }}">
+            {{ f.label_tag }}
         </label>
-        {{ field }}
+        {{ f }}
 
         {% else %}
 
         <div class="field-label">
-            {{ field.label_tag }}
+            {{ f.label_tag }}
         </div>
         <div class="field">
-            {{ field }}
-
-            {% if field.name == 'medical_examination_perpetrator' %}
-            <datalist id="datalistMedicalExaminationPerpetrator">
-                {% for perpetrator in medical_examination_perpetrators_list %}
-                <option value="{{ perpetrator }}"></option>
-                {% endfor %}
-            </datalist>
-            {% elif field.name == 'technical_inspection_perpetrator' %}
-            <datalist id="datalistTechnicalInspectionPerpetrator">
-                {% for perpetrator in technical_inspection_perpetrators_list %}
-                <option value="{{ perpetrator }}"></option>
-                {% endfor %}
-            </datalist>
-            {% endif %}
-
-        </div>
-        {{ field.errors }}
-
-        {% endif %}
-    </div>
-    {% endfor %}
-
-    <div class="col-12 form-flex adress-form d-none" id="emptyFormsetForm">
-        <p class="fw-light text-center fs-4">Адрес</p>
-        {% for f in formset.empty_form %}
-        {% if f.field.widget.input_type != 'hidden' %}
-        <div class="col-12 col-md-8 col-xl-6 address-field">
-            {% if f.field.widget.input_type == 'checkbox' %}
-
-            <label class="form-check-label" for="{{ f.id_for_label }}">
-                {{ f.label_tag }}
-            </label>
             {{ f }}
-
-            {% else %}
-
-            <div class="field-label">
-                {{ f.label_tag }}
-            </div>
-            <div class="field">
-                {{ f }}
-                {% if f.name == 'address_input' %}
-                <datalist id="datalistAddresses">
-                    {% for address in addresses %}
-                    <option value="{{ address }}"></option>
-                    {% endfor %}
-                </datalist>
-                {% endif %}
-            </div>
-            {{ f.errors }}
-
-            {% endif %}
         </div>
-        {% else %}
-        {{ f }}
+        {{ f.errors }}
+
         {% endif %}
-        {% endfor %}
     </div>
-
-    {% for formset_form in formset %}
-    <div class="col-12 form-flex adress-form">
-        <p class="fw-light text-center fs-4">Адрес</p>
-        {% for f in formset_form %}
-        {% if f.field.widget.input_type != 'hidden' %}
-        <div class="col-12 col-md-8 col-xl-6 address-field">
-            {% if f.field.widget.input_type == 'checkbox' %}
-
-            <label class="form-check-label" for="{{ f.id_for_label }}">
-                {{ f.label_tag }}
-            </label>
-            {{ f }}
-
-            {% else %}
-
-            <div class="field-label">
-                {{ f.label_tag }}
-            </div>
-            <div class="field">
-                {{ f }}
-                {% if f.name == 'address_input' %}
-                <datalist id="datalistAddresses">
-                    {% for address in addresses %}
-                    <option value="{{ address }}"></option>
-                    {% endfor %}
-                </datalist>
-                {% endif %}
-            </div>
-            {{ f.errors }}
-
-            {% endif %}
-        </div>
-        {% else %}
-        {{ f }}
-        {% endif %}
-        {% endfor %}
-    </div>
+    {% else %}
+    {{ f }}
+    {% endif %}
     {% endfor %}
+</div>
 
-    <a href="#" class="text-decoration-none text-center" id="addCourseBtn">
-        Добави адрес
-        <i class="fas fa-plus ms-1"></i>
-    </a>
+{% for formset_form in formset %}
+<div class="col-12 form-flex address-form">
+    <p class="fw-light text-center fs-4">Адрес</p>
+    {% for f in formset_form %}
+    {% if f.field.widget.input_type != 'hidden' %}
+    <div class="col-12 col-md-8 col-xl-6 address-field">
+        {% if f.field.widget.input_type == 'checkbox' %}
 
-    <button type="submit" class="btn btn-primary">Изпращане</button>
-</form>
-{% endblock content_main %}
+        <label class="form-check-label" for="{{ f.id_for_label }}">
+            {{ f.label_tag }}
+        </label>
+        {{ f }}
 
-{% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"
-    integrity="sha512-RCgrAvvoLpP7KVgTkTctrUdv7C6t7Un3p1iaoPr1++3pybCyCsCZZN7QEHMZTcJTmcJ7jzexTO+eFpHk4OCFAg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-{{ form.media.js }}
-<script>
-    $(function () {
-        $(".date-picker").datepicker({
-            format: 'dd/mm/yyyy'
-        });
-    });
-</script>
-{% endblock scripts %}
+        {% else %}
+
+        <div class="field-label">
+            {{ f.label_tag }}
+        </div>
+        <div class="field">
+            {{ f }}
+        </div>
+        {{ f.errors }}
+
+        {% endif %}
+    </div>
+    {% else %}
+    {{ f }}
+    {% endif %}
+    {% endfor %}
+</div>
+{% endfor %}
+
+<a href="#" class="text-decoration-none text-center" id="addCourseBtn">
+    Добави адрес
+    <i class="fas fa-plus ms-1"></i>
+</a>
+{{ formset.management_form }}
+{% endblock content_after %}

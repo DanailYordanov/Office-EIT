@@ -110,6 +110,6 @@ urlpatterns = [
          name='course-documents-xlsx'),
     path('course-date-journals/', views.course_date_journals_xlsx,
          name='course-date-journals-xlsx'),
-    path('select-options/from-to/', views.FromToAutoResponseView.as_view(),
-         name='select-options-from-to')
+    path('tag-auto-select-options/<str:field_name>/', views.TagAutoResponseView.as_view(),
+         name='tag-auto-select-options')
 ]

@@ -1,8 +1,9 @@
 from django import forms
+from django.db.models import Q
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
+from django.forms.models import ModelChoiceIterator
 from django_select2 import forms as s2forms
-from django.utils.encoding import force_text
 from main import models
 
 
@@ -102,115 +103,113 @@ class ContractorsModelForm(forms.ModelForm):
         }
 
 
-def represent_int(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
+class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
+    def __init__(self, *args, **kwargs):
+        self.field_name = kwargs.pop('field_name', None)
+        super().__init__(*args, **kwargs)
 
-
-class FromToWidget(s2forms.ModelSelect2TagWidget):
-    queryset = models.FromTo.objects.all()
-    search_fields = ['from_to__icontains']
-
-    # def value_from_datadict(self, data, files, name):
-    #     '''Create objects for given non-pimary-key values. Return list of all names as name is the to_field_name.'''
-    #     values = set(super().value_from_datadict(data, files, name))
-    # print(values)
-    # # This may only work for Tag, if Tag has title field.
-    # # You need to implement this method yourself, to ensure proper object creation.
-    # from_to = self.queryset.filter(
-    #     **{'from_to__in': list(values)}).values_list('from_to', flat=True)
-    # cleaned_values = list(from_to)
-    # for val in values - set(list(from_to)):
-    #     cleaned_values.append(self.queryset.create(from_to=val).from_to)
-    # return cleaned_values
-
-    # def value_from_datadict(self, data, files, name):
-    #     '''Create objects for given non-pimary-key values. Return list of all primary keys.'''
-    #     values = set(super().value_from_datadict(data, files, name))
-    #     # This may only work for MyModel, if MyModel has title field.
-    #     # You need to implement this method yourself, to ensure proper object creation.
-    #     pks = self.queryset.filter(
-    #         **{'pk__in': list(values)}).values_list('pk', flat=True)
-    #     pks = set(map(str, pks))
-    #     cleaned_values = list(values)
-    #     for val in values - pks:
-    #         cleaned_values.append(self.queryset.create(from_to=val).pk)
-    #     return cleaned_values
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        base_attrs.update({
+            'class': 'select-tag',
+            'data-minimum-input-length': 0
+        })
+        return super().build_attrs(base_attrs, extra_attrs)
 
     def value_from_datadict(self, data, files, name):
-        values = super().value_from_datadict(data, files, name)
-        print(values)
-        queryset = self.get_queryset()
-        pks = queryset.filter(
-            **{'pk__in': [v for v in values if v.isdigit()]}).values_list('pk', flat=True)
-        cleaned_values = []
-        for val in values:
-            if represent_int(val) and int(val) not in pks or not represent_int(val) and force_text(val) not in pks:
-                val = queryset.create(from_to=val).pk
-            cleaned_values.append(val)
-        return cleaned_values
+        value = super().value_from_datadict(data, files, name)
 
-    # def value_from_datadict(self, data, files, name):
-    #     values = set(super().value_from_datadict(data, files, name))
-    #     from_to_values = self.queryset.filter(
-    #         **{'from_to__in': list(values)}).values_list('from_to', flat=True)
+        if value:
+            value = value[0]
+            queryset = self.get_queryset()
 
-    #     cleaned_values = list(from_to_values)
-    #     print(f'Values - {values}')
-    #     print(f'Cleaned_values - {cleaned_values}')
-    #     print(f'Fortinaiti - {set(values) - set(list(from_to_values))}')
-    #     for val in (values - set(list(from_to_values))):
-    #         print(val)
-    #         cleaned_values.append(self.queryset.create(from_to=val).from_to)
-    #         # cleaned_values.append(
-    #         #     models.FromTo.objects.create(from_to=val).from_to)
-    #     return cleaned_values
+            try:
+                obj = queryset.get(**{self.field_name: value})
+            except (ValueError, TypeError, queryset.model.DoesNotExist):
+                obj = queryset.create(**{self.field_name: value})
 
-    # def optgroups(self, name, value, attrs=None):
-    #     values = value[0].split(',') if value[0] else []
-    #     selected = set(values)
-    #     subgroup = [self.create_option(
-    #         name, v, v, selected, i) for i, v in enumerate(values)]
-    #     return [(None, subgroup, 0)]
+            return getattr(obj, self.field_name)
+
+        return None
+
+    def optgroups(self, name, value, attrs=None):
+        """ 
+        While editing an existing object the 'value' variable is the object's id, not the to_field_name
+        So that's why the field inital value should be replaced in the form's init method 
+        """
+
+        default = (None, [], 0)
+        groups = [default]
+        has_selected = False
+        selected_choices = {str(v) for v in value}
+
+        if not self.is_required and not self.allow_multiple_selected:
+            default[1].append(self.create_option(name, "", "", False, 0))
+
+        if not isinstance(self.choices, ModelChoiceIterator):
+            return super().optgroups(name, value, attrs=attrs)
+
+        selected_choices = {
+            c for c in selected_choices if c not in self.choices.field.empty_values
+        }
+
+        query = Q(**{"%s__in" % self.field_name: selected_choices})
+
+        for obj in self.choices.queryset.filter(query):
+            option_value = self.choices.choice(obj)[0]
+            option_label = self.label_from_instance(obj)
+
+            selected = str(option_value) in value and (
+                has_selected is False or self.allow_multiple_selected
+            )
+            if selected is True and has_selected is False:
+                has_selected = True
+            index = len(default[1])
+            subgroup = default[1]
+            subgroup.append(
+                self.create_option(
+                    name, option_value, option_label, selected_choices, index
+                )
+            )
+
+        return groups
+
+
+class CustomModelSelectWidget(s2forms.ModelSelect2Widget):
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        base_attrs.update({
+            'data-minimum-input-length': 0
+        })
+        return super().build_attrs(base_attrs, extra_attrs)
 
 
 class CourseModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери', widget=s2forms.Select2Widget)
-    driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False).order_by('first_name'), label='Шорфьор', empty_label='Избери')
-    company = forms.ModelChoiceField(
-        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
-    contractor = forms.ModelChoiceField(
-        models.Contractor.objects.all().order_by('name'),
-        label='Контрагент',
-        empty_label='Избери',
-        widget=forms.Select(
-            attrs={
-                'data-load-contractor-reminder-url': reverse_lazy('main:load-contractor-reminder'),
-                'id': 'contractorID'
-            })
-    )
-    bank = forms.ModelChoiceField(
-        models.Bank.objects.all().order_by('name'), label='Банка', empty_label='Избери')
-    medical_examination_perpetrator = forms.CharField(
-        label='Извършител на медицински преглед', max_length=100, required=False, widget=forms.TextInput(
-            attrs={'class': 'form-control', 'placeholder': 'Извършител на медицински преглед', 'list': 'datalistMedicalExaminationPerpetrator'}))
-    technical_inspection_perpetrator = forms.CharField(
-        label='Извършител на технически преглед', max_length=100, required=False, widget=forms.TextInput(
-            attrs={'class': 'form-control', 'placeholder': 'Извършител на технически преглед', 'list': 'datalistTechnicalInspectionPerpetrator'}))
-    from_to = forms.ModelChoiceField(
-        models.FromTo.objects.all(), widget=FromToWidget(model=models.FromTo))
+    medical_examination_perpetrator = forms.ModelChoiceField(
+        models.MedicalExaminationPerpetrator.objects.all(),
+        to_field_name='perpetrator',
+        widget=CustomSelectTagWidget(
+            model=models.MedicalExaminationPerpetrator,
+            field_name='perpetrator',
+            search_fields=['perpetrator__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('perpetrator',))
+        ))
+
+    technical_inspection_perpetrator = forms.ModelChoiceField(
+        models.TechnicalInspectionPerpetrator.objects.all(),
+        to_field_name='perpetrator',
+        widget=CustomSelectTagWidget(
+            model=models.TechnicalInspectionPerpetrator,
+            field_name='perpetrator',
+            search_fields=['perpetrator__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('perpetrator',))
+        ))
 
     class Meta:
         model = models.Course
         exclude = ('number', 'create_date')
         widgets = {
             'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на заявка'}),
-            'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация', 'list': 'datalistFromTo'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
             'course_price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за курс'}),
             'driver_salary': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за командировка'}),
@@ -218,11 +217,59 @@ class CourseModelForm(forms.ModelForm):
             'export': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'mileage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Километраж'}),
             'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Лице за контакт'}),
-            'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'})
+            'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'}),
+
+            'driver': CustomModelSelectWidget(
+                model=get_user_model(),
+                queryset=get_user_model().objects.filter(
+                    is_active=True, is_staff=False).order_by('first_name'),
+                search_fields=['first_name__icontains']
+            ),
+
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
+
+            'company': CustomModelSelectWidget(
+                model=models.Company,
+                search_fields=['name__icontains'],
+            ),
+
+            'contractor': CustomModelSelectWidget(
+                model=models.Contractor,
+                search_fields=['name__icontains'],
+                attrs={
+                    'id': 'contractorID',
+                    'data-load-contractor-reminder-url': reverse_lazy('main:load-contractor-reminder')
+                },
+            ),
+
+            'bank': CustomModelSelectWidget(
+                model=models.Bank,
+                search_fields=['name__icontains',
+                               'bank_code__icontains', 'iban__icontains']
+            ),
+
+            'from_to': CustomSelectTagWidget(
+                model=models.FromTo,
+                field_name='from_to',
+                search_fields=['from_to__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('from_to',))
+            ),
+
+            'course_price_currency': s2forms.Select2Widget(choices=models.CURRENCY_CHOICES),
+            'driver_salary_currency': s2forms.Select2Widget(choices=models.CURRENCY_CHOICES)
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['driver'].queryset = get_user_model().objects.filter(
+            is_active=True, is_staff=False).order_by('first_name')
+
+        self.fields['from_to'].to_field_name = 'from_to'
 
         if self.instance.pk:
             if self.instance.export:
@@ -231,6 +278,9 @@ class CourseModelForm(forms.ModelForm):
 
                 if hasattr(self.instance, 'technical_inspection'):
                     self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
+
+            if hasattr(self.instance.from_to, 'from_to'):
+                self.initial['from_to'] = self.instance.from_to.from_to
 
         if self.data and 'export' in self.data:
             self.fields['medical_examination_perpetrator'].required = True
@@ -242,73 +292,68 @@ class CourseModelForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         if commit:
-            instance.save()
+            technical_inspection_perpetrator = self.cleaned_data['technical_inspection_perpetrator']
+            medical_examination_perpetrator = self.cleaned_data['medical_examination_perpetrator']
 
-            if self.cleaned_data['export']:
+            if not instance.id:
+                instance.save()
 
-                if 'technical_inspection_perpetrator' in self.changed_data:
+                models.CourseTechnicalInspection.objects.create(
+                    course=instance, perpetrator=technical_inspection_perpetrator)
 
-                    technical_inspection_perpetrator = (
-                        self.cleaned_data['technical_inspection_perpetrator']).strip()
-                    try:
-                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.get(
-                            perpetrator=technical_inspection_perpetrator)
-                    except models.TechnicalInspectionPerpetrator.DoesNotExist:
-                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.create(
-                            perpetrator=technical_inspection_perpetrator)
-                    finally:
+                models.CourseMedicalExamination.objects.create(
+                    course=instance, perpetrator=medical_examination_perpetrator)
+            else:
+                instance.save()
 
-                        try:
-                            techincal_inspection_instance = models.CourseTechnicalInspection.objects.get(
-                                course=instance)
-                        except models.CourseTechnicalInspection.DoesNotExist:
-                            models.CourseTechnicalInspection.objects.create(
-                                course=instance, perpetrator=perpetrator_instance)
-                        else:
-                            techincal_inspection_instance.perpetrator = perpetrator_instance
-                            techincal_inspection_instance.save()
+                course_technical_inspection = models.CourseTechnicalInspection.objects.get(
+                    course=instance)
+                course_medical_examination = models.CourseMedicalExamination.objects.get(
+                    course=instance)
 
-                if 'medical_examination_perpetrator' in self.changed_data:
+                if self.cleaned_data['export']:
+                    if 'technical_inspection_perpetrator' in self.changed_data:
+                        course_technical_inspection.perpetrator = self.cleaned_data[
+                            'technical_inspection_perpetrator']
+                        course_technical_inspection.save()
 
-                    medical_examination_perpetrator = (
-                        self.cleaned_data['medical_examination_perpetrator']).strip()
-                    try:
-                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.get(
-                            perpetrator=medical_examination_perpetrator)
-                    except models.MedicalExaminationPerpetrator.DoesNotExist:
-                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.create(
-                            perpetrator=medical_examination_perpetrator)
-                    finally:
-
-                        try:
-                            medical_examination_instance = models.CourseMedicalExamination.objects.get(
-                                course=instance)
-                        except models.CourseMedicalExamination.DoesNotExist:
-                            models.CourseMedicalExamination.objects.create(
-                                course=instance, perpetrator=perpetrator_instance)
-                        else:
-                            medical_examination_instance.perpetrator = perpetrator_instance
-                            medical_examination_instance.save()
+                    if 'medical_examination_perpetrator' in self.changed_data:
+                        course_medical_examination.perpetrator = self.cleaned_data[
+                            'medical_examination_perpetrator']
+                        course_medical_examination.save()
 
             self.save_m2m()
         return instance
 
 
 class CourseAddresModelForm(forms.ModelForm):
-    load_type = forms.ChoiceField(
-        label='Товарен/Разтоварен/Митница', choices=models.LOADING_TYPE_CHOICES, required=False)
-    save = forms.BooleanField(label='Запази', widget=forms.CheckboxInput(
-        attrs={'class': 'form-check-input'}), required=False)
-
     class Meta:
         model = models.CourseAddress
-        fields = ['load_type', 'address_input', 'date', 'save']
+        fields = ['load_type', 'address', 'date']
         widgets = {
-            'address_input': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Адрес', 'list': 'datalistAddresses'}),
+            'load_type': s2forms.Select2Widget(choices=models.LOADING_TYPE_CHOICES),
+
+            'address': CustomSelectTagWidget(
+                model=models.Address,
+                field_name='address',
+                search_fields=['address__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('address',))
+            ),
+
             'date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['address'].to_field_name = 'address'
+        self.fields['address'].empty_label = 'Избери'
+
+        if self.instance.pk:
+            if hasattr(self.instance.address, 'address'):
+                self.initial['address'] = self.instance.address.address
 
 
 class CustomBaseInlineFormSet(forms.BaseInlineFormSet):
