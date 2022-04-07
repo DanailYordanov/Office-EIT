@@ -471,19 +471,33 @@ class AddressModelForm(forms.ModelForm):
 
 
 class ExpenseModelForm(forms.ModelForm):
-    expense_type = forms.ModelChoiceField(
-        models.ExpenseType.objects.all().order_by('expense_type'), label='Вид разход', empty_label='Избери')
-
     class Meta:
         model = models.Expense
-        fields = ['expense_type', 'price', 'currency',
-                  'payment_type', 'additional_information']
+        exclude = ('course',)
         widgets = {
+            'expense_type': CustomSelectTagWidget(
+                model=models.ExpenseType,
+                field_name='expense_type',
+                search_fields=['expense_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('expense_type',))
+            ),
             'price': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Цена'}),
+            'currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES),
+            'payment_type': CustomSelectWidget(choices=models.PAYMENT_TYPE_CHOICES),
             'additional_information': forms.Textarea(
                 attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['expense_type'].to_field_name = 'expense_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.expense_type, 'expense_type'):
+                self.initial['expense_type'] = self.instance.expense_type.expense_type
 
 
 class TripOrderModelForm(forms.ModelForm):
