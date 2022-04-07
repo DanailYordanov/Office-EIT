@@ -278,6 +278,14 @@ class CourseModelForm(forms.ModelForm):
                                       args=('from_to',))
             ),
 
+            'cargo_type': CustomSelectTagWidget(
+                model=models.CargoType,
+                field_name='cargo_type',
+                search_fields=['cargo_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('cargo_type',))
+            ),
+
             'course_price_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES),
             'driver_salary_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES)
         }
@@ -290,6 +298,7 @@ class CourseModelForm(forms.ModelForm):
 
         self.fields['request_number'].to_field_name = 'request_number'
         self.fields['from_to'].to_field_name = 'from_to'
+        self.fields['cargo_type'].to_field_name = 'cargo_type'
 
         if self.instance.pk:
             if self.instance.export:
@@ -304,6 +313,9 @@ class CourseModelForm(forms.ModelForm):
 
             if hasattr(self.instance.from_to, 'from_to'):
                 self.initial['from_to'] = self.instance.from_to.from_to
+
+            if hasattr(self.instance.cargo_type, 'cargo_type'):
+                self.initial['cargo_type'] = self.instance.cargo_type.cargo_type
 
         if self.data and 'export' in self.data:
             self.fields['medical_examination_perpetrator'].required = True

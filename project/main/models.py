@@ -282,6 +282,18 @@ class RequestNumber(models.Model):
         return self.request_number
 
 
+class CargoType(models.Model):
+    cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
+
+    class Meta:
+        ordering = ['cargo_type']
+        verbose_name = 'Вид и тегло на товара'
+        verbose_name_plural = 'Видове и тегла на товари'
+
+    def __str__(self):
+        return self.cargo_type
+
+
 class Course(models.Model):
     number = models.IntegerField('№')
     driver = models.ForeignKey(
@@ -306,7 +318,8 @@ class Course(models.Model):
     driver_salary = models.FloatField('Цена за командировка')
     driver_salary_currency = models.CharField(
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
-    cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
+    cargo_type = models.ForeignKey(
+        CargoType, verbose_name='Вид и тегло на товара', null=True, on_delete=models.SET_NULL)
     export = models.BooleanField('За износ', default=False)
     mileage = models.FloatField('Километраж')
     contact_person = models.CharField(
