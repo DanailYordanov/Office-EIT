@@ -221,7 +221,6 @@ class CourseModelForm(forms.ModelForm):
         model = models.Course
         exclude = ('number', 'create_date')
         widgets = {
-            'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на заявка'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
             'course_price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за курс'}),
             'driver_salary': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за командировка'}),
@@ -263,6 +262,14 @@ class CourseModelForm(forms.ModelForm):
                                'bank_code__icontains', 'iban__icontains']
             ),
 
+            'request_number': CustomSelectTagWidget(
+                model=models.RequestNumber,
+                field_name='request_number',
+                search_fields=['request_number__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('request_number',))
+            ),
+
             'from_to': CustomSelectTagWidget(
                 model=models.FromTo,
                 field_name='from_to',
@@ -281,6 +288,7 @@ class CourseModelForm(forms.ModelForm):
         self.fields['driver'].queryset = get_user_model().objects.filter(
             is_active=True, is_staff=False).order_by('first_name')
 
+        self.fields['request_number'].to_field_name = 'request_number'
         self.fields['from_to'].to_field_name = 'from_to'
 
         if self.instance.pk:
@@ -290,6 +298,9 @@ class CourseModelForm(forms.ModelForm):
 
                 if hasattr(self.instance, 'technical_inspection'):
                     self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
+
+            if hasattr(self.instance.request_number, 'request_number'):
+                self.initial['request_number'] = self.instance.request_number.request_number
 
             if hasattr(self.instance.from_to, 'from_to'):
                 self.initial['from_to'] = self.instance.from_to.from_to

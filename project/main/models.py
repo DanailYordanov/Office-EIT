@@ -270,6 +270,18 @@ class FromTo(models.Model):
         return self.from_to
 
 
+class RequestNumber(models.Model):
+    request_number = models.CharField('Номер на заявка', max_length=100)
+
+    class Meta:
+        ordering = ['request_number']
+        verbose_name = 'Номер на заявка'
+        verbose_name_plural = 'Номера на заявки'
+
+    def __str__(self):
+        return self.request_number
+
+
 class Course(models.Model):
     number = models.IntegerField('№')
     driver = models.ForeignKey(
@@ -282,8 +294,8 @@ class Course(models.Model):
         Contractor, verbose_name='Контрагент', null=True, on_delete=models.SET_NULL)
     bank = models.ForeignKey(Bank, verbose_name='Банка',
                              null=True, on_delete=models.SET_NULL)
-    request_number = models.CharField(
-        'Номер на заявка', max_length=50, null=True, blank=True)
+    request_number = models.ForeignKey(
+        RequestNumber, verbose_name='Номер на заявка', null=True, on_delete=models.SET_NULL)
     from_to = models.ForeignKey(
         FromTo, verbose_name='Релация', null=True, on_delete=models.SET_NULL)
     description = models.CharField(
