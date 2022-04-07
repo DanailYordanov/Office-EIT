@@ -109,17 +109,30 @@ class CustomSelectWidget(s2forms.Select2Widget):
 
 
 class CarModelForm(forms.ModelForm):
-    car_type = forms.ModelChoiceField(
-        models.CarType.objects.all().order_by('car_type'), label='Вид автомобил', empty_label='Избери')
-
     class Meta:
         model = models.Car
         fields = '__all__'
         widgets = {
+            'car_type': CustomSelectTagWidget(
+                model=models.CarType,
+                field_name='car_type',
+                search_fields=['car_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('car_type',))
+            ),
             'brand': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Марка'}),
             'number_plate': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Регистрационен номер'}),
-            'vin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на рама'}),
+            'vin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на рама'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['car_type'].to_field_name = 'car_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.car_type, 'car_type'):
+                self.initial['car_type'] = self.instance.car_type.car_type
 
 
 class ReminderModelForm(forms.ModelForm):
