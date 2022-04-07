@@ -25,6 +25,7 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
     def build_attrs(self, base_attrs, extra_attrs=None):
         base_attrs.update({
             'data-theme': 'bootstrap-5',
+            'data-token-separators': [],
             'data-minimum-input-length': 0,
             'class': 'select-tag form-control'
         })
@@ -166,22 +167,36 @@ class ReminderModelForm(forms.ModelForm):
 
 
 class ServiceModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    service_type = forms.ModelChoiceField(
-        models.ServiceType.objects.all().order_by('service_type'), label='Вид обслужване', empty_label='Избери')
-    date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
-    additional_information = forms.CharField(label='Допълнителна информация', required=False, widget=forms.Textarea(
-        attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
-
     class Meta:
         model = models.Service
-        fields = ['car', 'service_type', 'run',
-                  'additional_information', 'date']
+        fields = '__all__'
         widgets = {
-            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'})
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
+            'service_type': CustomSelectTagWidget(
+                model=models.ServiceType,
+                field_name='service_type',
+                search_fields=['service_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('service_type',))
+            ),
+            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'}),
+            'date': forms.DateInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}),
+            'additional_information': forms.Textarea(
+                attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['service_type'].to_field_name = 'service_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.service_type, 'service_type'):
+                self.initial['service_type'] = self.instance.service_type.service_type
 
 
 class ContractorsModelForm(forms.ModelForm):
