@@ -136,16 +136,33 @@ class CarModelForm(forms.ModelForm):
 
 
 class ReminderModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    reminder_type = forms.ModelChoiceField(
-        models.ReminderType.objects.all().order_by('reminder_type'), label='Вид напомняне', empty_label='Избери')
-    expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.DateInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
-
     class Meta:
         model = models.Reminder
-        fields = ['reminder_type', 'car', 'expiration_date']
+        fields = '__all__'
+        widgets = {
+            'reminder_type': CustomSelectTagWidget(
+                model=models.ReminderType,
+                field_name='reminder_type',
+                search_fields=['reminder_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('reminder_type',))
+            ),
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
+            'expiration_date': forms.DateInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['reminder_type'].to_field_name = 'reminder_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.reminder_type, 'reminder_type'):
+                self.initial['reminder_type'] = self.instance.reminder_type.reminder_type
 
 
 class ServiceModelForm(forms.ModelForm):
