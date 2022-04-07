@@ -17,92 +17,6 @@ COURSE_DOCUMENTS_OPTIONS = [
 ]
 
 
-class CarModelForm(forms.ModelForm):
-    car_type = forms.ModelChoiceField(
-        models.CarType.objects.all().order_by('car_type'), label='Вид автомобил', empty_label='Избери')
-
-    class Meta:
-        model = models.Car
-        fields = '__all__'
-        widgets = {
-            'brand': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Марка'}),
-            'number_plate': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Регистрационен номер'}),
-            'vin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на рама'}),
-        }
-
-
-class ReminderModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    reminder_type = forms.ModelChoiceField(
-        models.ReminderType.objects.all().order_by('reminder_type'), label='Вид напомняне', empty_label='Избери')
-    expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.DateInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
-
-    class Meta:
-        model = models.Reminder
-        fields = ['reminder_type', 'car', 'expiration_date']
-
-
-class ServiceModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    service_type = forms.ModelChoiceField(
-        models.ServiceType.objects.all().order_by('service_type'), label='Вид обслужване', empty_label='Избери')
-    date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
-    additional_information = forms.CharField(label='Допълнителна информация', required=False, widget=forms.Textarea(
-        attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
-
-    class Meta:
-        model = models.Service
-        fields = ['car', 'service_type', 'run',
-                  'additional_information', 'date']
-        widgets = {
-            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'})
-        }
-
-
-class ContractorsModelForm(forms.ModelForm):
-    class Meta:
-        model = models.Contractor
-        fields = '__all__'
-        widgets = {
-            'name': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Име'}),
-            'bulstat': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Булстат',
-                    'data-populate-vat-info-url': reverse_lazy('main:populate-vat-info')
-                }),
-            'mol': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'МОЛ'}),
-            'country': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Държава'}),
-            'city': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Град'}),
-            'address': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
-            'postal_code': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Пощенски код'}),
-            'correspondence_address': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Адрес за кореспонденция'}),
-            'phone_number': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}),
-            'email': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
-            'maturity_date': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}),
-            'cmr_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'cmr_expiration_date': forms.DateInput(
-                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}),
-            'license_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'license_expiration_date': forms.DateInput(
-                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'})
-        }
-
-
 class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
     def __init__(self, *args, **kwargs):
         self.field_name = kwargs.pop('field_name', None)
@@ -192,6 +106,94 @@ class CustomSelectWidget(s2forms.Select2Widget):
             'data-theme': 'bootstrap-5'
         })
         return super().build_attrs(base_attrs, extra_attrs)
+
+
+class CarModelForm(forms.ModelForm):
+    car_type = forms.ModelChoiceField(
+        models.CarType.objects.all().order_by('car_type'), label='Вид автомобил', empty_label='Избери')
+
+    class Meta:
+        model = models.Car
+        fields = '__all__'
+        widgets = {
+            'brand': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Марка'}),
+            'number_plate': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Регистрационен номер'}),
+            'vin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на рама'}),
+        }
+
+
+class ReminderModelForm(forms.ModelForm):
+    car = forms.ModelChoiceField(
+        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
+    reminder_type = forms.ModelChoiceField(
+        models.ReminderType.objects.all().order_by('reminder_type'), label='Вид напомняне', empty_label='Избери')
+    expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.DateInput(
+        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
+
+    class Meta:
+        model = models.Reminder
+        fields = ['reminder_type', 'car', 'expiration_date']
+
+
+class ServiceModelForm(forms.ModelForm):
+    car = forms.ModelChoiceField(
+        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
+    service_type = forms.ModelChoiceField(
+        models.ServiceType.objects.all().order_by('service_type'), label='Вид обслужване', empty_label='Избери')
+    date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
+        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
+    additional_information = forms.CharField(label='Допълнителна информация', required=False, widget=forms.Textarea(
+        attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
+
+    class Meta:
+        model = models.Service
+        fields = ['car', 'service_type', 'run',
+                  'additional_information', 'date']
+        widgets = {
+            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'})
+        }
+
+
+class ContractorsModelForm(forms.ModelForm):
+    class Meta:
+        model = models.Contractor
+        fields = '__all__'
+        widgets = {
+            'client_type': CustomSelectWidget(choices=models.CLIENT_TYPE_CHOICES),
+
+            'name': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Име'}),
+            'bulstat': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Булстат',
+                    'data-populate-vat-info-url': reverse_lazy('main:populate-vat-info')
+                }),
+            'mol': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'МОЛ'}),
+            'country': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Държава'}),
+            'city': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Град'}),
+            'address': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
+            'postal_code': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Пощенски код'}),
+            'correspondence_address': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Адрес за кореспонденция'}),
+            'phone_number': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}),
+            'email': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
+            'maturity_date': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}),
+            'cmr_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'cmr_expiration_date': forms.DateInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}),
+            'license_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'license_expiration_date': forms.DateInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'})
+        }
 
 
 class CourseModelForm(forms.ModelForm):
