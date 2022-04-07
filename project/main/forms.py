@@ -110,8 +110,9 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
 
     def build_attrs(self, base_attrs, extra_attrs=None):
         base_attrs.update({
-            'class': 'select-tag',
-            'data-minimum-input-length': 0
+            'data-theme': 'bootstrap-5',
+            'data-minimum-input-length': 0,
+            'class': 'select-tag form-control'
         })
         return super().build_attrs(base_attrs, extra_attrs)
 
@@ -177,7 +178,18 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
 class CustomModelSelectWidget(s2forms.ModelSelect2Widget):
     def build_attrs(self, base_attrs, extra_attrs=None):
         base_attrs.update({
+            'class': 'form-control',
+            'data-theme': 'bootstrap-5',
             'data-minimum-input-length': 0
+        })
+        return super().build_attrs(base_attrs, extra_attrs)
+
+
+class CustomSelectWidget(s2forms.Select2Widget):
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        base_attrs.update({
+            'class': 'form-control',
+            'data-theme': 'bootstrap-5'
         })
         return super().build_attrs(base_attrs, extra_attrs)
 
@@ -259,8 +271,8 @@ class CourseModelForm(forms.ModelForm):
                                       args=('from_to',))
             ),
 
-            'course_price_currency': s2forms.Select2Widget(choices=models.CURRENCY_CHOICES),
-            'driver_salary_currency': s2forms.Select2Widget(choices=models.CURRENCY_CHOICES)
+            'course_price_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES),
+            'driver_salary_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES)
         }
 
     def __init__(self, *args, **kwargs):
@@ -331,7 +343,7 @@ class CourseAddresModelForm(forms.ModelForm):
         model = models.CourseAddress
         fields = ['load_type', 'address', 'date']
         widgets = {
-            'load_type': s2forms.Select2Widget(choices=models.LOADING_TYPE_CHOICES),
+            'load_type': CustomSelectWidget(choices=models.LOADING_TYPE_CHOICES),
 
             'address': CustomSelectTagWidget(
                 model=models.Address,
