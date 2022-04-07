@@ -1,5 +1,5 @@
 {% extends 'main/add_update_form.html' %}
-{% block content_after %}
+{% block content_in_after %}
 <div class="col-12 form-flex address-form d-none" id="emptyFormsetForm">
     <p class="fw-light text-center fs-4">Адрес</p>
     {% for f in formset.empty_form %}
@@ -67,4 +67,4 @@
     <i class="fas fa-plus ms-1"></i>
 </a>
 {{ formset.management_form }}
-{% endblock content_after %}
+{% endblock content_in_after %}
