@@ -566,18 +566,41 @@ class ExpenseOrderModelForm(forms.ModelForm):
 
 
 class CourseInvoiceModelForm(forms.ModelForm):
-    course = forms.ModelChoiceField(
-        models.Course.objects.all().order_by('-number'), label='Курс', empty_label='Избери')
-    tax_transaction_basis = forms.ModelChoiceField(
-        models.TaxTransactionBasis.objects.all(), label='Основание на сделката', empty_label='Избери')
-
     class Meta:
         model = models.CourseInvoice
         exclude = ('number', 'creator')
         widgets = {
+            'course': CustomModelSelectWidget(
+                model=models.Course,
+                search_fields=['number__icontains',
+                               'driver__first_name__icontains',
+                               'driver__middle_name__icontains',
+                               'driver__last_name__icontains',
+                               'from_to__from_to__icontains'
+                               ]
+            ),
+            'payment_type': CustomSelectWidget(choices=models.PAYMENT_TYPE_CHOICES),
+            'invoice_type': CustomSelectWidget(choices=models.INVOICE_TYPE_CHOICES),
+            'tax_type': CustomSelectWidget(choices=models.TAX_TYPE_CHOICES),
+            'tax_transaction_basis': CustomSelectTagWidget(
+                model=models.TaxTransactionBasis,
+                field_name='name',
+                search_fields=['name__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('name',))
+            ),
             'additional_information': forms.Textarea(
                 attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['tax_transaction_basis'].to_field_name = 'name'
+
+        if self.instance.pk:
+            if hasattr(self.instance.tax_transaction_basis, 'name'):
+                self.initial['tax_transaction_basis'] = self.instance.tax_transaction_basis.name
 
 
 class CompanyModelForm(forms.ModelForm):
