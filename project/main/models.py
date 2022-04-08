@@ -417,10 +417,10 @@ class TripOrder(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='trip_order_creator', null=True, on_delete=models.SET_NULL)
-    course = models.OneToOneField(
-        Course, verbose_name='Курс за износ', related_name='trip_order_course', on_delete=models.CASCADE)
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='trip_order_driver', null=True, on_delete=models.SET_NULL)
+    course = models.OneToOneField(
+        Course, verbose_name='Курс за износ', related_name='trip_order_course', on_delete=models.CASCADE)
     destination = models.CharField('Дестинация', max_length=100)
     from_date = models.DateField('Начална дата')
     to_date = models.DateField('Крайна дата')

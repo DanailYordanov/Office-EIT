@@ -824,26 +824,6 @@ def trip_order_xlsx(request, pk):
 
 
 @login_required
-def load_course_options(request):
-    if request.method == 'POST':
-        driver_id = request.POST.get('driver_id')
-
-        if driver_id != '':
-            courses = models.Course.objects.filter(
-                driver__id=int(driver_id), export=True)
-        else:
-            courses = models.Course.objects.none()
-
-        context = {
-            'courses': courses
-        }
-
-        return render(request, 'main/course_select_options.html', context)
-    else:
-        raise PermissionDenied
-
-
-@login_required
 def load_dates(request):
     if request.method == 'POST':
         course_id = request.POST.get('course_id')

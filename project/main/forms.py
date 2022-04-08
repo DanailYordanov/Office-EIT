@@ -505,32 +505,30 @@ class ExpenseModelForm(forms.ModelForm):
 
 
 class TripOrderModelForm(forms.ModelForm):
-    driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(
-            is_active=True, is_staff=False),
-        label='Шофьор',
-        empty_label='Избери',
-        widget=forms.Select(
-            attrs={
-                'data-load-courses-url': reverse_lazy('main:load-course-options'),
-                'id': 'driverTripOrderID'
-            })
-    )
-    course = forms.ModelChoiceField(
-        models.Course.objects.none(),
-        label='Курс за износ',
-        empty_label='Избери',
-        widget=forms.Select(
-            attrs={
-                'data-load-dates-url': reverse_lazy('main:load-dates'),
-                'id': 'courseTripOrderID'
-            })
-    )
-
     class Meta:
         model = models.TripOrder
-        fields = ['driver', 'course', 'destination', 'from_date', 'to_date']
+        exclude = ('number', 'creator')
         widgets = {
+            'driver': CustomModelSelectWidget(
+                model=get_user_model(),
+                queryset=get_user_model().objects.filter(
+                    is_active=True, is_staff=False),
+                search_fields=[
+                    'first_name__icontains',
+                    'middle_name__icontains',
+                    'last_name__icontains'
+                ]
+            ),
+            'course': CustomModelSelectWidget(
+                model=models.Course,
+                search_fields=['number__icontains',
+                               'driver__first_name__icontains',
+                               'driver__middle_name__icontains',
+                               'driver__last_name__icontains',
+                               'from_to__from_to__icontains'
+                               ],
+                dependent_fields={'driver': 'driver'}
+            ),
             'destination': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Дестинация'}),
             'from_date': forms.DateInput(
@@ -538,20 +536,6 @@ class TripOrderModelForm(forms.ModelForm):
             'to_date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Крайна дата'})
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if 'driver' in self.data:
-            try:
-                driver_id = int(self.data.get('driver'))
-                self.fields['course'].queryset = models.Course.objects.filter(
-                    driver__id=driver_id, export=True)
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk:
-            self.fields['course'].queryset = models.Course.objects.filter(
-                driver=self.instance.driver, export=True)
 
 
 class ExpenseOrderModelForm(forms.ModelForm):

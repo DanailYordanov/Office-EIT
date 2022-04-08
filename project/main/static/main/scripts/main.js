@@ -27,8 +27,6 @@ $(document).ready(function () {
 
     $('#addCourseBtn').click(addAddressField);
 
-    $('#driverTripOrderID').change(courseOptionsLoad);
-
     $('#courseTripOrderID').change(datesLoad);
 
     $('#contractorID').change(contractorReminder);
@@ -70,31 +68,6 @@ function addAddressField(e) {
     });
 
     $('#emptyFormsetForm').find('select').djangoSelect2();
-}
-
-
-function courseOptionsLoad() {
-    var driver_id = $(this).val();
-    var loadCoursesURL = $(this).attr('data-load-courses-url');
-    var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
-
-    $.ajax({
-        url: loadCoursesURL,
-        type: 'POST',
-        data: {
-            'driver_id': driver_id
-        },
-        headers: {
-            'X-CSRFToken': csrf_token
-        },
-        success: function (data) {
-            $('#courseTripOrderID').html(data);
-            $('#courseTripOrderID').niceSelect('update');
-        },
-        error: function (response) {
-            alert('Нещо се обърка. Опитайте отново!');
-        }
-    });
 }
 
 
