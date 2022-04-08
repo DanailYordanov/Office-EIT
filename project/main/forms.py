@@ -537,15 +537,22 @@ class TripOrderModelForm(forms.ModelForm):
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Крайна дата'})
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['driver'].queryset = get_user_model().objects.filter(
+            is_active=True, is_staff=False)
+
 
 class ExpenseOrderModelForm(forms.ModelForm):
-    trip_order = forms.ModelChoiceField(
-        models.TripOrder.objects.all(), label='Командировъчна заповед', empty_label='Избери')
-
     class Meta:
         model = models.ExpenseOrder
         exclude = ('number', 'creator')
         widgets = {
+            'trip_order': CustomModelSelectWidget(
+                model=models.TripOrder,
+                search_fields=['number']
+            ),
             'BGN_amount': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Сума в лева'}),
             'EUR_amount': forms.TextInput(
