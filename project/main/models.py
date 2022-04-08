@@ -272,7 +272,8 @@ class Course(models.Model):
                              null=True, on_delete=models.SET_NULL)
     request_number = models.CharField(
         'Номер на заявка', max_length=50, null=True, blank=True)
-    from_to = models.CharField('Релация', max_length=100)
+    from_to = models.CharField(
+        'Релация', max_length=100, null=True, blank=True)
     description = models.CharField(
         'Описание', max_length=1000, null=True, blank=True)
     course_price = models.FloatField('Цена за курс')
@@ -281,7 +282,8 @@ class Course(models.Model):
     driver_salary = models.FloatField('Цена за командировка')
     driver_salary_currency = models.CharField(
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
-    cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
+    cargo_type = models.CharField(
+        'Вид и тегло на товара', max_length=100, null=True, blank=True)
     export = models.BooleanField('За износ', default=False)
     mileage = models.FloatField('Километраж')
     contact_person = models.CharField(
