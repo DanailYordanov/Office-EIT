@@ -655,20 +655,37 @@ class BankModelForm(forms.ModelForm):
 
 
 class InstructionModelForm(forms.ModelForm):
-    driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
-    car = forms.ModelChoiceField(
-        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
-    company = forms.ModelChoiceField(
-        models.Company.objects.all(), label='Фирма', empty_label='Избери')
-
     class Meta:
         model = models.Instruction
         exclude = ('number', 'creator')
         widgets = {
+            'company': CustomModelSelectWidget(
+                model=models.Company,
+                search_fields=['name']
+            ),
+            'driver': CustomModelSelectWidget(
+                model=get_user_model(),
+                queryset=get_user_model().objects.filter(
+                    is_active=True, is_staff=False),
+                search_fields=[
+                    'first_name__icontains',
+                    'middle_name__icontains',
+                    'last_name__icontains'
+                ]
+            ),
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
             'city': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Град'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['driver'].queryset = get_user_model().objects.filter(
+            is_active=True, is_staff=False)
 
 
 class CourseDateJournalForm(forms.Form):
