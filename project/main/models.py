@@ -181,6 +181,7 @@ class Contractor(models.Model):
         'Дата на изтичане', null=True, blank=True)
 
     class Meta:
+        ordering = ['name']
         verbose_name = 'Контрагент'
         verbose_name_plural = 'Контрагенти'
 
@@ -354,6 +355,7 @@ class Address(models.Model):
     email = models.EmailField('E-mail', null=True, blank=True)
 
     class Meta:
+        ordering = ['address']
         verbose_name = 'Адрес'
         verbose_name_plural = 'Адреси'
 

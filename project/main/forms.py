@@ -280,8 +280,12 @@ class CourseModelForm(forms.ModelForm):
             'driver': CustomModelSelectWidget(
                 model=get_user_model(),
                 queryset=get_user_model().objects.filter(
-                    is_active=True, is_staff=False).order_by('first_name'),
-                search_fields=['first_name__icontains']
+                    is_active=True, is_staff=False),
+                search_fields=[
+                    'first_name__icontains',
+                    'middle_name__icontains',
+                    'last_name__icontains'
+                ]
             ),
 
             'car': CustomModelSelectWidget(
@@ -341,7 +345,7 @@ class CourseModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields['driver'].queryset = get_user_model().objects.filter(
-            is_active=True, is_staff=False).order_by('first_name')
+            is_active=True, is_staff=False)
 
         self.fields['request_number'].to_field_name = 'request_number'
         self.fields['from_to'].to_field_name = 'from_to'
@@ -503,7 +507,7 @@ class ExpenseModelForm(forms.ModelForm):
 class TripOrderModelForm(forms.ModelForm):
     driver = forms.ModelChoiceField(
         get_user_model().objects.filter(
-            is_active=True, is_staff=False).order_by('first_name'),
+            is_active=True, is_staff=False),
         label='Шофьор',
         empty_label='Избери',
         widget=forms.Select(
@@ -552,7 +556,7 @@ class TripOrderModelForm(forms.ModelForm):
 
 class ExpenseOrderModelForm(forms.ModelForm):
     trip_order = forms.ModelChoiceField(
-        models.TripOrder.objects.all().order_by('-number'), label='Командировъчна заповед', empty_label='Избери')
+        models.TripOrder.objects.all(), label='Командировъчна заповед', empty_label='Избери')
 
     class Meta:
         model = models.ExpenseOrder
@@ -661,11 +665,11 @@ class BankModelForm(forms.ModelForm):
 
 class InstructionModelForm(forms.ModelForm):
     driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False).order_by('first_name'), label='Шорфьор', empty_label='Избери')
+        get_user_model().objects.filter(is_active=True, is_staff=False), label='Шорфьор', empty_label='Избери')
     car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
+        models.Car.objects.all(), label='Автомобил', empty_label='Избери')
     company = forms.ModelChoiceField(
-        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
+        models.Company.objects.all(), label='Фирма', empty_label='Избери')
 
     class Meta:
         model = models.Instruction
@@ -678,7 +682,7 @@ class InstructionModelForm(forms.ModelForm):
 
 class CourseDateJournalForm(forms.Form):
     company = forms.ModelChoiceField(
-        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
+        models.Company.objects.all(), label='Фирма', empty_label='Избери')
     from_date = forms.DateField(label='От дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'От дата'}))
     to_date = forms.DateField(label='До дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
@@ -689,7 +693,7 @@ class CourseDateJournalForm(forms.Form):
 
 class CourseDocumentsForm(forms.Form):
     course = forms.ModelChoiceField(
-        models.Course.objects.all().order_by('-number'), label='Курс', empty_label='Избери')
+        models.Course.objects.all(), label='Курс', empty_label='Избери')
     document_type = forms.ChoiceField(
         label='Тип документ', choices=COURSE_DOCUMENTS_OPTIONS)
 
