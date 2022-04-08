@@ -27,8 +27,6 @@ $(document).ready(function () {
 
     $('#addCourseBtn').click(addAddressField);
 
-    $('#driverTripOrderID').change(courseOptionsLoad);
-
     $('#courseTripOrderID').change(datesLoad);
 
     $('#contractorID').change(contractorReminder);
@@ -46,7 +44,9 @@ $(document).ready(function () {
 function addAddressField(e) {
     e.preventDefault();
 
-    var formsNum = $('.adress-form').length - 1;
+    $('#emptyFormsetForm').find('select').select2('destroy');
+
+    var formsNum = $('.address-form').length - 1;
     var copiedForm = $('#emptyFormsetForm').clone();
     var totalForms = $('#id_addresses-TOTAL_FORMS');
 
@@ -59,31 +59,15 @@ function addAddressField(e) {
     $(".date-picker").datepicker({
         format: 'dd/mm/yyyy'
     });
-}
 
+    copiedForm.find('select').djangoSelect2();
 
-function courseOptionsLoad() {
-    var driver_id = $(this).val();
-    var loadCoursesURL = $(this).attr('data-load-courses-url');
-    var csrf_token = $("input[name=csrfmiddlewaretoken]").val();
-
-    $.ajax({
-        url: loadCoursesURL,
-        type: 'POST',
-        data: {
-            'driver_id': driver_id
-        },
-        headers: {
-            'X-CSRFToken': csrf_token
-        },
-        success: function (data) {
-            $('#courseTripOrderID').html(data);
-            $('#courseTripOrderID').niceSelect('update');
-        },
-        error: function (response) {
-            alert('Нещо се обърка. Опитайте отново!');
-        }
+    copiedForm.find('.select-tag').djangoSelect2({
+        'maximumSelectionLength': 1,
+        'placeholder': 'Избери'
     });
+
+    $('#emptyFormsetForm').find('select').djangoSelect2();
 }
 
 

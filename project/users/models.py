@@ -27,6 +27,11 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(
         'Телефонен номер', max_length=50, null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'Потребител'
+        verbose_name_plural = 'Потребители'
+        ordering = ['first_name', 'middle_name', 'last_name']
+
     def __str__(self):
         if self.middle_name:
             return f'{self.first_name} {self.middle_name} {self.last_name}'

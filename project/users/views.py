@@ -9,7 +9,7 @@ def profile_details(request, pk=None):
     if pk:
         if request.user.is_staff:
             user = get_object_or_404(get_user_model(), pk=pk)
-            redirect_url = reverse('profile-details', kwargs={'pk': pk})
+            redirect_url = reverse('main:users-details-list')
             message = f'Редактиране на информацията на {user}'
         else:
             raise PermissionDenied
@@ -30,7 +30,8 @@ def profile_details(request, pk=None):
     context = {
         'form': form,
         'message': message,
-        'redirect_url': redirect_url
+        'redirect_url': redirect_url,
+        'page_heading': 'Информация за шофьор'
     }
 
     return render(request, 'account/profile_details.html', context)

@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from allauth.account.forms import LoginForm, SignupForm, ResetPasswordKeyForm, ResetPasswordForm, ChangePasswordForm, AddEmailForm, SetPasswordForm
 from .models import CustomUser
 from main.models import Bank
+from main.forms import CustomModelSelectWidget
 
 
 DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
@@ -106,9 +107,6 @@ class CustomResetPasswordKeyForm(ResetPasswordKeyForm):
 
 
 class ProfileDetailsForm(forms.ModelForm):
-    bank = forms.ModelChoiceField(
-        Bank.objects.all(), label='Банка', empty_label='Избери')
-
     class Meta:
         model = get_user_model()
         fields = [
@@ -132,15 +130,19 @@ class ProfileDetailsForm(forms.ModelForm):
             'middle_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Презиме'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Фамилно име'}),
             'personal_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ЕГН'}),
-            'id_card_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
-            'drivers_license_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
-            'professional_competence': forms.DateInput(attrs={'class': 'form-control date-picker'}),
-            'adr_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
-            'digital_card_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
-            'psychological_test_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
-            'pasport_expiration': forms.DateInput(attrs={'class': 'form-control date-picker'}),
+            'id_card_expiration': forms.DateInput(attrs={'class': 'form-control date-picker', 'placeholder': 'Изтичане на лична карта'}),
+            'drivers_license_expiration': forms.DateInput(attrs={'class': 'form-control date-picker', 'placeholder': 'Изтичане на шофьорска книжка'}),
+            'professional_competence': forms.DateInput(attrs={'class': 'form-control date-picker', 'placeholder': 'Изтичане на професионална компетентност'}),
+            'adr_expiration': forms.DateInput(attrs={'class': 'form-control date-picker', 'placeholder': 'Изтичане на ADR'}),
+            'digital_card_expiration': forms.DateInput(attrs={'class': 'form-control date-picker', 'placeholder': 'Изтичане на дигитална карта'}),
+            'psychological_test_expiration': forms.DateInput(attrs={'class': 'form-control date-picker', 'placeholder': 'Изтичане на психотест'}),
+            'pasport_expiration': forms.DateInput(attrs={'class': 'form-control date-picker', 'placeholder': 'Изтичане на паспорт'}),
             'debit_card_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на дебитна карта'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'})
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефонен номер'}),
+            'bank': CustomModelSelectWidget(
+                model=Bank,
+                search_fields=['name__icontains', 'iban__icontains']
+            )
         }
 
     def __init__(self, user, *args, **kwargs):

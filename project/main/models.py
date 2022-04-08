@@ -9,12 +9,6 @@ CLIENT_TYPE_CHOICES = [
     ('Чуждестранен', 'Чуждестранен')
 ]
 
-CHARGING_VAT_CHOICES = [
-    ('', 'Избери'),
-    ('чл.21 ал.2 от ЗДДС', 'чл.21 ал.2 от ЗДДС'),
-    ('чл. 30, ал.1 от ЗДДС', 'чл. 30, ал.1 от ЗДДС')
-]
-
 CURRENCY_CHOICES = [
     ('', 'Избери'),
     ('BGN', 'BGN'),
@@ -177,8 +171,6 @@ class Contractor(models.Model):
     email = models.CharField('E-mail', max_length=100, null=True, blank=True)
     maturity_date = models.CharField(
         'Дата на падеж', max_length=50, null=True, blank=True)
-    charging_vat = models.CharField('Основание за неначисление на ДДС',
-                                    max_length=100, choices=CHARGING_VAT_CHOICES, null=True, blank=True)
     cmr_photo = models.FileField(
         'Прикачи ЧМР Застраховка', upload_to='cmr_photos', null=True, blank=True)
     cmr_expiration_date = models.DateField(
@@ -189,6 +181,7 @@ class Contractor(models.Model):
         'Дата на изтичане', null=True, blank=True)
 
     class Meta:
+        ordering = ['name']
         verbose_name = 'Контрагент'
         verbose_name_plural = 'Контрагенти'
 
@@ -258,6 +251,42 @@ class TaxTransactionBasis(models.Model):
         return self.name
 
 
+class FromTo(models.Model):
+    from_to = models.CharField('Релация', max_length=100)
+
+    class Meta:
+        ordering = ['from_to']
+        verbose_name = 'Релация'
+        verbose_name_plural = 'Релации'
+
+    def __str__(self):
+        return self.from_to
+
+
+class RequestNumber(models.Model):
+    request_number = models.CharField('Номер на заявка', max_length=100)
+
+    class Meta:
+        ordering = ['request_number']
+        verbose_name = 'Номер на заявка'
+        verbose_name_plural = 'Номера на заявки'
+
+    def __str__(self):
+        return self.request_number
+
+
+class CargoType(models.Model):
+    cargo_type = models.CharField('Вид и тегло на товара', max_length=100)
+
+    class Meta:
+        ordering = ['cargo_type']
+        verbose_name = 'Вид и тегло на товара'
+        verbose_name_plural = 'Видове и тегла на товари'
+
+    def __str__(self):
+        return self.cargo_type
+
+
 class Course(models.Model):
     number = models.IntegerField('№')
     driver = models.ForeignKey(
@@ -270,10 +299,17 @@ class Course(models.Model):
         Contractor, verbose_name='Контрагент', null=True, on_delete=models.SET_NULL)
     bank = models.ForeignKey(Bank, verbose_name='Банка',
                              null=True, on_delete=models.SET_NULL)
+<<<<<<< HEAD
     request_number = models.CharField(
         'Номер на заявка', max_length=50, null=True, blank=True)
     from_to = models.CharField(
         'Релация', max_length=100, null=True, blank=True)
+=======
+    request_number = models.ForeignKey(
+        RequestNumber, verbose_name='Номер на заявка', null=True, on_delete=models.SET_NULL)
+    from_to = models.ForeignKey(
+        FromTo, verbose_name='Релация', null=True, on_delete=models.SET_NULL)
+>>>>>>> django_select2
     description = models.CharField(
         'Описание', max_length=1000, null=True, blank=True)
     course_price = models.FloatField('Цена за курс')
@@ -282,8 +318,13 @@ class Course(models.Model):
     driver_salary = models.FloatField('Цена за командировка')
     driver_salary_currency = models.CharField(
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
+<<<<<<< HEAD
     cargo_type = models.CharField(
         'Вид и тегло на товара', max_length=100, null=True, blank=True)
+=======
+    cargo_type = models.ForeignKey(
+        CargoType, verbose_name='Вид и тегло на товара', null=True, on_delete=models.SET_NULL)
+>>>>>>> django_select2
     export = models.BooleanField('За износ', default=False)
     mileage = models.FloatField('Километраж')
     contact_person = models.CharField(
@@ -315,18 +356,6 @@ class Course(models.Model):
         })
 
 
-class FromTo(models.Model):
-    from_to = models.CharField('Релация', max_length=100)
-
-    class Meta:
-        ordering = ['from_to']
-        verbose_name = 'Релация'
-        verbose_name_plural = 'Релации'
-
-    def __str__(self):
-        return self.from_to
-
-
 class Address(models.Model):
     address = models.CharField('Адрес', max_length=200)
     contact_person = models.CharField(
@@ -338,6 +367,7 @@ class Address(models.Model):
     email = models.EmailField('E-mail', null=True, blank=True)
 
     class Meta:
+        ordering = ['address']
         verbose_name = 'Адрес'
         verbose_name_plural = 'Адреси'
 
@@ -348,10 +378,8 @@ class Address(models.Model):
 class CourseAddress(models.Model):
     course = models.ForeignKey(
         Course, verbose_name='Курс', related_name='addresses', on_delete=models.CASCADE)
-    address_obj = models.ForeignKey(
+    address = models.ForeignKey(
         Address, verbose_name='Свързан адрес', null=True, blank=True, on_delete=models.SET_NULL)
-    address_input = models.CharField(
-        'Въведен адрес', max_length=200, null=True, blank=True)
     load_type = models.CharField('Товарен/Разтоварен/Митница',
                                  choices=LOADING_TYPE_CHOICES, max_length=30)
     date = models.DateField('Дата', null=True, blank=True)
@@ -361,7 +389,7 @@ class CourseAddress(models.Model):
         verbose_name_plural = 'Адреси към курсове'
 
     def __str__(self):
-        return f'{self.course} - {self.address_input} - {self.date}'
+        return f'{self.course} - {self.address} - {self.date}'
 
 
 class ExpenseType(models.Model):
@@ -401,10 +429,10 @@ class TripOrder(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='trip_order_creator', null=True, on_delete=models.SET_NULL)
-    course = models.OneToOneField(
-        Course, verbose_name='Курс за износ', related_name='trip_order_course', on_delete=models.CASCADE)
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='trip_order_driver', null=True, on_delete=models.SET_NULL)
+    course = models.OneToOneField(
+        Course, verbose_name='Курс за износ', related_name='trip_order_course', on_delete=models.CASCADE)
     destination = models.CharField('Дестинация', max_length=100)
     from_date = models.DateField('Начална дата')
     to_date = models.DateField('Крайна дата')

@@ -58,8 +58,6 @@ urlpatterns = [
          views.TripOrderDeleteView.as_view(), name='delete-trip-order'),
     path('download/trip-order/<int:pk>/',
          views.trip_order_xlsx, name='trip-order-xlsx'),
-    path('load/course-options/', views.load_course_options,
-         name='load-course-options'),
     path('load/dates/', views.load_dates,
          name='load-dates'),
     path('expense-orders/', views.expense_orders_list, name='expense-orders-list'),
@@ -109,5 +107,7 @@ urlpatterns = [
     path('course-documents/', views.course_documents_xlsx,
          name='course-documents-xlsx'),
     path('course-date-journals/', views.course_date_journals_xlsx,
-         name='course-date-journals-xlsx')
+         name='course-date-journals-xlsx'),
+    path('tag-auto-select-options/<str:field_name>/', views.TagAutoResponseView.as_view(),
+         name='tag-auto-select-options')
 ]

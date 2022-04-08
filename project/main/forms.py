@@ -1,6 +1,9 @@
 from django import forms
+from django.db.models import Q
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
+from django.forms.models import ModelChoiceIterator
+from django_select2 import forms as s2forms
 from main import models
 
 
@@ -14,50 +17,186 @@ COURSE_DOCUMENTS_OPTIONS = [
 ]
 
 
-class CarModelForm(forms.ModelForm):
-    car_type = forms.ModelChoiceField(
-        models.CarType.objects.all().order_by('car_type'), label='Вид автомобил', empty_label='Избери')
+class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
+    def __init__(self, *args, **kwargs):
+        self.field_name = kwargs.pop('field_name', None)
+        super().__init__(*args, **kwargs)
 
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        base_attrs.update({
+            'data-theme': 'bootstrap-5',
+            'data-token-separators': [],
+            'data-minimum-input-length': 0,
+            'class': 'select-tag form-control'
+        })
+        return super().build_attrs(base_attrs, extra_attrs)
+
+    def value_from_datadict(self, data, files, name):
+        value = super().value_from_datadict(data, files, name)
+
+        if value:
+            value = value[0]
+            queryset = self.get_queryset()
+
+            try:
+                obj = queryset.get(**{self.field_name: value})
+            except (ValueError, TypeError, queryset.model.DoesNotExist):
+                obj = queryset.create(**{self.field_name: value})
+
+            return getattr(obj, self.field_name)
+
+        return None
+
+    def optgroups(self, name, value, attrs=None):
+        """ 
+        While editing an existing object the 'value' variable is the object's id, not the to_field_name
+        So that's why the field inital value should be replaced in the form's init method 
+        """
+
+        default = (None, [], 0)
+        groups = [default]
+        has_selected = False
+        selected_choices = {str(v) for v in value}
+
+        if not self.is_required and not self.allow_multiple_selected:
+            default[1].append(self.create_option(name, "", "", False, 0))
+
+        if not isinstance(self.choices, ModelChoiceIterator):
+            return super().optgroups(name, value, attrs=attrs)
+
+        selected_choices = {
+            c for c in selected_choices if c not in self.choices.field.empty_values
+        }
+
+        query = Q(**{"%s__in" % self.field_name: selected_choices})
+
+        for obj in self.choices.queryset.filter(query):
+            option_value = self.choices.choice(obj)[0]
+            option_label = self.label_from_instance(obj)
+
+            selected = str(option_value) in value and (
+                has_selected is False or self.allow_multiple_selected
+            )
+            if selected is True and has_selected is False:
+                has_selected = True
+            index = len(default[1])
+            subgroup = default[1]
+            subgroup.append(
+                self.create_option(
+                    name, option_value, option_label, selected_choices, index
+                )
+            )
+
+        return groups
+
+
+class CustomModelSelectWidget(s2forms.ModelSelect2Widget):
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        base_attrs.update({
+            'class': 'form-control',
+            'data-theme': 'bootstrap-5',
+            'data-minimum-input-length': 0
+        })
+        return super().build_attrs(base_attrs, extra_attrs)
+
+
+class CustomSelectWidget(s2forms.Select2Widget):
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        base_attrs.update({
+            'class': 'form-control',
+            'data-theme': 'bootstrap-5'
+        })
+        return super().build_attrs(base_attrs, extra_attrs)
+
+
+class CarModelForm(forms.ModelForm):
     class Meta:
         model = models.Car
         fields = '__all__'
         widgets = {
+            'car_type': CustomSelectTagWidget(
+                model=models.CarType,
+                field_name='car_type',
+                search_fields=['car_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('car_type',))
+            ),
             'brand': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Марка'}),
             'number_plate': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Регистрационен номер'}),
-            'vin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на рама'}),
+            'vin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на рама'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['car_type'].to_field_name = 'car_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.car_type, 'car_type'):
+                self.initial['car_type'] = self.instance.car_type.car_type
 
 
 class ReminderModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    reminder_type = forms.ModelChoiceField(
-        models.ReminderType.objects.all().order_by('reminder_type'), label='Вид напомняне', empty_label='Избери')
-    expiration_date = forms.DateField(label='Дата на изтичане', input_formats=DATE_FORMATS, widget=forms.DateInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}))
-
     class Meta:
         model = models.Reminder
-        fields = ['reminder_type', 'car', 'expiration_date']
+        fields = '__all__'
+        widgets = {
+            'reminder_type': CustomSelectTagWidget(
+                model=models.ReminderType,
+                field_name='reminder_type',
+                search_fields=['reminder_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('reminder_type',))
+            ),
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
+            'expiration_date': forms.DateInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['reminder_type'].to_field_name = 'reminder_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.reminder_type, 'reminder_type'):
+                self.initial['reminder_type'] = self.instance.reminder_type.reminder_type
 
 
 class ServiceModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    service_type = forms.ModelChoiceField(
-        models.ServiceType.objects.all().order_by('service_type'), label='Вид обслужване', empty_label='Избери')
-    date = forms.DateField(label='Дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
-        attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на извършване'}))
-    additional_information = forms.CharField(label='Допълнителна информация', required=False, widget=forms.Textarea(
-        attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}))
-
     class Meta:
         model = models.Service
-        fields = ['car', 'service_type', 'run',
-                  'additional_information', 'date']
+        fields = '__all__'
         widgets = {
-            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'})
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
+            'service_type': CustomSelectTagWidget(
+                model=models.ServiceType,
+                field_name='service_type',
+                search_fields=['service_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('service_type',))
+            ),
+            'run': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Пробег'}),
+            'date': forms.DateInput(
+                attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}),
+            'additional_information': forms.Textarea(
+                attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['service_type'].to_field_name = 'service_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.service_type, 'service_type'):
+                self.initial['service_type'] = self.instance.service_type.service_type
 
 
 class ContractorsModelForm(forms.ModelForm):
@@ -65,6 +204,8 @@ class ContractorsModelForm(forms.ModelForm):
         model = models.Contractor
         fields = '__all__'
         widgets = {
+            'client_type': CustomSelectWidget(choices=models.CLIENT_TYPE_CHOICES),
+
             'name': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Име'}),
             'bulstat': forms.TextInput(
@@ -101,37 +242,32 @@ class ContractorsModelForm(forms.ModelForm):
 
 
 class CourseModelForm(forms.ModelForm):
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False).order_by('first_name'), label='Шорфьор', empty_label='Избери')
-    company = forms.ModelChoiceField(
-        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
-    contractor = forms.ModelChoiceField(
-        models.Contractor.objects.all().order_by('name'),
-        label='Контрагент',
-        empty_label='Избери',
-        widget=forms.Select(
-            attrs={
-                'data-load-contractor-reminder-url': reverse_lazy('main:load-contractor-reminder'),
-                'id': 'contractorID'
-            })
-    )
-    bank = forms.ModelChoiceField(
-        models.Bank.objects.all().order_by('name'), label='Банка', empty_label='Избери')
-    medical_examination_perpetrator = forms.CharField(
-        label='Извършител на медицински преглед', max_length=100, required=False, widget=forms.TextInput(
-            attrs={'class': 'form-control', 'placeholder': 'Извършител на медицински преглед', 'list': 'datalistMedicalExaminationPerpetrator'}))
-    technical_inspection_perpetrator = forms.CharField(
-        label='Извършител на технически преглед', max_length=100, required=False, widget=forms.TextInput(
-            attrs={'class': 'form-control', 'placeholder': 'Извършител на технически преглед', 'list': 'datalistTechnicalInspectionPerpetrator'}))
+    medical_examination_perpetrator = forms.ModelChoiceField(
+        models.MedicalExaminationPerpetrator.objects.all(),
+        to_field_name='perpetrator',
+        widget=CustomSelectTagWidget(
+            model=models.MedicalExaminationPerpetrator,
+            field_name='perpetrator',
+            search_fields=['perpetrator__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('perpetrator',))
+        ))
+
+    technical_inspection_perpetrator = forms.ModelChoiceField(
+        models.TechnicalInspectionPerpetrator.objects.all(),
+        to_field_name='perpetrator',
+        widget=CustomSelectTagWidget(
+            model=models.TechnicalInspectionPerpetrator,
+            field_name='perpetrator',
+            search_fields=['perpetrator__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('perpetrator',))
+        ))
 
     class Meta:
         model = models.Course
         exclude = ('number', 'create_date')
         widgets = {
-            'request_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер на заявка'}),
-            'from_to': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Релация', 'list': 'datalistFromTo'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
             'course_price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за курс'}),
             'driver_salary': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за командировка'}),
@@ -139,11 +275,81 @@ class CourseModelForm(forms.ModelForm):
             'export': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'mileage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Километраж'}),
             'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Лице за контакт'}),
-            'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'})
+            'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'}),
+
+            'driver': CustomModelSelectWidget(
+                model=get_user_model(),
+                queryset=get_user_model().objects.filter(
+                    is_active=True, is_staff=False),
+                search_fields=[
+                    'first_name__icontains',
+                    'middle_name__icontains',
+                    'last_name__icontains'
+                ]
+            ),
+
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
+
+            'company': CustomModelSelectWidget(
+                model=models.Company,
+                search_fields=['name__icontains'],
+            ),
+
+            'contractor': CustomModelSelectWidget(
+                model=models.Contractor,
+                search_fields=['name__icontains'],
+                attrs={
+                    'id': 'contractorID',
+                    'data-load-contractor-reminder-url': reverse_lazy('main:load-contractor-reminder')
+                },
+            ),
+
+            'bank': CustomModelSelectWidget(
+                model=models.Bank,
+                search_fields=['name__icontains',
+                               'bank_code__icontains', 'iban__icontains']
+            ),
+
+            'request_number': CustomSelectTagWidget(
+                model=models.RequestNumber,
+                field_name='request_number',
+                search_fields=['request_number__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('request_number',))
+            ),
+
+            'from_to': CustomSelectTagWidget(
+                model=models.FromTo,
+                field_name='from_to',
+                search_fields=['from_to__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('from_to',))
+            ),
+
+            'cargo_type': CustomSelectTagWidget(
+                model=models.CargoType,
+                field_name='cargo_type',
+                search_fields=['cargo_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('cargo_type',))
+            ),
+
+            'course_price_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES),
+            'driver_salary_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES)
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['driver'].queryset = get_user_model().objects.filter(
+            is_active=True, is_staff=False)
+
+        self.fields['request_number'].to_field_name = 'request_number'
+        self.fields['from_to'].to_field_name = 'from_to'
+        self.fields['cargo_type'].to_field_name = 'cargo_type'
 
         if self.instance.pk:
             if self.instance.export:
@@ -152,6 +358,15 @@ class CourseModelForm(forms.ModelForm):
 
                 if hasattr(self.instance, 'technical_inspection'):
                     self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
+
+            if hasattr(self.instance.request_number, 'request_number'):
+                self.initial['request_number'] = self.instance.request_number.request_number
+
+            if hasattr(self.instance.from_to, 'from_to'):
+                self.initial['from_to'] = self.instance.from_to.from_to
+
+            if hasattr(self.instance.cargo_type, 'cargo_type'):
+                self.initial['cargo_type'] = self.instance.cargo_type.cargo_type
 
         if self.data and 'export' in self.data:
             self.fields['medical_examination_perpetrator'].required = True
@@ -163,73 +378,68 @@ class CourseModelForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         if commit:
-            instance.save()
+            technical_inspection_perpetrator = self.cleaned_data['technical_inspection_perpetrator']
+            medical_examination_perpetrator = self.cleaned_data['medical_examination_perpetrator']
 
-            if self.cleaned_data['export']:
+            if not instance.id:
+                instance.save()
 
-                if 'technical_inspection_perpetrator' in self.changed_data:
+                models.CourseTechnicalInspection.objects.create(
+                    course=instance, perpetrator=technical_inspection_perpetrator)
 
-                    technical_inspection_perpetrator = (
-                        self.cleaned_data['technical_inspection_perpetrator']).strip()
-                    try:
-                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.get(
-                            perpetrator=technical_inspection_perpetrator)
-                    except models.TechnicalInspectionPerpetrator.DoesNotExist:
-                        perpetrator_instance = models.TechnicalInspectionPerpetrator.objects.create(
-                            perpetrator=technical_inspection_perpetrator)
-                    finally:
+                models.CourseMedicalExamination.objects.create(
+                    course=instance, perpetrator=medical_examination_perpetrator)
+            else:
+                instance.save()
 
-                        try:
-                            techincal_inspection_instance = models.CourseTechnicalInspection.objects.get(
-                                course=instance)
-                        except models.CourseTechnicalInspection.DoesNotExist:
-                            models.CourseTechnicalInspection.objects.create(
-                                course=instance, perpetrator=perpetrator_instance)
-                        else:
-                            techincal_inspection_instance.perpetrator = perpetrator_instance
-                            techincal_inspection_instance.save()
+                course_technical_inspection = models.CourseTechnicalInspection.objects.get(
+                    course=instance)
+                course_medical_examination = models.CourseMedicalExamination.objects.get(
+                    course=instance)
 
-                if 'medical_examination_perpetrator' in self.changed_data:
+                if self.cleaned_data['export']:
+                    if 'technical_inspection_perpetrator' in self.changed_data:
+                        course_technical_inspection.perpetrator = self.cleaned_data[
+                            'technical_inspection_perpetrator']
+                        course_technical_inspection.save()
 
-                    medical_examination_perpetrator = (
-                        self.cleaned_data['medical_examination_perpetrator']).strip()
-                    try:
-                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.get(
-                            perpetrator=medical_examination_perpetrator)
-                    except models.MedicalExaminationPerpetrator.DoesNotExist:
-                        perpetrator_instance = models.MedicalExaminationPerpetrator.objects.create(
-                            perpetrator=medical_examination_perpetrator)
-                    finally:
-
-                        try:
-                            medical_examination_instance = models.CourseMedicalExamination.objects.get(
-                                course=instance)
-                        except models.CourseMedicalExamination.DoesNotExist:
-                            models.CourseMedicalExamination.objects.create(
-                                course=instance, perpetrator=perpetrator_instance)
-                        else:
-                            medical_examination_instance.perpetrator = perpetrator_instance
-                            medical_examination_instance.save()
+                    if 'medical_examination_perpetrator' in self.changed_data:
+                        course_medical_examination.perpetrator = self.cleaned_data[
+                            'medical_examination_perpetrator']
+                        course_medical_examination.save()
 
             self.save_m2m()
         return instance
 
 
 class CourseAddresModelForm(forms.ModelForm):
-    load_type = forms.ChoiceField(
-        label='Товарен/Разтоварен/Митница', choices=models.LOADING_TYPE_CHOICES, required=False)
-    save = forms.BooleanField(label='Запази', widget=forms.CheckboxInput(
-        attrs={'class': 'form-check-input'}), required=False)
-
     class Meta:
         model = models.CourseAddress
-        fields = ['load_type', 'address_input', 'date', 'save']
+        fields = ['load_type', 'address', 'date']
         widgets = {
-            'address_input': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Адрес', 'list': 'datalistAddresses'}),
+            'load_type': CustomSelectWidget(choices=models.LOADING_TYPE_CHOICES),
+
+            'address': CustomSelectTagWidget(
+                model=models.Address,
+                field_name='address',
+                search_fields=['address__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('address',))
+            ),
+
             'date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['address'].to_field_name = 'address'
+        self.fields['address'].empty_label = 'Избери'
+
+        if self.instance.pk:
+            if hasattr(self.instance.address, 'address'):
+                self.initial['address'] = self.instance.address.address
 
 
 class CustomBaseInlineFormSet(forms.BaseInlineFormSet):
@@ -265,48 +475,60 @@ class AddressModelForm(forms.ModelForm):
 
 
 class ExpenseModelForm(forms.ModelForm):
-    expense_type = forms.ModelChoiceField(
-        models.ExpenseType.objects.all().order_by('expense_type'), label='Вид разход', empty_label='Избери')
-
     class Meta:
         model = models.Expense
-        fields = ['expense_type', 'price', 'currency',
-                  'payment_type', 'additional_information']
+        exclude = ('course',)
         widgets = {
+            'expense_type': CustomSelectTagWidget(
+                model=models.ExpenseType,
+                field_name='expense_type',
+                search_fields=['expense_type__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('expense_type',))
+            ),
             'price': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Цена'}),
+            'currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES),
+            'payment_type': CustomSelectWidget(choices=models.PAYMENT_TYPE_CHOICES),
             'additional_information': forms.Textarea(
                 attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['expense_type'].to_field_name = 'expense_type'
+
+        if self.instance.pk:
+            if hasattr(self.instance.expense_type, 'expense_type'):
+                self.initial['expense_type'] = self.instance.expense_type.expense_type
+
 
 class TripOrderModelForm(forms.ModelForm):
-    driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(
-            is_active=True, is_staff=False).order_by('first_name'),
-        label='Шофьор',
-        empty_label='Избери',
-        widget=forms.Select(
-            attrs={
-                'data-load-courses-url': reverse_lazy('main:load-course-options'),
-                'id': 'driverTripOrderID'
-            })
-    )
-    course = forms.ModelChoiceField(
-        models.Course.objects.none(),
-        label='Курс за износ',
-        empty_label='Избери',
-        widget=forms.Select(
-            attrs={
-                'data-load-dates-url': reverse_lazy('main:load-dates'),
-                'id': 'courseTripOrderID'
-            })
-    )
-
     class Meta:
         model = models.TripOrder
-        fields = ['driver', 'course', 'destination', 'from_date', 'to_date']
+        exclude = ('number', 'creator')
         widgets = {
+            'driver': CustomModelSelectWidget(
+                model=get_user_model(),
+                queryset=get_user_model().objects.filter(
+                    is_active=True, is_staff=False),
+                search_fields=[
+                    'first_name__icontains',
+                    'middle_name__icontains',
+                    'last_name__icontains'
+                ]
+            ),
+            'course': CustomModelSelectWidget(
+                model=models.Course,
+                search_fields=['number__icontains',
+                               'driver__first_name__icontains',
+                               'driver__middle_name__icontains',
+                               'driver__last_name__icontains',
+                               'from_to__from_to__icontains'
+                               ],
+                dependent_fields={'driver': 'driver'}
+            ),
             'destination': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Дестинация'}),
             'from_date': forms.DateInput(
@@ -318,26 +540,19 @@ class TripOrderModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if 'driver' in self.data:
-            try:
-                driver_id = int(self.data.get('driver'))
-                self.fields['course'].queryset = models.Course.objects.filter(
-                    driver__id=driver_id, export=True)
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk:
-            self.fields['course'].queryset = models.Course.objects.filter(
-                driver=self.instance.driver, export=True)
+        self.fields['driver'].queryset = get_user_model().objects.filter(
+            is_active=True, is_staff=False)
 
 
 class ExpenseOrderModelForm(forms.ModelForm):
-    trip_order = forms.ModelChoiceField(
-        models.TripOrder.objects.all().order_by('-number'), label='Командировъчна заповед', empty_label='Избери')
-
     class Meta:
         model = models.ExpenseOrder
         exclude = ('number', 'creator')
         widgets = {
+            'trip_order': CustomModelSelectWidget(
+                model=models.TripOrder,
+                search_fields=['number']
+            ),
             'BGN_amount': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Сума в лева'}),
             'EUR_amount': forms.TextInput(
@@ -346,18 +561,41 @@ class ExpenseOrderModelForm(forms.ModelForm):
 
 
 class CourseInvoiceModelForm(forms.ModelForm):
-    course = forms.ModelChoiceField(
-        models.Course.objects.all().order_by('-number'), label='Курс', empty_label='Избери')
-    tax_transaction_basis = forms.ModelChoiceField(
-        models.TaxTransactionBasis.objects.all(), label='Основание на сделката', empty_label='Избери')
-
     class Meta:
         model = models.CourseInvoice
         exclude = ('number', 'creator')
         widgets = {
+            'course': CustomModelSelectWidget(
+                model=models.Course,
+                search_fields=['number__icontains',
+                               'driver__first_name__icontains',
+                               'driver__middle_name__icontains',
+                               'driver__last_name__icontains',
+                               'from_to__from_to__icontains'
+                               ]
+            ),
+            'payment_type': CustomSelectWidget(choices=models.PAYMENT_TYPE_CHOICES),
+            'invoice_type': CustomSelectWidget(choices=models.INVOICE_TYPE_CHOICES),
+            'tax_type': CustomSelectWidget(choices=models.TAX_TYPE_CHOICES),
+            'tax_transaction_basis': CustomSelectTagWidget(
+                model=models.TaxTransactionBasis,
+                field_name='name',
+                search_fields=['name__icontains'],
+                data_url=reverse_lazy('main:tag-auto-select-options',
+                                      args=('name',))
+            ),
             'additional_information': forms.Textarea(
                 attrs={'class': 'form-control', 'placeholder': 'Допълнителна информация'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['tax_transaction_basis'].to_field_name = 'name'
+
+        if self.instance.pk:
+            if hasattr(self.instance.tax_transaction_basis, 'name'):
+                self.initial['tax_transaction_basis'] = self.instance.tax_transaction_basis.name
 
 
 class CompanyModelForm(forms.ModelForm):
@@ -417,38 +655,80 @@ class BankModelForm(forms.ModelForm):
 
 
 class InstructionModelForm(forms.ModelForm):
-    driver = forms.ModelChoiceField(
-        get_user_model().objects.filter(is_active=True, is_staff=False).order_by('first_name'), label='Шорфьор', empty_label='Избери')
-    car = forms.ModelChoiceField(
-        models.Car.objects.all().order_by('brand'), label='Автомобил', empty_label='Избери')
-    company = forms.ModelChoiceField(
-        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
-
     class Meta:
         model = models.Instruction
         exclude = ('number', 'creator')
         widgets = {
+            'company': CustomModelSelectWidget(
+                model=models.Company,
+                search_fields=['name']
+            ),
+            'driver': CustomModelSelectWidget(
+                model=get_user_model(),
+                queryset=get_user_model().objects.filter(
+                    is_active=True, is_staff=False),
+                search_fields=[
+                    'first_name__icontains',
+                    'middle_name__icontains',
+                    'last_name__icontains'
+                ]
+            ),
+            'car': CustomModelSelectWidget(
+                model=models.Car,
+                search_fields=['brand__icontains', 'number_plate__icontains']
+            ),
             'city': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Град'})
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['driver'].queryset = get_user_model().objects.filter(
+            is_active=True, is_staff=False)
+
 
 class CourseDateJournalForm(forms.Form):
     company = forms.ModelChoiceField(
-        models.Company.objects.all().order_by('name'), label='Фирма', empty_label='Избери')
+        models.Company.objects.all(),
+        label='Фирма',
+        empty_label='Избери',
+        widget=CustomModelSelectWidget(
+            model=models.Company,
+            search_fields=['name']
+        )
+    )
     from_date = forms.DateField(label='От дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'От дата'}))
     to_date = forms.DateField(label='До дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'До дата'}))
     journal_type = forms.ChoiceField(
-        label='Вид дневник', choices=models.COURSE_DOCUMENT_TYPE_CHOICES)
+        label='Вид дневник',
+        choices=models.COURSE_DOCUMENT_TYPE_CHOICES,
+        widget=CustomSelectWidget(choices=models.COURSE_DOCUMENT_TYPE_CHOICES)
+    )
 
 
 class CourseDocumentsForm(forms.Form):
     course = forms.ModelChoiceField(
-        models.Course.objects.all().order_by('-number'), label='Курс', empty_label='Избери')
+        models.Course.objects.all(),
+        label='Курс',
+        empty_label='Избери',
+        widget=CustomModelSelectWidget(
+            model=models.Course,
+            search_fields=['number__icontains',
+                           'driver__first_name__icontains',
+                           'driver__middle_name__icontains',
+                           'driver__last_name__icontains',
+                           'from_to__from_to__icontains'
+                           ]
+        ),
+    )
     document_type = forms.ChoiceField(
-        label='Тип документ', choices=COURSE_DOCUMENTS_OPTIONS)
+        label='Тип документ',
+        choices=COURSE_DOCUMENTS_OPTIONS,
+        widget=CustomSelectWidget(choices=COURSE_DOCUMENTS_OPTIONS)
+    )
 
     def clean(self):
         form_data = self.cleaned_data
