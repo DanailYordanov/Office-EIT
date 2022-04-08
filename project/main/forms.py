@@ -690,20 +690,45 @@ class InstructionModelForm(forms.ModelForm):
 
 class CourseDateJournalForm(forms.Form):
     company = forms.ModelChoiceField(
-        models.Company.objects.all(), label='Фирма', empty_label='Избери')
+        models.Company.objects.all(),
+        label='Фирма',
+        empty_label='Избери',
+        widget=CustomModelSelectWidget(
+            model=models.Company,
+            search_fields=['name']
+        )
+    )
     from_date = forms.DateField(label='От дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'От дата'}))
     to_date = forms.DateField(label='До дата', input_formats=DATE_FORMATS, widget=forms.DateInput(
         attrs={'class': 'form-control date-picker', 'placeholder': 'До дата'}))
     journal_type = forms.ChoiceField(
-        label='Вид дневник', choices=models.COURSE_DOCUMENT_TYPE_CHOICES)
+        label='Вид дневник',
+        choices=models.COURSE_DOCUMENT_TYPE_CHOICES,
+        widget=CustomSelectWidget(choices=models.COURSE_DOCUMENT_TYPE_CHOICES)
+    )
 
 
 class CourseDocumentsForm(forms.Form):
     course = forms.ModelChoiceField(
-        models.Course.objects.all(), label='Курс', empty_label='Избери')
+        models.Course.objects.all(),
+        label='Курс',
+        empty_label='Избери',
+        widget=CustomModelSelectWidget(
+            model=models.Course,
+            search_fields=['number__icontains',
+                           'driver__first_name__icontains',
+                           'driver__middle_name__icontains',
+                           'driver__last_name__icontains',
+                           'from_to__from_to__icontains'
+                           ]
+        ),
+    )
     document_type = forms.ChoiceField(
-        label='Тип документ', choices=COURSE_DOCUMENTS_OPTIONS)
+        label='Тип документ',
+        choices=COURSE_DOCUMENTS_OPTIONS,
+        widget=CustomSelectWidget(choices=COURSE_DOCUMENTS_OPTIONS)
+    )
 
     def clean(self):
         form_data = self.cleaned_data
