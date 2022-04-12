@@ -92,7 +92,7 @@ class Car(models.Model):
         verbose_name_plural = 'Автомобили'
 
     def __str__(self):
-        return f'{self.brand} - {self.number_plate}'
+        return self.number_plate
 
 
 class ReminderType(models.Model):
@@ -171,7 +171,7 @@ class Contractor(models.Model):
         'Телефонен номер', max_length=100, null=True, blank=True)
     email = models.CharField('E-mail', max_length=100, null=True, blank=True)
     maturity_date = models.CharField(
-        'Дата на падеж', max_length=50, null=True, blank=True)
+        'Падеж', max_length=50, null=True, blank=True)
     cmr_photo = models.FileField(
         'Прикачи ЧМР Застраховка', upload_to='cmr_photos', null=True, blank=True)
     cmr_expiration_date = models.DateField(

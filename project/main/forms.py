@@ -243,7 +243,7 @@ class ContractorsModelForm(forms.ModelForm):
             'email': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
             'maturity_date': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Дата на падеж'}),
+                attrs={'class': 'form-control', 'placeholder': 'Падеж'}),
             'cmr_photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'cmr_expiration_date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата на изтичане'}),
