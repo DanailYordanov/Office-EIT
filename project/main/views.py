@@ -1108,10 +1108,11 @@ def course_invoice_xlsx(request, pk):
         ws['G9'] = contractor.name
         ws['G11'] = contractor.bulstat
 
-        if contractor.client_type == 'Български':
-            ws['G12'] = contractor.bulstat[2:]
-        else:
-            ws['G12'] = contractor.bulstat
+        if contractor.bulstat:
+            if contractor.client_type == 'Български':
+                ws['G12'] = contractor.bulstat[2:]
+            else:
+                ws['G12'] = contractor.bulstat
 
         ws['G13'] = contractor.city
         ws['G14'] = contractor.address
@@ -1119,8 +1120,11 @@ def course_invoice_xlsx(request, pk):
         ws['G17'] = contractor.phone_number
 
         ws['R9'] = company.name
-        ws['R11'] = company.bulstat
-        ws['R12'] = company.bulstat[2:]
+
+        if company.bulstat:
+            ws['R11'] = company.bulstat
+            ws['R12'] = company.bulstat[2:]
+
         ws['R13'] = company.city
         ws['R14'] = company.address
         ws['R16'] = company.mol
@@ -1139,15 +1143,13 @@ def course_invoice_xlsx(request, pk):
         else:
             ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева'
 
-        from_destination = course.from_to.split(' ')[0]
-        to_destination = course.from_to.split(' ')[2]
-        from_to = f'Транспорт от {from_destination} до {to_destination} с камион'
+        from_to = f'Транспорт от {course.from_to.__str__()} с камион'
 
         ws['H27'] = course_invoice.additional_information
 
         ws['C21'] = from_to
         ws['I22'] = course.car.number_plate
-        ws['H23'] = course.request_number
+        ws['H23'] = course.request_number.__str__()
 
         ws['J28'] = course_invoice.creation_date
         ws['J29'] = course_invoice.tax_transaction_basis.__str__()
@@ -1190,8 +1192,12 @@ def course_invoice_xlsx(request, pk):
             ws['B2'] = translator.translate(company.name)
             ws['Q2'] = str(course_invoice.number).zfill(10)
             ws['C3'] = company.bulstat
-            ws['B4'] = translator.translate(company.address)
-            ws['B5'] = translator.translate(company.city)
+
+            if company.address:
+                ws['B4'] = translator.translate(company.address)
+
+            if company.city:    
+                ws['B5'] = translator.translate(company.city)
 
             ws['C17'] = contractor.name
             ws['C18'] = contractor.address
@@ -1201,7 +1207,7 @@ def course_invoice_xlsx(request, pk):
                 course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
             ws['O18'] = course.car.number_plate
 
-            ws['D41'] = translator.translate(course.from_to)
+            ws['D41'] = translator.translate(course.from_to.__str__())
             ws['E42'] = course.car.number_plate
             ws['N40'] = price
 
