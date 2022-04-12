@@ -252,7 +252,7 @@ class TaxTransactionBasis(models.Model):
         return self.name
 
 
-from_to_regex = '^[a-zA-Z]+ {1}-{1} {1}[a-zA-Z]+$'
+from_to_regex = '^[A-zА-я]+ {1}-{1} {1}[A-zА-я]+$'
 from_to_error_message = """
     Невалиден формат! Използвайте следния формат: "{Дестинация} - {Дестинация}",
     с празни места единствено преди и след дестинациите.
