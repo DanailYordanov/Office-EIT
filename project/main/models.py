@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.shortcuts import reverse
+from django.core.validators import RegexValidator
 
 
 CLIENT_TYPE_CHOICES = [
@@ -251,8 +252,20 @@ class TaxTransactionBasis(models.Model):
         return self.name
 
 
+from_to_regex = '^[a-zA-Z]+ {1}-{1} {1}[a-zA-Z]+$'
+from_to_error_message = """
+    Невалиден формат! Използвайте следния формат: "{Дестинация} - {Дестинация}",
+    с празни места единствено преди и след дестинациите.
+    """
+from_to_validator = RegexValidator(
+    regex=from_to_regex,
+    message=from_to_error_message
+)
+
+
 class FromTo(models.Model):
-    from_to = models.CharField('Релация', max_length=100)
+    from_to = models.CharField(
+        'Релация', max_length=100, validators=[from_to_validator])
 
     class Meta:
         ordering = ['from_to']

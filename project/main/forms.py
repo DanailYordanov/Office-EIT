@@ -1,3 +1,4 @@
+import re
 from django import forms
 from django.db.models import Q
 from django.urls import reverse_lazy
@@ -33,9 +34,12 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
 
     def value_from_datadict(self, data, files, name):
         value = super().value_from_datadict(data, files, name)
-
         if value:
             value = value[0]
+
+            if name == 'from_to' and not re.search(models.from_to_regex, value):
+                return value
+
             queryset = self.get_queryset()
 
             try:
@@ -43,8 +47,7 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
             except (ValueError, TypeError, queryset.model.DoesNotExist):
                 obj = queryset.create(**{self.field_name: value})
 
-            return getattr(obj, self.field_name)
-
+            return obj
         return None
 
     def optgroups(self, name, value, attrs=None):
@@ -88,6 +91,15 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
             )
 
         return groups
+
+
+class TagModelChoiceField(forms.ModelChoiceField):
+    def to_python(self, value):
+        """
+        This method needs to be overridden due to the fact that the value
+        which is returned from 'value_from_datadict' function always exists. 
+        """
+        return value
 
 
 class CustomModelSelectWidget(s2forms.ModelSelect2Widget):
@@ -242,8 +254,9 @@ class ContractorsModelForm(forms.ModelForm):
 
 
 class CourseModelForm(forms.ModelForm):
-    medical_examination_perpetrator = forms.ModelChoiceField(
+    medical_examination_perpetrator = TagModelChoiceField(
         models.MedicalExaminationPerpetrator.objects.all(),
+        label='Извършител на медицински преглед',
         to_field_name='perpetrator',
         widget=CustomSelectTagWidget(
             model=models.MedicalExaminationPerpetrator,
@@ -253,8 +266,9 @@ class CourseModelForm(forms.ModelForm):
                                   args=('perpetrator',))
         ))
 
-    technical_inspection_perpetrator = forms.ModelChoiceField(
+    technical_inspection_perpetrator = TagModelChoiceField(
         models.TechnicalInspectionPerpetrator.objects.all(),
+        label='Извършител на технически преглед',
         to_field_name='perpetrator',
         widget=CustomSelectTagWidget(
             model=models.TechnicalInspectionPerpetrator,
@@ -262,6 +276,44 @@ class CourseModelForm(forms.ModelForm):
             search_fields=['perpetrator__icontains'],
             data_url=reverse_lazy('main:tag-auto-select-options',
                                   args=('perpetrator',))
+        ))
+
+    request_number = TagModelChoiceField(
+        models.RequestNumber.objects.all(),
+        label='Номер на заявка',
+        to_field_name='request_number',
+        widget=CustomSelectTagWidget(
+            model=models.RequestNumber,
+            field_name='request_number',
+            search_fields=['request_number__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('request_number',))
+        )
+    )
+
+    from_to = TagModelChoiceField(
+        models.FromTo.objects.all(),
+        label='Релация',
+        to_field_name='from_to',
+        validators=[models.from_to_validator],
+        widget=CustomSelectTagWidget(
+            model=models.FromTo,
+            field_name='from_to',
+            search_fields=['from_to__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('from_to',))
+        ))
+
+    cargo_type = TagModelChoiceField(
+        models.CargoType.objects.all(),
+        label='Вид и тегло на товара',
+        to_field_name='cargo_type',
+        widget=CustomSelectTagWidget(
+            model=models.CargoType,
+            field_name='cargo_type',
+            search_fields=['cargo_type__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('cargo_type',))
         ))
 
     class Meta:
@@ -313,30 +365,6 @@ class CourseModelForm(forms.ModelForm):
                                'bank_code__icontains', 'iban__icontains']
             ),
 
-            'request_number': CustomSelectTagWidget(
-                model=models.RequestNumber,
-                field_name='request_number',
-                search_fields=['request_number__icontains'],
-                data_url=reverse_lazy('main:tag-auto-select-options',
-                                      args=('request_number',))
-            ),
-
-            'from_to': CustomSelectTagWidget(
-                model=models.FromTo,
-                field_name='from_to',
-                search_fields=['from_to__icontains'],
-                data_url=reverse_lazy('main:tag-auto-select-options',
-                                      args=('from_to',))
-            ),
-
-            'cargo_type': CustomSelectTagWidget(
-                model=models.CargoType,
-                field_name='cargo_type',
-                search_fields=['cargo_type__icontains'],
-                data_url=reverse_lazy('main:tag-auto-select-options',
-                                      args=('cargo_type',))
-            ),
-
             'course_price_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES),
             'driver_salary_currency': CustomSelectWidget(choices=models.CURRENCY_CHOICES)
         }
@@ -346,10 +374,6 @@ class CourseModelForm(forms.ModelForm):
 
         self.fields['driver'].queryset = get_user_model().objects.filter(
             is_active=True, is_staff=False)
-
-        self.fields['request_number'].to_field_name = 'request_number'
-        self.fields['from_to'].to_field_name = 'from_to'
-        self.fields['cargo_type'].to_field_name = 'cargo_type'
 
         if self.instance.pk:
             if self.instance.export:
