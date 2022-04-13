@@ -61,11 +61,7 @@ function addAddressField(e) {
     });
 
     copiedForm.find('select').djangoSelect2();
-
-    copiedForm.find('.select-tag').djangoSelect2({
-        'maximumSelectionLength': 1,
-        'placeholder': 'Избери'
-    });
+    copiedForm.find('.select-tag').djangoSelect2();
 
     $('#emptyFormsetForm').find('select').djangoSelect2();
 }

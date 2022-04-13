@@ -27,8 +27,10 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
         base_attrs.update({
             'data-theme': 'bootstrap-5',
             'data-token-separators': [],
+            'data-placeholder': 'Въведи',
             'data-minimum-input-length': 0,
-            'class': 'select-tag form-control'
+            'class': 'select-tag form-control',
+            'data-maximum-selection-length': 1
         })
         return super().build_attrs(base_attrs, extra_attrs)
 
@@ -107,6 +109,7 @@ class CustomModelSelectWidget(s2forms.ModelSelect2Widget):
         base_attrs.update({
             'class': 'form-control',
             'data-theme': 'bootstrap-5',
+            'data-placeholder': 'Избери',
             'data-minimum-input-length': 0
         })
         return super().build_attrs(base_attrs, extra_attrs)
@@ -116,7 +119,8 @@ class CustomSelectWidget(s2forms.Select2Widget):
     def build_attrs(self, base_attrs, extra_attrs=None):
         base_attrs.update({
             'class': 'form-control',
-            'data-theme': 'bootstrap-5'
+            'data-theme': 'bootstrap-5',
+            'data-placeholder': 'Избери'
         })
         return super().build_attrs(base_attrs, extra_attrs)
 
@@ -280,6 +284,7 @@ class CourseModelForm(forms.ModelForm):
 
     request_number = TagModelChoiceField(
         models.RequestNumber.objects.all(),
+        required=False,
         label='Номер на заявка',
         to_field_name='request_number',
         widget=CustomSelectTagWidget(
@@ -316,17 +321,41 @@ class CourseModelForm(forms.ModelForm):
                                   args=('cargo_type',))
         ))
 
+    contact_person = TagModelChoiceField(
+        models.ContactPerson.objects.all(),
+        required=False,
+        label='Лице за контакт',
+        to_field_name='contact_person',
+        widget=CustomSelectTagWidget(
+            model=models.ContactPerson,
+            field_name='contact_person',
+            search_fields=['contact_person__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('contact_person',))
+        ))
+
+    description = TagModelChoiceField(
+        models.Description.objects.all(),
+        required=False,
+        label='Описание',
+        to_field_name='description',
+        widget=CustomSelectTagWidget(
+            model=models.Description,
+            field_name='description',
+            search_fields=['description__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('description',))
+        ))
+
     class Meta:
         model = models.Course
         exclude = ('number', 'create_date')
         widgets = {
-            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Описание'}),
             'course_price': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за курс'}),
             'driver_salary': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Цена за командировка'}),
             'cargo_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Вид и тегло на товара'}),
             'export': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'mileage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Километраж'}),
-            'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Лице за контакт'}),
             'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'}),
 
             'driver': CustomModelSelectWidget(
@@ -392,6 +421,12 @@ class CourseModelForm(forms.ModelForm):
             if hasattr(self.instance.cargo_type, 'cargo_type'):
                 self.initial['cargo_type'] = self.instance.cargo_type.cargo_type
 
+            if hasattr(self.instance.contact_person, 'contact_person'):
+                self.initial['contact_person'] = self.instance.contact_person.contact_person
+
+            if hasattr(self.instance.description, 'description'):
+                self.initial['description'] = self.instance.description.description
+
         if self.data and 'export' in self.data:
             self.fields['medical_examination_perpetrator'].required = True
             self.fields['technical_inspection_perpetrator'].required = True
@@ -437,29 +472,29 @@ class CourseModelForm(forms.ModelForm):
 
 
 class CourseAddresModelForm(forms.ModelForm):
+    address = TagModelChoiceField(
+        models.Address.objects.all(),
+        label='Адрес',
+        to_field_name='address',
+        widget=CustomSelectTagWidget(
+            model=models.Address,
+            field_name='address',
+            search_fields=['address__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('address',))
+        ))
+
     class Meta:
         model = models.CourseAddress
         fields = ['load_type', 'address', 'date']
         widgets = {
             'load_type': CustomSelectWidget(choices=models.LOADING_TYPE_CHOICES),
-
-            'address': CustomSelectTagWidget(
-                model=models.Address,
-                field_name='address',
-                search_fields=['address__icontains'],
-                data_url=reverse_lazy('main:tag-auto-select-options',
-                                      args=('address',))
-            ),
-
             'date': forms.DateInput(
                 attrs={'class': 'form-control date-picker', 'placeholder': 'Дата'})
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.fields['address'].to_field_name = 'address'
-        self.fields['address'].empty_label = 'Избери'
 
         if self.instance.pk:
             if hasattr(self.instance.address, 'address'):
