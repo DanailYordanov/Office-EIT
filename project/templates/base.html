@@ -18,16 +18,26 @@
     {% if request.user.is_authenticated %}
     <div class="offcanvas offcanvas-end" id="notificationsOffCanvas">
         <div class="offcanvas-header bg-light border-bottom">
-            <p class="offcanvas-title fw-light fs-4">Известия ({{ notifications.count }})</p>
+            <p class="offcanvas-title fw-light fs-4">Известия ({{ notifications_count }})</p>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
-            {% for notification in notifications %}
+            {% for notification in reminders_notifications %}
             <div class="notification border-bottom">
                 <p>
                     <span class="fw-bold">{{ notification.reminder_type }}:</span>
                     изтича на {{ notification.expiration_date }}
                     за автомобил {{ notification.car }}
+                </p>
+            </div>
+            {% endfor %}
+
+            {% for notification in drivers_notifications %}
+            <div class="notification border-bottom">
+                <p>
+                    <span class="fw-bold">{{ notification.expiration_field }}:</span>
+                    изтича на {{ notification.expiration_date }}
+                    за шофьор {{ notification.driver }}
                 </p>
             </div>
             {% endfor %}

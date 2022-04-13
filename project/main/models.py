@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.cache import cache
 from django.shortcuts import reverse
 from django.core.validators import RegexValidator
 
@@ -110,6 +111,10 @@ class Reminder(models.Model):
     class Meta:
         verbose_name = 'Напомняне'
         verbose_name_plural = 'Напомняния'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete('reminders_notifications')
 
     def __str__(self):
         return f'{self.car.number_plate} - {self.reminder_type.reminder_type}'

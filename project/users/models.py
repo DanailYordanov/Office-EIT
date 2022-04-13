@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.cache import cache
 from django.contrib.auth.models import AbstractUser
 from main.models import Bank
 
@@ -37,6 +38,10 @@ class CustomUser(AbstractUser):
             return f'{self.first_name} {self.middle_name} {self.last_name}'
         else:
             return f'{self.first_name} {self.last_name}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete('drivers_notifications')
 
     def get_full_name(self):
         if self.middle_name:

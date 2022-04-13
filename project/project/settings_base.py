@@ -113,10 +113,6 @@ LOGIN_REDIRECT_URL = 'main:courses-list'
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': '127.0.0.1:11211',
-    },
-    'select2': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': 'redis://127.0.0.1:6379/2',
         'OPTIONS': {
@@ -125,4 +121,4 @@ CACHES = {
     }
 }
 
-SELECT2_CACHE_BACKEND = 'select2'
+SELECT2_CACHE_BACKEND = 'default'
