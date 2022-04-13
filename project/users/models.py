@@ -43,6 +43,10 @@ class CustomUser(AbstractUser):
         super().save(*args, **kwargs)
         cache.delete('drivers_notifications')
 
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        cache.delete('drivers_notifications')
+
     def get_full_name(self):
         if self.middle_name:
             full_name = '%s %s %s' % (

@@ -41,7 +41,8 @@ def notifications_processor(request):
 
     context = {
         'drivers_notifications': drivers_notifications,
-        'reminders_notifications': reminders_notifications
+        'reminders_notifications': reminders_notifications,
+        'notifications_count': len(drivers_notifications) + len(reminders_notifications)
     }
 
     return context

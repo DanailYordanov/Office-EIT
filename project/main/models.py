@@ -116,6 +116,10 @@ class Reminder(models.Model):
         super().save(*args, **kwargs)
         cache.delete('reminders_notifications')
 
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        cache.delete('reminders_notifications')
+
     def __str__(self):
         return f'{self.car.number_plate} - {self.reminder_type.reminder_type}'
 
