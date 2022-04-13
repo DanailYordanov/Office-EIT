@@ -300,6 +300,29 @@ class CargoType(models.Model):
         return self.cargo_type
 
 
+class ContactPerson(models.Model):
+    contact_person = models.CharField('Лице за контакт', max_length=100)
+
+    class Meta:
+        ordering = ['contact_person']
+        verbose_name = 'Лице за контакт'
+        verbose_name_plural = 'Лица за контакти'
+
+    def __str__(self):
+        return self.contact_person
+
+
+class Description(models.Model):
+    description = models.CharField('Описание', max_length=1000)
+
+    class Meta:
+        verbose_name = 'Описание'
+        verbose_name_plural = 'Описания'
+
+    def __str__(self):
+        return self.description
+
+
 class Course(models.Model):
     number = models.IntegerField('№')
     driver = models.ForeignKey(
