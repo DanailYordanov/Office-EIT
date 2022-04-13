@@ -1196,7 +1196,7 @@ def course_invoice_xlsx(request, pk):
             if company.address:
                 ws['B4'] = translator.translate(company.address)
 
-            if company.city:    
+            if company.city:
                 ws['B5'] = translator.translate(company.city)
 
             ws['C17'] = contractor.name
@@ -1796,7 +1796,39 @@ def course_date_journals_xlsx(request):
 
                     response = HttpResponse(
                         content_type='application/vnd.ms-excel')
-                    response['Content-Disposition'] = f'attachment; filename="Medical Journal.xlsx"'
+                    response['Content-Disposition'] = f'attachment; filename="Medical Examinations Journal.xlsx"'
+
+                    wb.save(response)
+
+                    os.remove(unique_xlsx_path)
+
+                elif journal_type == 'instruction':
+                    instructions = models.Instruction.objects.filter(
+                        creation_date__range=[from_date, to_date]
+                    )
+
+                    unique_token = secrets.token_hex(32)
+
+                    xlsx_path = os.path.join(
+                        settings.BASE_DIR, 'main/xlsx_files/instruction_journal.xlsx')
+
+                    unique_xlsx_path = os.path.join(
+                        settings.BASE_DIR, f'main/xlsx_files/instruction_journal_{unique_token}.xlsx')
+
+                    shutil.copy(xlsx_path, unique_xlsx_path)
+
+                    wb = load_workbook(filename=unique_xlsx_path)
+                    ws = wb.active
+
+                    for i in range(0, len(instructions)):
+                        ws[f'A{i + 2}'] = instructions[i].number
+                        ws[f'B{i + 2}'] = instructions[i].driver.__str__()
+                        ws[f'G{i + 2}'] = dateformat.format(
+                            instructions[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+                    response = HttpResponse(
+                        content_type='application/vnd.ms-excel')
+                    response['Content-Disposition'] = f'attachment; filename="Instructions Journal.xlsx"'
 
                     wb.save(response)
 

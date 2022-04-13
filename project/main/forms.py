@@ -17,6 +17,13 @@ COURSE_DOCUMENTS_OPTIONS = [
     ('Служебни бележки', 'Служебни бележки')
 ]
 
+COURSE_DOCUMENT_TYPE_CHOICES = [
+    ('', 'Избери'),
+    ('instruction', 'Инструкции'),
+    ('medical_examination', 'Медицински прегледи'),
+    ('technical_inspection', 'Технически прегледи')
+]
+
 
 class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
     def __init__(self, *args, **kwargs):
@@ -763,8 +770,8 @@ class CourseDateJournalForm(forms.Form):
         attrs={'class': 'form-control date-picker', 'placeholder': 'До дата'}))
     journal_type = forms.ChoiceField(
         label='Вид дневник',
-        choices=models.COURSE_DOCUMENT_TYPE_CHOICES,
-        widget=CustomSelectWidget(choices=models.COURSE_DOCUMENT_TYPE_CHOICES)
+        choices=COURSE_DOCUMENT_TYPE_CHOICES,
+        widget=CustomSelectWidget(choices=COURSE_DOCUMENT_TYPE_CHOICES)
     )
 
 

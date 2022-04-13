@@ -59,13 +59,6 @@ TAX_TYPE_CHOICES = [
 ]
 
 
-COURSE_DOCUMENT_TYPE_CHOICES = [
-    ('', 'Избери'),
-    ('medical_examination', 'Медицински прегледи'),
-    ('technical_inspection', 'Технически прегледи')
-]
-
-
 class CarType(models.Model):
     car_type = models.CharField('Вид автомобил', max_length=50)
 
