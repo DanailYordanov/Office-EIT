@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.core.cache import cache
 from django.contrib.auth.models import AbstractUser
 from main.models import Bank
@@ -22,7 +23,7 @@ class CustomUser(AbstractUser):
     pasport_expiration = models.DateField(
         'Изтичане на паспорт', null=True, blank=True)
     bank = models.ForeignKey(Bank, verbose_name='Банка',
-                             null=True, on_delete=models.SET_NULL)
+                             null=True, blank=True, on_delete=models.SET_NULL)
     debit_card_number = models.IntegerField(
         'Номер на дебитна карта', null=True, blank=True)
     phone_number = models.CharField(
@@ -46,6 +47,11 @@ class CustomUser(AbstractUser):
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
         cache.delete('drivers_notifications')
+
+    def get_absolute_url(self):
+        return reverse('profile-details', kwargs={
+            'pk': self.id
+        })
 
     def get_full_name(self):
         if self.middle_name:

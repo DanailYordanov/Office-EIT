@@ -37,7 +37,10 @@
                 <p>
                     <span class="fw-bold">{{ notification.expiration_field }}:</span>
                     изтича на {{ notification.expiration_date }}
-                    за шофьор {{ notification.driver }}
+                    за шофьор
+                    <a href="{{ notification.driver.get_absolute_url }}" class="text-decoration-none">
+                        {{ notification.driver }}
+                    </a>
                 </p>
             </div>
             {% endfor %}
