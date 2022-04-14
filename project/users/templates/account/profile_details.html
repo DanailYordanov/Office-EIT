@@ -1,4 +1,9 @@
 {% extends 'main/add_update_form.html' %}
+
 {% block content_in_before %}
 <p class="text-center fw-light fs-4">{{ message }}</p>
 {% endblock content_in_before %}
+
+{% block content_in_after %}
+{% include 'main/add_update_formset.html' with formset_form_name='файл' %}
+{% endblock content_in_after %}

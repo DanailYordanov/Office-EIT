@@ -1,10 +1,11 @@
 from django import forms
+from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from allauth.account.forms import LoginForm, SignupForm, ResetPasswordKeyForm, ResetPasswordForm, ChangePasswordForm, AddEmailForm, SetPasswordForm
-from .models import CustomUser
+from allauth.account.forms import LoginForm, SignupForm, ResetPasswordKeyForm, ResetPasswordForm, ChangePasswordForm, AddEmailForm
+from .models import CustomUser, UserDocument, DocumentType
 from main.models import Bank
-from main.forms import CustomModelSelectWidget
+from main.forms import CustomModelSelectWidget, CustomBaseInlineFormSet, TagModelChoiceField, CustomSelectTagWidget
 
 
 DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
@@ -150,3 +151,36 @@ class ProfileDetailsForm(forms.ModelForm):
         if not user.is_staff:
             del self.fields['bank']
             del self.fields['debit_card_number']
+
+
+class UserDocumentModelForm(forms.ModelForm):
+    document_type = TagModelChoiceField(
+        DocumentType.objects.all(),
+        label='Тип документ',
+        to_field_name='document_type',
+        widget=CustomSelectTagWidget(
+            model=DocumentType,
+            field_name='document_type',
+            search_fields=['document_type__icontains'],
+            data_url=reverse_lazy('main:tag-auto-select-options',
+                                  args=('document_type',))
+        )
+    )
+
+    class Meta:
+        model = UserDocument
+        exclude = ('user', )
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={'class': 'form-control'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            if hasattr(self.instance.document_type, 'document_type'):
+                self.initial['document_type'] = self.instance.document_type.document_type
+
+
+UserDocumentFormset = forms.inlineformset_factory(
+    get_user_model(), UserDocument, formset=CustomBaseInlineFormSet, form=UserDocumentModelForm, extra=0)

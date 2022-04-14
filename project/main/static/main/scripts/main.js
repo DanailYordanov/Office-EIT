@@ -25,7 +25,7 @@ $(document).ready(function () {
         hidePerpetratorFields();
     }
 
-    $('#addCourseBtn').click(addAddressField);
+    $('#addFormsetForm').click(addFormsetForm);
 
     $('#courseTripOrderID').change(datesLoad);
 
@@ -41,25 +41,25 @@ $(document).ready(function () {
 });
 
 
-function addAddressField(e) {
+function addFormsetForm(e) {
     e.preventDefault();
 
     $('#emptyFormsetForm').find('select').select2('destroy');
 
-    var formsNum = $('.address-form').length - 1;
+    var formsNum = $('.formset-form').length - 1;
     var copiedForm = $('#emptyFormsetForm').clone();
-    var totalForms = $('#id_addresses-TOTAL_FORMS');
+    var totalForms = $('input[name$="TOTAL_FORMS"]');
 
     totalForms.val(formsNum + 1);
     copiedForm.removeAttr('id');
     copiedForm.removeClass('d-none');
     copiedForm.html(copiedForm.html().replace(/__prefix__/g, formsNum));
 
-    $('#addCourseBtn').before(copiedForm);
-    $(".date-picker").datepicker({
+    $('#addFormsetForm').before(copiedForm);
+
+    copiedForm.find(".date-picker").datepicker({
         format: 'dd/mm/yyyy'
     });
-
     copiedForm.find('select').djangoSelect2();
     copiedForm.find('.select-tag').djangoSelect2();
 
