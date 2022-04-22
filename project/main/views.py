@@ -1060,21 +1060,13 @@ def course_invoice_xlsx(request, pk):
 
         unique_token = secrets.token_hex(32)
 
-        unique_dir_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/{unique_token}')
-
-        os.mkdir(unique_dir_path)
-
-        original_xlsx_path = os.path.join(
+        xlsx_path = os.path.join(
             settings.BASE_DIR, 'main/xlsx_files/course_invoice.xlsx')
 
-        original_unique_xlsx_path = os.path.join(
-            unique_dir_path, 'course_invoice_original.xlsx')
+        unique_xlsx_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/course_invoice_{unique_token}.xlsx')
 
-        copy_unique_xlsx_path = os.path.join(
-            unique_dir_path, 'course_invoice_copy.xlsx')
-
-        shutil.copy(original_xlsx_path, original_unique_xlsx_path)
+        shutil.copy(xlsx_path, unique_xlsx_path)
 
         course = course_invoice.course
         contractor = course.contractor
@@ -1098,8 +1090,8 @@ def course_invoice_xlsx(request, pk):
         vat_price = f'{vat_price} {currency}'
         calculated_price = f'{calculated_price} {currency}'
 
-        wb = load_workbook(filename=original_unique_xlsx_path)
-        ws = wb.active
+        wb = load_workbook(filename=unique_xlsx_path)
+        ws = wb['original']
 
         ws['V5'] = str(course_invoice.number).zfill(10)
         ws['V6'] = dateformat.format(
@@ -1159,33 +1151,11 @@ def course_invoice_xlsx(request, pk):
         ws['R31'] = bank.name
         ws['R33'] = bank.bank_code
 
-        ws['I35'] = course.contact_person
+        ws['I35'] = course.contact_person.__str__()
         ws['S35'] = course_invoice.creator.__str__()
 
-        wb.save(original_unique_xlsx_path)
-
-        shutil.copy(original_unique_xlsx_path, copy_unique_xlsx_path)
-
-        wb = load_workbook(filename=copy_unique_xlsx_path)
-        ws = wb.active
-
-        ws['L3'] = 'Копие'
-
-        wb.save(copy_unique_xlsx_path)
-
         if course.export:
-
-            translated_invoice_xlsx_path = os.path.join(
-                settings.BASE_DIR, 'main/xlsx_files/course_translated_invoice.xlsx')
-
-            unique_translated_invoice_xlsx_path = os.path.join(
-                unique_dir_path, 'course_translated_invoice.xlsx')
-
-            shutil.copy(translated_invoice_xlsx_path,
-                        unique_translated_invoice_xlsx_path)
-
-            wb = load_workbook(filename=unique_translated_invoice_xlsx_path)
-            ws = wb.active
+            ws = wb['translated']
 
             translator = GoogleTranslator(source='bg', target='en')
 
@@ -1224,19 +1194,12 @@ def course_invoice_xlsx(request, pk):
             ws['C84'] = bank.iban
             ws['C85'] = bank.bank_code
 
-            wb.save(unique_translated_invoice_xlsx_path)
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course.number}.xlsx"'
 
-        shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
+        wb.save(response)
 
-        zip_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/{unique_token}.zip')
-
-        response = HttpResponse(open(zip_path, 'rb'))
-        response['Content-Type'] = 'application/zip'
-        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.number}.zip"'
-
-        os.remove(zip_path)
-        shutil.rmtree(unique_dir_path, ignore_errors=True)
+        os.remove(unique_xlsx_path)
 
         return response
     else:
@@ -1587,7 +1550,7 @@ def receipt_xlsx(course):
         ws['F12'] = contractor.postal_code[3]
 
     ws['J12'] = contractor.city
-    ws['D15'] = course.contact_person
+    ws['D15'] = course.contact_person.__str__()
 
     ws['AC20'] = company.name
     ws['AE21'] = company.correspondence_address
