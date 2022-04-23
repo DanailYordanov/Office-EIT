@@ -12,9 +12,8 @@ DATE_FORMATS = ['%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d', '%Y-%m-%d']
 
 COURSE_DOCUMENTS_OPTIONS = [
     ('', 'Избери'),
-    ('Писмо', 'Писмо'),
-    ('Обратна разписка', 'Обратна разписка'),
-    ('Служебни бележки', 'Служебни бележки')
+    ('official_notices', 'Служебни бележки'),
+    ('receipt_letter', 'Обратна разписка и писмо')
 ]
 
 COURSE_DOCUMENT_TYPE_CHOICES = [

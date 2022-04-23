@@ -1476,64 +1476,17 @@ def instruction_xlsx(request, pk):
         raise PermissionDenied
 
 
-def letter_xlsx(course):
+def receipt_letter_xlsx(course):
     company = course.company
     contractor = course.contractor
 
     unique_token = secrets.token_hex(32)
 
     xlsx_path = os.path.join(
-        settings.BASE_DIR, 'main/xlsx_files/letter.xlsx')
+        settings.BASE_DIR, 'main/xlsx_files/receipt_letter.xlsx')
 
     unique_xlsx_path = os.path.join(
-        settings.BASE_DIR, f'main/xlsx_files/letter_{unique_token}.xlsx')
-
-    shutil.copy(xlsx_path, unique_xlsx_path)
-
-    wb = load_workbook(filename=unique_xlsx_path)
-    ws = wb.active
-
-    ws['A2'] = company.name
-    ws['A3'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
-    ws['B4'] = company.phone_number
-    ws['B5'] = company.email
-
-    ws['G18'] = contractor.name
-    ws['G19'] = contractor.correspondence_address
-    ws['G20'] = f'{contractor.postal_code} {contractor.city}'
-    ws['H21'] = contractor.phone_number
-
-    ws['A26'] = company.name
-    ws['A27'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
-    ws['B28'] = company.phone_number
-    ws['B29'] = company.email
-
-    ws['G42'] = contractor.name
-    ws['G43'] = contractor.correspondence_address
-    ws['G44'] = f'{contractor.postal_code} {contractor.city}'
-    ws['H45'] = contractor.phone_number
-
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = f'attachment; filename="Letter.xlsx"'
-
-    wb.save(response)
-
-    os.remove(unique_xlsx_path)
-
-    return response
-
-
-def receipt_xlsx(course):
-    company = course.company
-    contractor = course.contractor
-
-    unique_token = secrets.token_hex(32)
-
-    xlsx_path = os.path.join(
-        settings.BASE_DIR, 'main/xlsx_files/receipt.xlsx')
-
-    unique_xlsx_path = os.path.join(
-        settings.BASE_DIR, f'main/xlsx_files/receipt_{unique_token}.xlsx')
+        settings.BASE_DIR, f'main/xlsx_files/receipt_letter_{unique_token}.xlsx')
 
     shutil.copy(xlsx_path, unique_xlsx_path)
 
@@ -1564,8 +1517,18 @@ def receipt_xlsx(course):
 
     ws['AJ25'] = company.city
 
+    ws['A30'] = company.name
+    ws['A31'] = f'{company.postal_code} {company.city} {company.correspondence_address}'
+    ws['E32'] = company.phone_number
+    ws['E33'] = company.email
+
+    ws['Z46'] = contractor.name
+    ws['Z47'] = contractor.correspondence_address
+    ws['Z48'] = f'{contractor.postal_code} {contractor.city}'
+    ws['AD49'] = contractor.phone_number
+
     response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = f'attachment; filename="Receipt.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="Receipt Letter.xlsx"'
 
     wb.save(response)
 
@@ -1658,12 +1621,10 @@ def course_documents_xlsx(request):
                 course = form.cleaned_data.get('course')
                 document_type = form.cleaned_data.get('document_type')
 
-                if document_type == 'Писмо':
-                    response = letter_xlsx(course)
-                elif document_type == 'Обратна разписка':
-                    response = receipt_xlsx(course)
-                elif document_type == 'Служебни бележки':
+                if document_type == 'official_notices':
                     response = official_notices_xlsx(course)
+                elif document_type == 'receipt_letter':
+                    response = receipt_letter_xlsx(course)
 
                 return response
         else:
