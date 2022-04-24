@@ -1741,7 +1741,8 @@ def course_date_journals_xlsx(request):
 
                     for i in range(0, len(instructions)):
                         ws[f'A{i + 2}'] = instructions[i].number
-                        ws[f'B{i + 2}'] = instructions[i].driver.__str__()
+                        ws[f'B{i + 2}'] = instructions[i].course.driver.__str__()
+                        ws[f'C{i + 2}'] = instructions[i].course.car.number_plate
                         ws[f'G{i + 2}'] = dateformat.format(
                             instructions[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
