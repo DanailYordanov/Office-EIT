@@ -357,6 +357,8 @@ class Course(models.Model):
         ContactPerson, verbose_name='Лице за контакт', null=True, blank=True, on_delete=models.SET_NULL)
     other_conditions = models.CharField(
         'Други условия', max_length=1000, null=True, blank=True)
+    file = models.FileField(
+        'Прикачи файл', upload_to='course_files', null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:

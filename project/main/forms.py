@@ -363,6 +363,7 @@ class CourseModelForm(forms.ModelForm):
             'export': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'mileage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Километраж'}),
             'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'}),
+            'file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
 
             'driver': CustomModelSelectWidget(
                 model=get_user_model(),

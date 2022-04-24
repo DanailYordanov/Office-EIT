@@ -427,7 +427,8 @@ def add_course(request, pk=None):
             initial_form['technical_inspection_perpetrator'] = technical_inspection_perpetrator
 
         if request.method == 'POST':
-            form = forms.CourseModelForm(request.POST, initial=initial_form)
+            form = forms.CourseModelForm(
+                request.POST, request.FILES, initial=initial_form)
             formset = forms.CourseAddressAddFormset(
                 request.POST, initial=initial_formset)
 
@@ -466,7 +467,8 @@ def update_course(request, pk):
         course = get_object_or_404(models.Course, id=pk)
 
         if request.method == 'POST':
-            form = forms.CourseModelForm(request.POST, instance=course)
+            form = forms.CourseModelForm(
+                request.POST, request.FILES, instance=course)
             formset = forms.CourseAddressUpdateFormset(
                 request.POST, instance=course)
 
