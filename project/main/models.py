@@ -550,13 +550,8 @@ class Instruction(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='instruction_creator', null=True, on_delete=models.SET_NULL)
-    company = models.ForeignKey(
-        Company, verbose_name='Фирма', null=True, on_delete=models.SET_NULL)
-    driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='instruction_driver', null=True, on_delete=models.SET_NULL)
-    car = models.ForeignKey(
-        Car, verbose_name='Автомобил', null=True, on_delete=models.SET_NULL)
-    city = models.CharField('Град', max_length=100, null=True, blank=True)
+    course = models.ForeignKey(Course, verbose_name='Курс',
+                               related_name='instruction_course', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
@@ -565,13 +560,13 @@ class Instruction(models.Model):
         verbose_name_plural = 'Инструкции'
 
     def __str__(self):
-        return f'Инструкция на {self.driver} № - {self.number}'
+        return f'Инструкция на {self.course.driver} № - {self.number}'
 
     def save(self, *args, **kwargs):
         if not self.id:
-            self.number = self.company.instruction_id
-            self.company.instruction_id += 1
-            self.company.save()
+            self.number = self.course.company.instruction_id
+            self.course.company.instruction_id += 1
+            self.course.company.save()
 
         super().save(*args, **kwargs)
 

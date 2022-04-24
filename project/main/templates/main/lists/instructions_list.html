@@ -17,8 +17,7 @@
         <thead>
             <tr>
                 <th class="col-1">№</th>
-                <th class="col-3">Шофьор</th>
-                <th class="col-3">Автомобил</th>
+                <th class="col-3">Курс</th>
                 <th class="col-2">Действия</th>
             </tr>
         </thead>
@@ -49,8 +48,11 @@
             </div>
             <tr>
                 <td class="searchable">{{ instruction.number }}</td>
-                <td class="searchable">{{ instruction.driver }}</td>
-                <td class="searchable">{{ instruction.car }}</td>
+                <td class="searchable">
+                    <a href="{{ instruction.course.get_absolute_url }}" class="text-decoration-none">
+                        {{ instruction.course }}
+                    </a>
+                </td>
                 <td class="text-center">
                     <a href="{% url 'main:update-instruction' pk=instruction.id %}"
                         class="btn btn-primary table-action-button">

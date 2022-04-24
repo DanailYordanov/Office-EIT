@@ -434,6 +434,10 @@ def add_course(request, pk=None):
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
 
+                if form_instance.export:
+                    models.Instruction.objects.create(
+                        creator=request.user, course=form_instance)
+
                 for f in formset:
                     if f.is_valid():
                         f.instance.course = form_instance
@@ -468,6 +472,11 @@ def update_course(request, pk):
 
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
+
+                if 'export' in form.changed_data and form_instance.export:
+                    if not form_instance.instruction_course.all():
+                        models.Instruction.objects.create(
+                            creator=request.user, course=form_instance)
 
                 for f in formset:
                     if f.is_valid():
@@ -1433,7 +1442,7 @@ def instruction_xlsx(request, pk):
 
         shutil.copy(xlsx_path, unique_xlsx_path)
 
-        company = instruction.company
+        company = instruction.course.company
 
         wb = load_workbook(filename=unique_xlsx_path)
         ws = wb.active
@@ -1442,27 +1451,13 @@ def instruction_xlsx(request, pk):
         ws['A3'] = f'{company.city}, {company.address}'
         ws['A4'] = company.bulstat
         ws['E7'] = instruction.number
-        ws['B9'] = instruction.driver.__str__()
-        ws['G9'] = instruction.driver.personal_id
-        ws['B11'] = instruction.car.number_plate
-        ws['G18'] = instruction.driver.__str__()
+        ws['B9'] = instruction.course.driver.__str__()
+        ws['G9'] = instruction.course.driver.personal_id
+        ws['B11'] = instruction.course.car.number_plate
+        ws['G18'] = instruction.course.driver.__str__()
         ws['G21'] = instruction.creator.__str__()
         ws['B20'] = dateformat.format(
             instruction.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['A21'] = instruction.city
-
-        ws['A25'] = company.name
-        ws['A26'] = f'{company.city}, {company.address}'
-        ws['A27'] = company.bulstat
-        ws['E30'] = instruction.number
-        ws['B32'] = instruction.driver.__str__()
-        ws['G32'] = instruction.driver.personal_id
-        ws['B34'] = instruction.car.number_plate
-        ws['G41'] = instruction.driver.__str__()
-        ws['G44'] = instruction.creator.__str__()
-        ws['B43'] = dateformat.format(
-            instruction.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['A44'] = instruction.city
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = f'attachment; filename="Instruction {instruction.number}.xlsx"'

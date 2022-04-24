@@ -724,33 +724,16 @@ class InstructionModelForm(forms.ModelForm):
         model = models.Instruction
         exclude = ('number', 'creator')
         widgets = {
-            'company': CustomModelSelectWidget(
-                model=models.Company,
-                search_fields=['name']
-            ),
-            'driver': CustomModelSelectWidget(
-                model=get_user_model(),
-                queryset=get_user_model().objects.filter(
-                    is_active=True, is_staff=False),
-                search_fields=[
-                    'first_name__icontains',
-                    'middle_name__icontains',
-                    'last_name__icontains'
-                ]
-            ),
-            'car': CustomModelSelectWidget(
-                model=models.Car,
-                search_fields=['brand__icontains', 'number_plate__icontains']
-            ),
-            'city': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Град'})
+            'course': CustomModelSelectWidget(
+                model=models.Course,
+                search_fields=['number__icontains',
+                               'driver__first_name__icontains',
+                               'driver__middle_name__icontains',
+                               'driver__last_name__icontains',
+                               'from_to__from_to__icontains'
+                               ]
+            )
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields['driver'].queryset = get_user_model().objects.filter(
-            is_active=True, is_staff=False)
 
 
 class CourseDateJournalForm(forms.Form):
