@@ -25,7 +25,7 @@ $(document).ready(function () {
         hidePerpetratorFields();
     }
 
-    $('#addFormsetForm').click(addFormsetForm);
+    $('.add-formset-btn').click(addFormsetForm);
 
     $('#courseTripOrderID').change(datesLoad);
 
@@ -44,26 +44,29 @@ $(document).ready(function () {
 function addFormsetForm(e) {
     e.preventDefault();
 
-    $('#emptyFormsetForm').find('select').select2('destroy');
+    var formsetName = $(this).attr('formset-name');
+    var emptyFormsetForm = $(`.empty-fromset-form[formset-name=${formsetName}]`)[0];
 
-    var formsNum = $('.formset-form').length - 1;
-    var copiedForm = $('#emptyFormsetForm').clone();
-    var totalForms = $('input[name$="TOTAL_FORMS"]');
+    $(emptyFormsetForm).find('select').select2('destroy');
+
+    var formsNum = $(`.formset-form[formset-name=${formsetName}]`).length - 1;
+    var totalForms = $(`.formset-management-form[formset-name=${formsetName}]`).find('input[name$="TOTAL_FORMS"]');
+    var copiedForm = $(emptyFormsetForm).clone();
 
     totalForms.val(formsNum + 1);
     copiedForm.removeAttr('id');
     copiedForm.removeClass('d-none');
     copiedForm.html(copiedForm.html().replace(/__prefix__/g, formsNum));
 
-    $('#addFormsetForm').before(copiedForm);
+    $(this).before(copiedForm);
 
-    copiedForm.find(".date-picker").datepicker({
+    copiedForm.find('.date-picker').datepicker({
         format: 'dd/mm/yyyy'
     });
     copiedForm.find('select').djangoSelect2();
     copiedForm.find('.select-tag').djangoSelect2();
 
-    $('#emptyFormsetForm').find('select').djangoSelect2();
+    $(emptyFormsetForm).find('select').djangoSelect2();
 }
 
 

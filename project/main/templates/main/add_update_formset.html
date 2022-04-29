@@ -1,4 +1,4 @@
-<div class="col-12 form-flex formset-form d-none" id="emptyFormsetForm">
+<div class="col-12 d-none form-flex formset-form empty-fromset-form" formset-name="{{ formset_form_name }}">
     <p class="fw-light text-center fs-4 text-capitalize">{{ formset_form_name }}</p>
     {% for f in formset.empty_form %}
     {% if f.field.widget.input_type != 'hidden' %}
@@ -29,7 +29,7 @@
 </div>
 
 {% for formset_form in formset %}
-<div class="col-12 form-flex formset-form">
+<div class="col-12 form-flex formset-form" formset-name="{{ formset_form_name }}">
     <p class="fw-light text-center fs-4 text-capitalize">{{ formset_form_name }}</p>
     {% for f in formset_form %}
     {% if f.field.widget.input_type != 'hidden' %}
@@ -60,8 +60,11 @@
 </div>
 {% endfor %}
 
-<a href="#" class="text-decoration-none text-center" id="addFormsetForm">
+<a href="#" class="add-formset-btn text-center text-decoration-none" formset-name="{{ formset_form_name }}">
     Добави {{ formset_form_name }}
     <i class="fas fa-plus ms-1"></i>
 </a>
-{{ formset.management_form }}
+
+<div class="formset-management-form" formset-name="{{ formset_form_name }}">
+    {{ formset.management_form }}
+</div>
