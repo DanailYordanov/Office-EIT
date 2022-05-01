@@ -353,6 +353,12 @@ class CourseModelForm(forms.ModelForm):
                                   args=('description',))
         ))
 
+    trip_order_to_date = forms.DateField(
+        label='Крайна дата на командировка',
+        widget=forms.DateInput(
+            attrs={'class': 'form-control date-picker', 'placeholder': 'Крайна дата на командировка'})
+    )
+
     class Meta:
         model = models.Course
         exclude = ('number', 'create_date')
@@ -419,6 +425,10 @@ class CourseModelForm(forms.ModelForm):
                 if hasattr(self.instance, 'technical_inspection'):
                     self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
 
+                if self.instance.trip_order_course.all():
+                    self.fields['trip_order_to_date'].initial = self.instance.trip_order_course.all(
+                    ).first().to_date
+
             if hasattr(self.instance.request_number, 'request_number'):
                 self.initial['request_number'] = self.instance.request_number.request_number
 
@@ -435,9 +445,11 @@ class CourseModelForm(forms.ModelForm):
                 self.initial['description'] = self.instance.description.description
 
         if self.data and 'export' in self.data:
+            self.fields['trip_order_to_date'].required = True
             self.fields['medical_examination_perpetrator'].required = True
             self.fields['technical_inspection_perpetrator'].required = True
         else:
+            self.fields['trip_order_to_date'].required = False
             self.fields['medical_examination_perpetrator'].required = False
             self.fields['technical_inspection_perpetrator'].required = False
 

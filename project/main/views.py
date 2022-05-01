@@ -435,14 +435,34 @@ def add_course(request, pk=None):
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
 
-                if form_instance.export:
-                    models.Instruction.objects.create(
-                        creator=request.user, course=form_instance)
-
                 for f in formset:
                     if f.is_valid():
                         f.instance.course = form_instance
                         f.save()
+
+                if form_instance.export:
+                    models.Instruction.objects.create(
+                        creator=request.user, course=form_instance)
+
+                    load_date = form_instance.addresses.filter(
+                        load_type='Адрес на товарене').order_by('date').first()
+
+                    if load_date:
+                        load_date = load_date.date
+
+                    destination = (
+                        form_instance.from_to.from_to.split('до')[-1]).strip().capitalize()
+
+                    to_date = form.cleaned_data['trip_order_to_date']
+
+                    models.TripOrder.objects.create(
+                        creator=request.user,
+                        driver=form_instance.driver,
+                        course=form_instance,
+                        destination=destination,
+                        from_date=load_date,
+                        to_date=to_date
+                    )
 
                 return redirect('main:courses-list')
         else:
@@ -475,17 +495,63 @@ def update_course(request, pk):
             if form.is_valid() and formset.is_valid():
                 form_instance = form.save()
 
-                if 'export' in form.changed_data and form_instance.export:
-                    if not form_instance.instruction_course.all():
-                        models.Instruction.objects.create(
-                            creator=request.user, course=form_instance)
-
                 for f in formset:
                     if f.is_valid():
                         f.instance.course = form_instance
                         f.save()
 
                 formset.save()
+
+                if form_instance.export:
+                    from_date = next((
+                        form for form in formset.cleaned_data if form['load_type'] == 'Адрес на товарене'), None
+                    )['date']
+
+                    to_date = form.cleaned_data['trip_order_to_date']
+
+                    destination = (
+                        form_instance.from_to.from_to.split('до')[-1]).strip().capitalize()
+
+                    if 'export' in form.changed_data:
+                        if not form_instance.instruction_course.all():
+                            models.Instruction.objects.create(
+                                creator=request.user, course=form_instance)
+
+                        if not form_instance.trip_order_course.all():
+                            models.TripOrder.objects.create(
+                                creator=request.user,
+                                driver=form_instance.driver,
+                                course=form_instance,
+                                destination=destination,
+                                from_date=from_date,
+                                to_date=to_date
+                            )
+                    else:
+                        trip_orders = form_instance.trip_order_course.all()
+
+                        if 'driver' in form.changed_data:
+                            for trip_order in trip_orders:
+                                trip_order.driver = form_instance.driver
+                                trip_order.save()
+
+                        if 'trip_order_to_date' in form.changed_data:
+                            for trip_order in trip_orders:
+                                trip_order.to_date = to_date
+                                trip_order.save()
+
+                        if 'from_to' in form.changed_data:
+                            for trip_order in trip_orders:
+                                trip_order.destination = destination
+                                trip_order.save()
+
+                        if formset.has_changed():
+                            for f in formset:
+                                if 'date' in f.changed_data and f.cleaned_data['load_type'] == 'Адрес на товарене':
+                                    for trip_order in trip_orders:
+                                        trip_order.from_date = f.cleaned_data['date']
+                                        trip_order.save()
+                                        break
+
                 return redirect('main:courses-list')
         else:
             form = forms.CourseModelForm(instance=course)
