@@ -737,6 +737,16 @@ class InstructionModelForm(forms.ModelForm):
         model = models.Instruction
         exclude = ('number', 'creator')
         widgets = {
+            'driver': CustomModelSelectWidget(
+                model=get_user_model(),
+                queryset=get_user_model().objects.filter(
+                    is_active=True, is_staff=False),
+                search_fields=[
+                    'first_name__icontains',
+                    'middle_name__icontains',
+                    'last_name__icontains'
+                ]
+            ),
             'course': CustomModelSelectWidget(
                 model=models.Course,
                 search_fields=['number__icontains',
@@ -744,7 +754,8 @@ class InstructionModelForm(forms.ModelForm):
                                'driver__middle_name__icontains',
                                'driver__last_name__icontains',
                                'from_to__from_to__icontains'
-                               ]
+                               ],
+                dependent_fields={'driver': 'driver'}
             )
         }
 

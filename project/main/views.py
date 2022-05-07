@@ -1519,10 +1519,10 @@ def instruction_xlsx(request, pk):
         ws['A3'] = f'{company.city}, {company.address}'
         ws['A4'] = company.bulstat
         ws['E7'] = instruction.number
-        ws['B9'] = instruction.course.driver.__str__()
-        ws['G9'] = instruction.course.driver.personal_id
+        ws['B9'] = instruction.driver.__str__()
+        ws['G9'] = instruction.driver.personal_id
         ws['B11'] = instruction.course.car.number_plate
-        ws['G18'] = instruction.course.driver.__str__()
+        ws['G18'] = instruction.driver.__str__()
         ws['G21'] = instruction.creator.__str__()
         ws['B20'] = dateformat.format(
             instruction.creation_date, formats.get_format('SHORT_DATE_FORMAT'))

@@ -552,6 +552,8 @@ class Instruction(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='instruction_creator', null=True, on_delete=models.SET_NULL)
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='instruction_driver', null=True, on_delete=models.SET_NULL)
     course = models.ForeignKey(Course, verbose_name='Курс',
                                related_name='instruction_course', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
@@ -562,7 +564,7 @@ class Instruction(models.Model):
         verbose_name_plural = 'Инструкции'
 
     def __str__(self):
-        return f'Инструкция на {self.course.driver} № - {self.number}'
+        return f'Инструкция на {self.driver} № - {self.number}'
 
     def save(self, *args, **kwargs):
         if not self.id:
