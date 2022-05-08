@@ -22,7 +22,7 @@ $(document).ready(function () {
     }
 
     if ($('#id_export').length > 0) {
-        hidePerpetratorFields();
+        hideExportFields();
     }
 
     $('.add-formset-btn').click(addFormsetForm);
@@ -37,7 +37,7 @@ $(document).ready(function () {
 
     $('#vatPopulateBtn').click(populateVatFields);
 
-    $('#id_export').change(hidePerpetratorFields);
+    $('#id_export').change(hideExportFields);
 });
 
 
@@ -214,13 +214,15 @@ function populateVatFields() {
 }
 
 
-function hidePerpetratorFields() {
+function hideExportFields() {
     var exportCheckbox = $('#id_export')[0];
 
     if (exportCheckbox.checked) {
+        $('#id_trip_order_to_date').parent().parent().show();
         $('#id_medical_examination_perpetrator').parent().parent().show();
         $('#id_technical_inspection_perpetrator').parent().parent().show();
     } else {
+        $('#id_trip_order_to_date').parent().parent().hide();
         $('#id_medical_examination_perpetrator').parent().parent().hide();
         $('#id_technical_inspection_perpetrator').parent().parent().hide();
     }
