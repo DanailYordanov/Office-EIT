@@ -1861,10 +1861,10 @@ def course_date_journals_xlsx(request):
                     unique_token = secrets.token_hex(32)
 
                     xlsx_path = os.path.join(
-                        settings.BASE_DIR, 'main/xlsx_files/course_medical_journal.xlsx')
+                        settings.BASE_DIR, 'main/xlsx_files/course_medical_examination_journal.xlsx')
 
                     unique_xlsx_path = os.path.join(
-                        settings.BASE_DIR, f'main/xlsx_files/course_medical_journal_{unique_token}.xlsx')
+                        settings.BASE_DIR, f'main/xlsx_files/course_medical_examination_journal_{unique_token}.xlsx')
 
                     shutil.copy(xlsx_path, unique_xlsx_path)
 
