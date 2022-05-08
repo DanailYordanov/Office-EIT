@@ -45,7 +45,7 @@
 
     {% if request.user.is_staff %}
     <p>
-        <span class="fw-normal">Шофьор:</span> {{ course.driver }}
+        <span class="fw-normal">Шофьор:</span> {{ course.get_drivers }}
     </p>
 
     <p>

@@ -59,9 +59,9 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
         return None
 
     def optgroups(self, name, value, attrs=None):
-        """ 
+        """
         While editing an existing object the 'value' variable is the object's id, not the to_field_name
-        So that's why the field inital value should be replaced in the form's init method 
+        So that's why the field inital value should be replaced in the form's init method
         """
 
         default = (None, [], 0)
@@ -101,11 +101,40 @@ class CustomSelectTagWidget(s2forms.ModelSelect2TagWidget):
         return groups
 
 
+class CustomMultipleSelectTagWidget(s2forms.ModelSelect2TagWidget):
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        base_attrs.update({
+            'data-theme': 'bootstrap-5',
+            'data-token-separators': [],
+            'data-placeholder': 'Въведи',
+            'data-minimum-input-length': 0,
+            'class': 'select-tag form-control'
+        })
+        return super().build_attrs(base_attrs, extra_attrs)
+
+    def value_from_datadict(self, data, files, name):
+        values = super().value_from_datadict(data, files, name)
+
+        if values:
+            cleaned_values = list()
+
+            for value in values:
+                try:
+                    obj = self.queryset.get(pk=value)
+                    cleaned_values.append(obj)
+                except (ValueError, TypeError, self.queryset.model.DoesNotExist):
+                    pass
+
+            return cleaned_values
+
+        return None
+
+
 class TagModelChoiceField(forms.ModelChoiceField):
     def to_python(self, value):
         """
         This method needs to be overridden due to the fact that the value
-        which is returned from 'value_from_datadict' function always exists. 
+        which is returned from 'value_from_datadict' function always exists.
         """
         return value
 
@@ -264,6 +293,16 @@ class ContractorsModelForm(forms.ModelForm):
 
 
 class CourseModelForm(forms.ModelForm):
+    driver = forms.ModelMultipleChoiceField(
+        get_user_model().objects.filter(is_active=True, is_staff=False),
+        label='Шофьор',
+        widget=CustomMultipleSelectTagWidget(
+            model=get_user_model(),
+            queryset=get_user_model().objects.filter(is_active=True, is_staff=False),
+            search_fields=['first_name__icontains',
+                           'middle_name__icontains', 'last_name__icontains']
+        ))
+
     medical_examination_perpetrator = TagModelChoiceField(
         models.MedicalExaminationPerpetrator.objects.all(),
         label='Извършител на медицински преглед',
@@ -371,17 +410,6 @@ class CourseModelForm(forms.ModelForm):
             'other_conditions': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Други условия'}),
             'file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
 
-            'driver': CustomModelSelectWidget(
-                model=get_user_model(),
-                queryset=get_user_model().objects.filter(
-                    is_active=True, is_staff=False),
-                search_fields=[
-                    'first_name__icontains',
-                    'middle_name__icontains',
-                    'last_name__icontains'
-                ]
-            ),
-
             'car': CustomModelSelectWidget(
                 model=models.Car,
                 search_fields=['brand__icontains', 'number_plate__icontains']
@@ -419,15 +447,18 @@ class CourseModelForm(forms.ModelForm):
 
         if self.instance.pk:
             if self.instance.export:
-                if hasattr(self.instance, 'medical_examination'):
-                    self.fields['medical_examination_perpetrator'].initial = self.instance.medical_examination.perpetrator.perpetrator
+                trip_order = self.instance.trip_order_course.all().first()
+                medical_examination = self.instance.medical_examination.all().first()
+                technical_inspection = self.instance.technical_inspection.all().first()
 
-                if hasattr(self.instance, 'technical_inspection'):
-                    self.fields['technical_inspection_perpetrator'].initial = self.instance.technical_inspection.perpetrator.perpetrator
+                if medical_examination:
+                    self.fields['medical_examination_perpetrator'].initial = medical_examination.perpetrator.perpetrator
 
-                if self.instance.trip_order_course.all():
-                    self.fields['trip_order_to_date'].initial = self.instance.trip_order_course.all(
-                    ).first().to_date
+                if technical_inspection:
+                    self.fields['technical_inspection_perpetrator'].initial = technical_inspection.perpetrator.perpetrator
+
+                if trip_order:
+                    self.fields['trip_order_to_date'].initial = trip_order.to_date
 
             if hasattr(self.instance.request_number, 'request_number'):
                 self.initial['request_number'] = self.instance.request_number.request_number
@@ -452,42 +483,6 @@ class CourseModelForm(forms.ModelForm):
             self.fields['trip_order_to_date'].required = False
             self.fields['medical_examination_perpetrator'].required = False
             self.fields['technical_inspection_perpetrator'].required = False
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            technical_inspection_perpetrator = self.cleaned_data['technical_inspection_perpetrator']
-            medical_examination_perpetrator = self.cleaned_data['medical_examination_perpetrator']
-
-            if not instance.id:
-                instance.save()
-
-                models.CourseTechnicalInspection.objects.create(
-                    course=instance, perpetrator=technical_inspection_perpetrator)
-
-                models.CourseMedicalExamination.objects.create(
-                    course=instance, perpetrator=medical_examination_perpetrator)
-            else:
-                instance.save()
-
-                course_technical_inspection = models.CourseTechnicalInspection.objects.get(
-                    course=instance)
-                course_medical_examination = models.CourseMedicalExamination.objects.get(
-                    course=instance)
-
-                if self.cleaned_data['export']:
-                    if 'technical_inspection_perpetrator' in self.changed_data:
-                        course_technical_inspection.perpetrator = self.cleaned_data[
-                            'technical_inspection_perpetrator']
-                        course_technical_inspection.save()
-
-                    if 'medical_examination_perpetrator' in self.changed_data:
-                        course_medical_examination.perpetrator = self.cleaned_data[
-                            'medical_examination_perpetrator']
-                        course_medical_examination.save()
-
-            self.save_m2m()
-        return instance
 
 
 class CourseAddresModelForm(forms.ModelForm):

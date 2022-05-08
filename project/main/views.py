@@ -392,7 +392,7 @@ def add_course(request, pk=None):
         if pk:
             initial_course = get_object_or_404(models.Course, id=pk)
 
-            initial_form['driver'] = initial_course.driver
+            initial_form['driver'] = initial_course.driver.all()
             initial_form['car'] = initial_course.car
             initial_form['company'] = initial_course.company
             initial_form['contractor'] = initial_course.contractor
@@ -403,11 +403,14 @@ def add_course(request, pk=None):
             initial_form['contact_person'] = initial_course.contact_person
             initial_form['other_conditions'] = initial_course.other_conditions
 
-            if hasattr(initial_course, 'medical_examination'):
-                initial_form['medical_examination_perpetrator'] = initial_course.medical_examination
+            medical_examination = initial_course.medical_examination.all().first()
+            technical_inspection = initial_course.technical_inspection.all().first()
 
-            if hasattr(initial_course, 'technical_inspection'):
-                initial_form['technical_inspection_perpetrator'] = initial_course.technical_inspection
+            if medical_examination:
+                initial_form['medical_examination_perpetrator'] = medical_examination.perpetrator
+
+            if technical_inspection:
+                initial_form['technical_inspection_perpetrator'] = technical_inspection.perpetrator
 
             for address in initial_course.addresses.all():
                 initial_formset.append(
@@ -441,28 +444,48 @@ def add_course(request, pk=None):
                         f.save()
 
                 if form_instance.export:
-                    models.Instruction.objects.create(
-                        creator=request.user, course=form_instance)
+                    from_date = next((
+                        form for form in formset.cleaned_data if form['load_type'] == 'Адрес на товарене'), None
+                    )['date']
 
-                    load_date = form_instance.addresses.filter(
-                        load_type='Адрес на товарене').order_by('date').first()
-
-                    if load_date:
-                        load_date = load_date.date
+                    to_date = form.cleaned_data['trip_order_to_date']
 
                     destination = (
                         form_instance.from_to.from_to.split('до')[-1]).strip().capitalize()
 
-                    to_date = form.cleaned_data['trip_order_to_date']
+                    medical_examination_perpetrator = form.cleaned_data[
+                        'medical_examination_perpetrator']
 
-                    models.TripOrder.objects.create(
-                        creator=request.user,
-                        driver=form_instance.driver,
-                        course=form_instance,
-                        destination=destination,
-                        from_date=load_date,
-                        to_date=to_date
-                    )
+                    technical_inspection_perpetrator = form.cleaned_data[
+                        'technical_inspection_perpetrator']
+
+                    for driver in form.cleaned_data['driver']:
+                        models.Instruction.objects.create(
+                            creator=request.user,
+                            course=form_instance,
+                            driver=driver,
+                        )
+
+                        models.TripOrder.objects.create(
+                            creator=request.user,
+                            driver=driver,
+                            course=form_instance,
+                            destination=destination,
+                            from_date=from_date,
+                            to_date=to_date
+                        )
+
+                        models.CourseMedicalExamination.objects.create(
+                            course=form_instance,
+                            driver=driver,
+                            perpetrator=medical_examination_perpetrator
+                        )
+
+                        models.CourseTechnicalInspection.objects.create(
+                            course=form_instance,
+                            driver=driver,
+                            perpetrator=technical_inspection_perpetrator
+                        )
 
                 return redirect('main:courses-list')
         else:
@@ -512,28 +535,53 @@ def update_course(request, pk):
                     destination = (
                         form_instance.from_to.from_to.split('до')[-1]).strip().capitalize()
 
-                    if 'export' in form.changed_data:
-                        if not form_instance.instruction_course.all():
-                            models.Instruction.objects.create(
-                                creator=request.user, course=form_instance)
+                    medical_examination_perpetrator = form.cleaned_data[
+                        'medical_examination_perpetrator']
 
-                        if not form_instance.trip_order_course.all():
+                    technical_inspection_perpetrator = form.cleaned_data[
+                        'technical_inspection_perpetrator']
+
+                    trip_orders = form_instance.trip_order_course.all()
+                    instructions = form_instance.instruction_course.all()
+                    course_medical_examinations = form_instance.medical_examination.all()
+                    course_technical_inspections = form_instance.technical_inspection.all()
+
+                    if not instructions:
+                        for driver in form.cleaned_data['driver']:
+                            models.Instruction.objects.create(
+                                creator=request.user,
+                                course=form_instance,
+                                driver=driver,
+                            )
+
+                    if not trip_orders:
+                        for driver in form.cleaned_data['driver']:
                             models.TripOrder.objects.create(
                                 creator=request.user,
-                                driver=form_instance.driver,
+                                driver=driver,
                                 course=form_instance,
                                 destination=destination,
                                 from_date=from_date,
                                 to_date=to_date
                             )
+
+                    if not course_medical_examinations:
+                        for driver in form.cleaned_data['driver']:
+                            models.CourseMedicalExamination.objects.create(
+                                course=form_instance,
+                                driver=driver,
+                                perpetrator=medical_examination_perpetrator
+                            )
+
+                    if not course_technical_inspections:
+                        for driver in form.cleaned_data['driver']:
+                            models.CourseTechnicalInspection.objects.create(
+                                course=form_instance,
+                                driver=driver,
+                                perpetrator=technical_inspection_perpetrator
+                            )
+
                     else:
-                        trip_orders = form_instance.trip_order_course.all()
-
-                        if 'driver' in form.changed_data:
-                            for trip_order in trip_orders:
-                                trip_order.driver = form_instance.driver
-                                trip_order.save()
-
                         if 'trip_order_to_date' in form.changed_data:
                             for trip_order in trip_orders:
                                 trip_order.to_date = to_date
@@ -544,6 +592,18 @@ def update_course(request, pk):
                                 trip_order.destination = destination
                                 trip_order.save()
 
+                        if 'medical_examination_perpetrator' in form.changed_data:
+                            for medical_examination in course_medical_examinations:
+                                medical_examination.perpetrator = form.cleaned_data[
+                                    'medical_examination_perpetrator']
+                                medical_examination.save()
+
+                        if 'technical_inspection_perpetrator' in form.changed_data:
+                            for technical_inspection in course_technical_inspections:
+                                technical_inspection.perpetrator = form.cleaned_data[
+                                    'technical_inspection_perpetrator']
+                                technical_inspection.save()
+
                         if formset.has_changed():
                             for f in formset:
                                 if 'date' in f.changed_data and f.cleaned_data['load_type'] == 'Адрес на товарене':
@@ -551,6 +611,58 @@ def update_course(request, pk):
                                         trip_order.from_date = f.cleaned_data['date']
                                         trip_order.save()
                                         break
+
+                        if 'driver' in form.changed_data:
+                            while len(form.cleaned_data['driver']) > len(form_instance.trip_order_course.all()):
+                                trip_order = trip_orders.first()
+
+                                if trip_order:
+                                    trip_order.pk = None
+                                    trip_order.save()
+
+                            while len(form.cleaned_data['driver']) > len(form_instance.instruction_course.all()):
+                                instruction = instructions.first()
+
+                                if instruction:
+                                    instruction.pk = None
+                                    instruction.save()
+
+                            while len(form.cleaned_data['driver']) > len(form_instance.medical_examination.all()):
+                                medical_examination = course_medical_examinations.first()
+
+                                if medical_examination:
+                                    medical_examination.pk = None
+                                    medical_examination.save()
+
+                            while len(form.cleaned_data['driver']) > len(form_instance.technical_inspection.all()):
+                                technical_inspection = course_technical_inspections.first()
+
+                                if technical_inspection:
+                                    technical_inspection.pk = None
+                                    technical_inspection.save()
+
+                            trip_orders = form_instance.trip_order_course.all()
+                            instructions = form_instance.instruction_course.all()
+                            course_medical_examinations = form_instance.medical_examination.all()
+                            course_technical_inspections = form_instance.technical_inspection.all()
+
+                            for i in range(0, len(form.cleaned_data['driver'])):
+                                trip_order = trip_orders[i]
+                                instruction = instructions[i]
+                                medical_examination = course_medical_examinations[i]
+                                technical_inspection = course_technical_inspections[i]
+
+                                trip_order.driver = form.cleaned_data['driver'][i]
+                                trip_order.save()
+
+                                instruction.driver = form.cleaned_data['driver'][i]
+                                instruction.save()
+
+                                medical_examination.driver = form.cleaned_data['driver'][i]
+                                medical_examination.save()
+
+                                technical_inspection.driver = form.cleaned_data['driver'][i]
+                                technical_inspection.save()
 
                 return redirect('main:courses-list')
         else:
@@ -878,8 +990,8 @@ def trip_order_xlsx(request, pk):
         ws['B1'] = trip_order.number
         ws['E1'] = trip_order.from_date
         ws['B2'] = course.car.number_plate
-        ws['G2'] = course.driver.__str__()
-        ws['G17'] = course.driver.debit_card_number
+        ws['G2'] = trip_order.driver.__str__()
+        ws['G17'] = trip_order.driver.debit_card_number
 
         wb.save(unique_course_expenses_xlsx_path)
 
@@ -1602,75 +1714,64 @@ def receipt_letter_xlsx(course):
 
 def official_notices_xlsx(course):
     company = course.company
+    medical_examinations = course.medical_examination.all()
+    technical_inspections = course.technical_inspection.all()
 
     unique_token = secrets.token_hex(32)
 
-    unique_dir_path = os.path.join(
-        settings.BASE_DIR, f'main/xlsx_files/{unique_token}')
+    xlsx_path = os.path.join(
+        settings.BASE_DIR, 'main/xlsx_files/official_notices.xlsx')
 
-    os.mkdir(unique_dir_path)
+    unique_xlsx_path = os.path.join(
+        settings.BASE_DIR, f'main/xlsx_files/official_notices_{unique_token}.xlsx')
 
-    course_technical_inspection_xlsx_path = os.path.join(
-        settings.BASE_DIR, 'main/xlsx_files/course_technical_inspection.xlsx')
+    shutil.copy(xlsx_path, unique_xlsx_path)
 
-    unique_course_technical_inspection_xlsx_path = os.path.join(
-        unique_dir_path, 'course_technical_inspection.xlsx')
+    wb = load_workbook(filename=unique_xlsx_path)
+    ws = wb['technical_inspection']
 
-    shutil.copy(course_technical_inspection_xlsx_path,
-                unique_course_technical_inspection_xlsx_path)
+    worksheets = 1
 
-    wb = load_workbook(
-        filename=unique_course_technical_inspection_xlsx_path)
-    ws = wb.active
+    for technical_inspection in technical_inspections:
+        ws['A1'] = company.name
+        ws['A2'] = f'{company.city}, {company.address}'
+        ws['A3'] = company.bulstat
+        ws['E9'] = technical_inspection.number
+        ws['B12'] = course.car.number_plate
+        ws['B13'] = technical_inspection.driver.__str__()
+        ws['C15'] = technical_inspection.perpetrator.perpetrator
+        ws['B18'] = dateformat.format(
+            course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
-    ws['A1'] = company.name
-    ws['A2'] = f'{company.city}, {company.address}'
-    ws['A3'] = company.bulstat
-    ws['E9'] = course.technical_inspection.number
-    ws['B12'] = course.car.number_plate
-    ws['B13'] = course.driver.__str__()
-    ws['C15'] = course.technical_inspection.perpetrator.perpetrator
-    ws['B18'] = dateformat.format(
-        course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+        if len(technical_inspections) > worksheets:
+            ws = wb.copy_worksheet(ws)
+            worksheets += 1
 
-    wb.save(unique_course_technical_inspection_xlsx_path)
+    ws = wb['medical_examination']
 
-    course_medical_examination_xlsx_path = os.path.join(
-        settings.BASE_DIR, 'main/xlsx_files/course_medical_examination.xlsx')
+    worksheets = 1
 
-    unique_course_medical_examination_xlsx_path = os.path.join(
-        unique_dir_path, 'course_medical_examination.xlsx')
+    for medical_examination in medical_examinations:
+        ws['A1'] = company.name
+        ws['A2'] = f'{company.city}, {company.address}'
+        ws['A3'] = company.bulstat
+        ws['E9'] = medical_examination.number
+        ws['A12'] = medical_examination.driver.__str__()
+        ws['B13'] = course.car.number_plate
+        ws['C17'] = medical_examination.perpetrator.perpetrator
+        ws['B20'] = dateformat.format(
+            course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
 
-    shutil.copy(course_medical_examination_xlsx_path,
-                unique_course_medical_examination_xlsx_path)
+        if len(medical_examinations) > worksheets:
+            ws = wb.copy_worksheet(ws)
+            worksheets += 1
 
-    wb = load_workbook(
-        filename=unique_course_medical_examination_xlsx_path)
-    ws = wb.active
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = f'attachment; filename="Official Notices.xlsx"'
 
-    ws['A1'] = company.name
-    ws['A2'] = f'{company.city}, {company.address}'
-    ws['A3'] = company.bulstat
-    ws['E9'] = course.medical_examination.number
-    ws['A12'] = course.driver.__str__()
-    ws['B13'] = course.car.number_plate
-    ws['C17'] = course.medical_examination.perpetrator.perpetrator
-    ws['B20'] = dateformat.format(
-        course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+    wb.save(response)
 
-    wb.save(unique_course_medical_examination_xlsx_path)
-
-    shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
-
-    zip_path = os.path.join(
-        settings.BASE_DIR, f'main/xlsx_files/{unique_token}.zip')
-
-    response = HttpResponse(open(zip_path, 'rb'))
-    response['Content-Type'] = 'application/zip'
-    response['Content-Disposition'] = f'attachment; filename="Official Notices {course.medical_examination.number}.zip"'
-
-    os.remove(zip_path)
-    shutil.rmtree(unique_dir_path, ignore_errors=True)
+    os.remove(unique_xlsx_path)
 
     return response
 
@@ -1776,7 +1877,7 @@ def course_date_journals_xlsx(request):
 
                     for i in range(0, len(medical_examinations)):
                         ws[f'A{i + 6}'] = medical_examinations[i].number
-                        ws[f'B{i + 6}'] = medical_examinations[i].course.driver.__str__()
+                        ws[f'B{i + 6}'] = medical_examinations[i].driver.__str__()
                         ws[f'C{i + 6}'] = dateformat.format(
                             medical_examinations[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))
                         ws[f'F{i + 6}'] = medical_examinations[i].perpetrator.perpetrator
@@ -1809,7 +1910,7 @@ def course_date_journals_xlsx(request):
 
                     for i in range(0, len(instructions)):
                         ws[f'A{i + 2}'] = instructions[i].number
-                        ws[f'B{i + 2}'] = instructions[i].course.driver.__str__()
+                        ws[f'B{i + 2}'] = instructions[i].driver.__str__()
                         ws[f'C{i + 2}'] = instructions[i].course.car.number_plate
                         ws[f'G{i + 2}'] = dateformat.format(
                             instructions[i].creation_date, formats.get_format('SHORT_DATE_FORMAT'))

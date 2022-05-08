@@ -327,8 +327,8 @@ class Description(models.Model):
 
 class Course(models.Model):
     number = models.IntegerField('№')
-    driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', null=True, on_delete=models.SET_NULL)
+    driver = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор')
     car = models.ForeignKey(
         Car, verbose_name='Автомобил', null=True, on_delete=models.SET_NULL)
     company = models.ForeignKey(
@@ -367,7 +367,8 @@ class Course(models.Model):
         verbose_name_plural = 'Курсове'
 
     def __str__(self):
-        return f'№{self.number} - {self.driver} - {self.contractor} - {self.from_to}'
+        drivers = self.get_drivers()
+        return f'№{self.number} - {drivers} - {self.contractor} - {self.from_to}'
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -382,6 +383,9 @@ class Course(models.Model):
         return reverse('main:course-information', kwargs={
             'pk': self.id,
         })
+
+    def get_drivers(self):
+        return ', '.join(map(str, self.driver.all()))
 
 
 class Address(models.Model):
@@ -589,8 +593,10 @@ class TechnicalInspectionPerpetrator(models.Model):
 
 class CourseTechnicalInspection(models.Model):
     number = models.IntegerField('№')
-    course = models.OneToOneField(
+    course = models.ForeignKey(
         Course, verbose_name='Курс', related_name='technical_inspection', on_delete=models.CASCADE)
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='course_technical_inspection_driver', null=True, on_delete=models.SET_NULL)
     perpetrator = models.ForeignKey(
         TechnicalInspectionPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
@@ -627,8 +633,10 @@ class MedicalExaminationPerpetrator(models.Model):
 
 class CourseMedicalExamination(models.Model):
     number = models.IntegerField('№')
-    course = models.OneToOneField(
+    course = models.ForeignKey(
         Course, verbose_name='Курс', related_name='medical_examination', on_delete=models.CASCADE)
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='course_medical_examination_driver', null=True, on_delete=models.SET_NULL)
     perpetrator = models.ForeignKey(
         MedicalExaminationPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
