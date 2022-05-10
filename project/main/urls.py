@@ -70,6 +70,8 @@ urlpatterns = [
          views.expense_order_xlsx, name='expense-order-xlsx'),
     path('course-invoices-list/', views.course_invoices_list,
          name='course-invoices-list'),
+    path('add-course-invoice/<int:pk>/', views.add_course_invoice,
+         name='add-course-invoice'),
     path('add-course-invoice/', views.add_course_invoice,
          name='add-course-invoice'),
     path('update-course-invoice/<int:pk>/',

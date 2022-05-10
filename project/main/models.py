@@ -520,7 +520,7 @@ class CourseInvoice(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
-    course = models.ForeignKey(
+    course = models.OneToOneField(
         Course, verbose_name='Курс', null=True, on_delete=models.CASCADE)
     payment_type = models.CharField(
         'Вид плащане', max_length=50, choices=PAYMENT_TYPE_CHOICES)

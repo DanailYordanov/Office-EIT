@@ -446,7 +446,10 @@ def add_course(request, pk=None):
                 if form_instance.export:
                     from_date = next((
                         form for form in formset.cleaned_data if form['load_type'] == 'Адрес на товарене'), None
-                    )['date']
+                    )
+
+                    if from_date:
+                        from_date = from_date['date']
 
                     to_date = form.cleaned_data['trip_order_to_date']
 
@@ -487,7 +490,7 @@ def add_course(request, pk=None):
                             perpetrator=technical_inspection_perpetrator
                         )
 
-                return redirect('main:courses-list')
+                return redirect('main:add-course-invoice', pk=form_instance.id)
         else:
             form = forms.CourseModelForm(initial=initial_form)
             formset = forms.CourseAddressAddFormset(initial=initial_formset)
@@ -528,7 +531,10 @@ def update_course(request, pk):
                 if form_instance.export:
                     from_date = next((
                         form for form in formset.cleaned_data if form['load_type'] == 'Адрес на товарене'), None
-                    )['date']
+                    )
+
+                    if from_date:
+                        from_date = from_date['date']
 
                     to_date = form.cleaned_data['trip_order_to_date']
 
@@ -1186,7 +1192,7 @@ def course_invoices_list(request):
 
 
 @login_required
-def add_course_invoice(request):
+def add_course_invoice(request, pk=None):
     if request.user.is_staff:
         if request.method == 'POST':
             form = forms.CourseInvoiceModelForm(request.POST)
@@ -1197,7 +1203,13 @@ def add_course_invoice(request):
 
                 return redirect('main:course-invoices-list')
         else:
-            form = forms.CourseInvoiceModelForm()
+            initial_data = dict()
+
+            if pk:
+                initial_data['course'] = get_object_or_404(
+                    models.Course, pk=pk)
+
+            form = forms.CourseInvoiceModelForm(initial=initial_data)
     else:
         raise PermissionDenied
 
