@@ -934,6 +934,44 @@ class TripOrderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user.is_staff
 
 
+def trip_order_xlsx_populate(ws, trip_order):
+    company = trip_order.course.company
+    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
+    duration_time = 0
+
+    if trip_order.to_date and trip_order.from_date:
+        duration_time = (trip_order.to_date - trip_order.from_date).days + 1
+
+    ws['A1'] = heading
+    ws['E3'] = trip_order.number
+    ws['G3'] = dateformat.format(
+        trip_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+    ws['A8'] = trip_order.driver.__str__()
+    ws['B12'] = trip_order.destination
+
+    if trip_order.from_date:
+        ws['C13'] = dateformat.format(
+            trip_order.from_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+    if trip_order.to_date:
+        ws['E13'] = dateformat.format(
+            trip_order.to_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+    ws['I13'] = duration_time
+    ws['F15'] = trip_order.course.car.number_plate
+    ws['F18'] = f'{company.name}'
+    ws['A29'] = trip_order.driver.__str__()
+    ws['F29'] = trip_order.creator.__str__()
+
+
+def trip_order_expenses_xlsx_populate(ws, trip_order):
+    ws['B1'] = trip_order.number
+    ws['E1'] = trip_order.from_date
+    ws['B2'] = trip_order.course.car.number_plate
+    ws['G2'] = trip_order.driver.__str__()
+    ws['G17'] = trip_order.driver.debit_card_number
+
+
 @login_required
 def trip_order_xlsx(request, pk):
     if request.user.is_staff:
@@ -941,77 +979,29 @@ def trip_order_xlsx(request, pk):
 
         unique_token = secrets.token_hex(32)
 
-        unique_dir_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/{unique_token}')
-
-        os.mkdir(unique_dir_path)
-
-        trip_order_xlsx_path = os.path.join(
+        xlsx_path = os.path.join(
             settings.BASE_DIR, 'main/xlsx_files/trip_order.xlsx')
 
-        unique_trip_order_xlsx_path = os.path.join(
-            unique_dir_path, 'trip_order.xlsx')
+        unique_xlsx_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/trip_order_{unique_token}.xlsx')
 
-        shutil.copy(trip_order_xlsx_path, unique_trip_order_xlsx_path)
+        shutil.copy(xlsx_path, unique_xlsx_path)
 
-        duration_time = (trip_order.to_date - trip_order.from_date).days + 1
-        company = trip_order.course.company
-        heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
+        wb = load_workbook(filename=unique_xlsx_path)
+        ws = wb['trip_order']
 
-        wb = load_workbook(filename=unique_trip_order_xlsx_path)
-        ws = wb.active
+        trip_order_xlsx_populate(ws, trip_order)
 
-        ws['A1'] = heading
-        ws['E3'] = trip_order.number
-        ws['G3'] = dateformat.format(
-            trip_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['A8'] = trip_order.driver.__str__()
-        ws['B12'] = trip_order.destination
-        ws['C13'] = dateformat.format(
-            trip_order.from_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['E13'] = dateformat.format(
-            trip_order.to_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['I13'] = duration_time
-        ws['F15'] = trip_order.course.car.number_plate
-        ws['F18'] = f'{company.name}'
-        ws['A29'] = trip_order.driver.__str__()
-        ws['F29'] = trip_order.creator.__str__()
+        ws = wb['expenses']
 
-        wb.save(unique_trip_order_xlsx_path)
+        trip_order_expenses_xlsx_populate(ws, trip_order)
 
-        course = trip_order.course
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.number}.xlsx"'
 
-        course_expenses_xlsx_path = os.path.join(
-            settings.BASE_DIR, 'main/xlsx_files/course_expenses.xlsx')
+        wb.save(response)
 
-        unique_course_expenses_xlsx_path = os.path.join(
-            unique_dir_path, 'course_expenses.xlsx')
-
-        shutil.copy(course_expenses_xlsx_path,
-                    unique_course_expenses_xlsx_path)
-
-        wb = load_workbook(filename=unique_course_expenses_xlsx_path)
-        ws = wb.active
-
-        ws['B1'] = trip_order.number
-        ws['E1'] = trip_order.from_date
-        ws['B2'] = course.car.number_plate
-        ws['G2'] = trip_order.driver.__str__()
-        ws['G17'] = trip_order.driver.debit_card_number
-
-        wb.save(unique_course_expenses_xlsx_path)
-
-        shutil.make_archive(unique_dir_path, 'zip', unique_dir_path)
-
-        zip_path = os.path.join(
-            settings.BASE_DIR, f'main/xlsx_files/{unique_token}.zip')
-
-        response = HttpResponse(open(zip_path, 'rb'))
-        response['Content-Type'] = 'application/zip'
-        response['Content-Disposition'] = f'attachment; filename="Trip Order {trip_order.number}.zip"'
-
-        os.remove(zip_path)
-        shutil.rmtree(unique_dir_path, ignore_errors=True)
+        os.remove(unique_xlsx_path)
 
         return response
     else:
@@ -1123,6 +1113,34 @@ class ExpenseOrderDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView
         return self.request.user.is_staff
 
 
+def expense_order_xlsx_populate(ws, expense_order):
+    company = expense_order.trip_order.course.company
+    heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
+
+    ws['A1'] = heading
+    ws['E3'] = expense_order.number
+    ws['G3'] = dateformat.format(
+        expense_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+    ws['D5'] = expense_order.trip_order.driver.__str__()
+    ws['B7'] = expense_order.BGN_amount
+    ws['E7'] = expense_order.EUR_amount
+    ws['F10'] = expense_order.trip_order.number
+
+    if expense_order.trip_order.from_date:
+        ws['H10'] = dateformat.format(
+            expense_order.trip_order.from_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+    ws['G12'] = expense_order.trip_order.driver.debit_card_number
+
+    if expense_order.trip_order.driver.bank:
+        ws['E13'] = expense_order.trip_order.driver.bank.iban
+
+    ws['B15'] = dateformat.format(
+        expense_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+    ws['A19'] = expense_order.trip_order.driver.__str__()
+    ws['F19'] = expense_order.creator.__str__()
+
+
 @login_required
 def expense_order_xlsx(request, pk):
     if request.user.is_staff:
@@ -1138,31 +1156,10 @@ def expense_order_xlsx(request, pk):
 
         shutil.copy(xlsx_path, unique_xlsx_path)
 
-        company = expense_order.trip_order.course.company
-        heading = f'{company.name}, {company.city}, ЕИК {company.bulstat}'
-
         wb = load_workbook(filename=unique_xlsx_path)
         ws = wb.active
 
-        ws['A1'] = heading
-        ws['E3'] = expense_order.number
-        ws['G3'] = dateformat.format(
-            expense_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['D5'] = expense_order.trip_order.driver.__str__()
-        ws['B7'] = expense_order.BGN_amount
-        ws['E7'] = expense_order.EUR_amount
-        ws['F10'] = expense_order.trip_order.number
-        ws['H10'] = dateformat.format(
-            expense_order.trip_order.from_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['G12'] = expense_order.trip_order.driver.debit_card_number
-
-        if expense_order.trip_order.driver.bank:
-            ws['E13'] = expense_order.trip_order.driver.bank.iban
-
-        ws['B15'] = dateformat.format(
-            expense_order.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-        ws['A19'] = expense_order.trip_order.driver.__str__()
-        ws['F19'] = expense_order.creator.__str__()
+        expense_order_xlsx_populate(ws, expense_order)
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = f'attachment; filename="Expense Order {expense_order.number}.xlsx"'
@@ -1254,6 +1251,117 @@ class CourseInvoiceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVie
         return self.request.user.is_staff
 
 
+def course_invoice_xlsx_populate(ws, course_invoice):
+    course = course_invoice.course
+    bank = course.bank
+    company = course.company
+    contractor = course.contractor
+    prices = course_invoice.get_prices()
+
+    ws['V5'] = str(course_invoice.number).zfill(10)
+    ws['V6'] = dateformat.format(
+        course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+    ws['G9'] = contractor.name
+    ws['G11'] = contractor.bulstat
+
+    if contractor.bulstat:
+        if contractor.client_type == 'Български':
+            ws['G12'] = contractor.bulstat[2:]
+        else:
+            ws['G12'] = contractor.bulstat
+
+    ws['G13'] = contractor.city
+    ws['G14'] = contractor.address
+    ws['G16'] = contractor.mol
+    ws['G17'] = contractor.phone_number
+
+    ws['R9'] = company.name
+
+    if company.bulstat:
+        ws['R11'] = company.bulstat
+        ws['R12'] = company.bulstat[2:]
+
+    ws['R13'] = company.city
+    ws['R14'] = company.address
+    ws['R16'] = company.mol
+    ws['R17'] = company.phone_number
+
+    ws['T21'] = prices['price']
+
+    if course_invoice.tax_type == 'Стандартна фактура':
+        ws['X24'] = prices['price']
+        ws['X25'] = prices['vat_price']
+
+    ws['X26'] = prices['calculated_price']
+
+    ws['G24'] = prices['price_in_words']
+
+    from_to = f'Транспорт от {course.from_to.__str__()} с камион'
+
+    ws['H27'] = course_invoice.additional_information
+
+    ws['C21'] = from_to
+    ws['I22'] = course.car.number_plate
+    ws['H23'] = course.request_number.__str__()
+
+    ws['J28'] = course_invoice.creation_date
+    ws['J29'] = course_invoice.tax_transaction_basis.__str__()
+
+    ws['R28'] = course_invoice.payment_type
+    ws['R29'] = bank.iban
+    ws['R31'] = bank.name
+    ws['R33'] = bank.bank_code
+
+    ws['I35'] = course.contact_person.__str__()
+    ws['S35'] = course_invoice.creator.__str__()
+
+
+def course_invoice_translated_xlsx_populate(ws, course_invoice):
+    course = course_invoice.course
+    bank = course.bank
+    company = course.company
+    contractor = course.contractor
+    prices = course_invoice.get_prices()
+
+    translator = GoogleTranslator(source='bg', target='en')
+
+    ws['B2'] = translator.translate(company.name)
+    ws['Q2'] = str(course_invoice.number).zfill(10)
+    ws['C3'] = company.bulstat
+
+    if company.address:
+        ws['B4'] = translator.translate(company.address)
+
+    if company.city:
+        ws['B5'] = translator.translate(company.city)
+
+    ws['C17'] = contractor.name
+    ws['C18'] = contractor.address
+    ws['C19'] = contractor.bulstat
+
+    ws['O17'] = dateformat.format(
+        course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+    ws['O18'] = course.car.number_plate
+
+    ws['D41'] = translator.translate(course.from_to.__str__())
+    ws['E42'] = course.car.number_plate
+    ws['N40'] = prices['price']
+
+    if course_invoice.tax_type == 'Стандартна фактура':
+        ws['P52'] = prices['vat_price']
+
+    ws['P53'] = prices['calculated_price']
+
+    ws['D73'] = dateformat.format(
+        course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+    ws['C82'] = translator.translate(course_invoice.payment_type)
+    ws['B83'] = translator.translate(bank.name)
+    ws['C84'] = bank.iban
+    ws['C85'] = bank.bank_code
+
+
 @login_required
 def course_invoice_xlsx(request, pk):
     if request.user.is_staff:
@@ -1269,134 +1377,18 @@ def course_invoice_xlsx(request, pk):
 
         shutil.copy(xlsx_path, unique_xlsx_path)
 
-        course = course_invoice.course
-        contractor = course.contractor
-        bank = course.bank
-        company = course.company
-
-        currency = course.course_price_currency
-        price = round(course.course_price, 2)
-        vat_price = round(course.course_price * 0.2, 2)
-
-        if course_invoice.tax_type == 'Стандартна фактура':
-            calculated_price = price + vat_price
-        else:
-            calculated_price = price
-
-        whole_part = int(calculated_price)
-        fractional_part = int(((calculated_price - whole_part) * 100))
-        price_in_words = NumberToWords()
-
-        price = f'{price} {currency}'
-        vat_price = f'{vat_price} {currency}'
-        calculated_price = f'{calculated_price} {currency}'
-
         wb = load_workbook(filename=unique_xlsx_path)
         ws = wb['original']
 
-        ws['V5'] = str(course_invoice.number).zfill(10)
-        ws['V6'] = dateformat.format(
-            course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+        course_invoice_xlsx_populate(ws, course_invoice)
 
-        ws['G9'] = contractor.name
-        ws['G11'] = contractor.bulstat
-
-        if contractor.bulstat:
-            if contractor.client_type == 'Български':
-                ws['G12'] = contractor.bulstat[2:]
-            else:
-                ws['G12'] = contractor.bulstat
-
-        ws['G13'] = contractor.city
-        ws['G14'] = contractor.address
-        ws['G16'] = contractor.mol
-        ws['G17'] = contractor.phone_number
-
-        ws['R9'] = company.name
-
-        if company.bulstat:
-            ws['R11'] = company.bulstat
-            ws['R12'] = company.bulstat[2:]
-
-        ws['R13'] = company.city
-        ws['R14'] = company.address
-        ws['R16'] = company.mol
-        ws['R17'] = company.phone_number
-
-        ws['T21'] = price
-
-        if course_invoice.tax_type == 'Стандартна фактура':
-            ws['X24'] = price
-            ws['X25'] = vat_price
-
-        ws['X26'] = calculated_price
-
-        if fractional_part != 0:
-            ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
-        else:
-            ws['G24'] = f'{price_in_words.cyrillic(whole_part)} лева'
-
-        from_to = f'Транспорт от {course.from_to.__str__()} с камион'
-
-        ws['H27'] = course_invoice.additional_information
-
-        ws['C21'] = from_to
-        ws['I22'] = course.car.number_plate
-        ws['H23'] = course.request_number.__str__()
-
-        ws['J28'] = course_invoice.creation_date
-        ws['J29'] = course_invoice.tax_transaction_basis.__str__()
-
-        ws['R28'] = course_invoice.payment_type
-        ws['R29'] = bank.iban
-        ws['R31'] = bank.name
-        ws['R33'] = bank.bank_code
-
-        ws['I35'] = course.contact_person.__str__()
-        ws['S35'] = course_invoice.creator.__str__()
-
-        if course.export:
+        if course_invoice.course.export:
             ws = wb['translated']
 
-            translator = GoogleTranslator(source='bg', target='en')
-
-            ws['B2'] = translator.translate(company.name)
-            ws['Q2'] = str(course_invoice.number).zfill(10)
-            ws['C3'] = company.bulstat
-
-            if company.address:
-                ws['B4'] = translator.translate(company.address)
-
-            if company.city:
-                ws['B5'] = translator.translate(company.city)
-
-            ws['C17'] = contractor.name
-            ws['C18'] = contractor.address
-            ws['C19'] = contractor.bulstat
-
-            ws['O17'] = dateformat.format(
-                course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-            ws['O18'] = course.car.number_plate
-
-            ws['D41'] = translator.translate(course.from_to.__str__())
-            ws['E42'] = course.car.number_plate
-            ws['N40'] = price
-
-            if course_invoice.tax_type == 'Стандартна фактура':
-                ws['P52'] = vat_price
-
-            ws['P53'] = calculated_price
-
-            ws['D73'] = dateformat.format(
-                course_invoice.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
-
-            ws['C82'] = translator.translate(course_invoice.payment_type)
-            ws['B83'] = translator.translate(bank.name)
-            ws['C84'] = bank.iban
-            ws['C85'] = bank.bank_code
+            course_invoice_translated_xlsx_populate(ws, course_invoice)
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course.number}.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="Course Invoice {course_invoice.course.number}.xlsx"'
 
         wb.save(response)
 
@@ -1619,6 +1611,22 @@ class InstructionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         return self.request.user.is_staff
 
 
+def instruction_xlsx_populate(ws, instruction):
+    company = instruction.course.company
+
+    ws['A2'] = company.name
+    ws['A3'] = f'{company.city}, {company.address}'
+    ws['A4'] = company.bulstat
+    ws['E7'] = instruction.number
+    ws['B9'] = instruction.driver.__str__()
+    ws['G9'] = instruction.driver.personal_id
+    ws['B11'] = instruction.course.car.number_plate
+    ws['G18'] = instruction.driver.__str__()
+    ws['G21'] = instruction.creator.__str__()
+    ws['B20'] = dateformat.format(
+        instruction.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+
 @login_required
 def instruction_xlsx(request, pk):
     if request.user.is_staff:
@@ -1634,22 +1642,10 @@ def instruction_xlsx(request, pk):
 
         shutil.copy(xlsx_path, unique_xlsx_path)
 
-        company = instruction.course.company
-
         wb = load_workbook(filename=unique_xlsx_path)
         ws = wb.active
 
-        ws['A2'] = company.name
-        ws['A3'] = f'{company.city}, {company.address}'
-        ws['A4'] = company.bulstat
-        ws['E7'] = instruction.number
-        ws['B9'] = instruction.driver.__str__()
-        ws['G9'] = instruction.driver.personal_id
-        ws['B11'] = instruction.course.car.number_plate
-        ws['G18'] = instruction.driver.__str__()
-        ws['G21'] = instruction.creator.__str__()
-        ws['B20'] = dateformat.format(
-            instruction.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+        instruction_xlsx_populate(ws, instruction)
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = f'attachment; filename="Instruction {instruction.number}.xlsx"'
@@ -1663,22 +1659,9 @@ def instruction_xlsx(request, pk):
         raise PermissionDenied
 
 
-def receipt_letter_xlsx(course):
+def receipt_letter_xlsx_populate(ws, course):
     company = course.company
     contractor = course.contractor
-
-    unique_token = secrets.token_hex(32)
-
-    xlsx_path = os.path.join(
-        settings.BASE_DIR, 'main/xlsx_files/receipt_letter.xlsx')
-
-    unique_xlsx_path = os.path.join(
-        settings.BASE_DIR, f'main/xlsx_files/receipt_letter_{unique_token}.xlsx')
-
-    shutil.copy(xlsx_path, unique_xlsx_path)
-
-    wb = load_workbook(filename=unique_xlsx_path)
-    ws = wb.active
 
     ws['C8'] = contractor.name
     ws['E10'] = contractor.correspondence_address
@@ -1714,6 +1697,23 @@ def receipt_letter_xlsx(course):
     ws['Z48'] = f'{contractor.postal_code} {contractor.city}'
     ws['AD49'] = contractor.phone_number
 
+
+def receipt_letter_xlsx(course):
+    unique_token = secrets.token_hex(32)
+
+    xlsx_path = os.path.join(
+        settings.BASE_DIR, 'main/xlsx_files/receipt_letter.xlsx')
+
+    unique_xlsx_path = os.path.join(
+        settings.BASE_DIR, f'main/xlsx_files/receipt_letter_{unique_token}.xlsx')
+
+    shutil.copy(xlsx_path, unique_xlsx_path)
+
+    wb = load_workbook(filename=unique_xlsx_path)
+    ws = wb.active
+
+    receipt_letter_xlsx_populate(ws, course)
+
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = f'attachment; filename="Receipt Letter.xlsx"'
 
@@ -1724,8 +1724,37 @@ def receipt_letter_xlsx(course):
     return response
 
 
-def official_notices_xlsx(course):
+def technical_inspection_xlsx_populate(ws, technical_inspection):
+    course = technical_inspection.course
     company = course.company
+
+    ws['A1'] = company.name
+    ws['A2'] = f'{company.city}, {company.address}'
+    ws['A3'] = company.bulstat
+    ws['E9'] = technical_inspection.number
+    ws['B12'] = course.car.number_plate
+    ws['B13'] = technical_inspection.driver.__str__()
+    ws['C15'] = technical_inspection.perpetrator.perpetrator
+    ws['B18'] = dateformat.format(
+        course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+
+def medical_examination_xlsx_populate(ws, medical_examination):
+    course = medical_examination.course
+    company = course.company
+
+    ws['A1'] = company.name
+    ws['A2'] = f'{company.city}, {company.address}'
+    ws['A3'] = company.bulstat
+    ws['E9'] = medical_examination.number
+    ws['A12'] = medical_examination.driver.__str__()
+    ws['B13'] = course.car.number_plate
+    ws['C17'] = medical_examination.perpetrator.perpetrator
+    ws['B20'] = dateformat.format(
+        course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+
+
+def official_notices_xlsx(course):
     medical_examinations = course.medical_examination.all()
     technical_inspections = course.technical_inspection.all()
 
@@ -1745,15 +1774,7 @@ def official_notices_xlsx(course):
     worksheets = 1
 
     for technical_inspection in technical_inspections:
-        ws['A1'] = company.name
-        ws['A2'] = f'{company.city}, {company.address}'
-        ws['A3'] = company.bulstat
-        ws['E9'] = technical_inspection.number
-        ws['B12'] = course.car.number_plate
-        ws['B13'] = technical_inspection.driver.__str__()
-        ws['C15'] = technical_inspection.perpetrator.perpetrator
-        ws['B18'] = dateformat.format(
-            course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+        technical_inspection_xlsx_populate(ws, technical_inspection)
 
         if len(technical_inspections) > worksheets:
             ws = wb.copy_worksheet(ws)
@@ -1764,15 +1785,7 @@ def official_notices_xlsx(course):
     worksheets = 1
 
     for medical_examination in medical_examinations:
-        ws['A1'] = company.name
-        ws['A2'] = f'{company.city}, {company.address}'
-        ws['A3'] = company.bulstat
-        ws['E9'] = medical_examination.number
-        ws['A12'] = medical_examination.driver.__str__()
-        ws['B13'] = course.car.number_plate
-        ws['C17'] = medical_examination.perpetrator.perpetrator
-        ws['B20'] = dateformat.format(
-            course.creation_date, formats.get_format('SHORT_DATE_FORMAT'))
+        medical_examination_xlsx_populate(ws, medical_examination)
 
         if len(medical_examinations) > worksheets:
             ws = wb.copy_worksheet(ws)

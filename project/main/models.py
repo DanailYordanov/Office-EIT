@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import reverse
 from django.core.validators import RegexValidator
+from num2cyrillic import NumberToWords
 
 
 CLIENT_TYPE_CHOICES = [
@@ -541,6 +542,39 @@ class CourseInvoice(models.Model):
 
     def __str__(self):
         return f'Фактура за курс № - {self.number}'
+
+    def get_prices(self):
+        price = round(self.course.course_price, 2)
+
+        if self.tax_type == 'Стандартна фактура':
+            vat_price = round(self.course.course_price * 0.2, 2)
+        else:
+            vat_price = 0
+
+        calculated_price = price + vat_price
+        whole_part = int(calculated_price)
+        fractional_part = int(((calculated_price - whole_part) * 100))
+        price_in_words = NumberToWords()
+
+        if fractional_part != 0:
+            price_in_words = f'{price_in_words.cyrillic(whole_part)} лева и {price_in_words.cyrillic(fractional_part)} стотинки'
+        else:
+            price_in_words = f'{price_in_words.cyrillic(whole_part)} лева'
+
+        currency = self.course.course_price_currency
+
+        price = f'{price} {currency}'
+        vat_price = f'{vat_price} {currency}'
+        calculated_price = f'{calculated_price} {currency}'
+
+        prices = {
+            'price': price,
+            'vat_price': vat_price,
+            'price_in_words': price_in_words,
+            'calculated_price': calculated_price
+        }
+
+        return prices
 
     def save(self, *args, **kwargs):
         if not self.id:
