@@ -75,7 +75,7 @@ class CarType(models.Model):
 
 class Car(models.Model):
     car_type = models.ForeignKey(
-        CarType, verbose_name='Вид автомобил', null=True, on_delete=models.CASCADE)
+        CarType, verbose_name='Вид автомобил', related_name='cars', null=True, on_delete=models.CASCADE)
     brand = models.CharField('Марка', max_length=50)
     number_plate = models.CharField('Регистрационен номер', max_length=50)
     vin = models.CharField(
@@ -104,7 +104,7 @@ class ReminderType(models.Model):
 
 class Reminder(models.Model):
     reminder_type = models.ForeignKey(
-        ReminderType, verbose_name='Вид напомняне', null=True, on_delete=models.CASCADE)
+        ReminderType, verbose_name='Вид напомняне', related_name='reminders', null=True, on_delete=models.CASCADE)
     car = models.ForeignKey(
         Car, verbose_name='Автомобил', on_delete=models.CASCADE)
     expiration_date = models.DateField('Дата на изтичнане')
@@ -139,9 +139,9 @@ class ServiceType(models.Model):
 
 class Service(models.Model):
     car = models.ForeignKey(
-        Car, verbose_name='Автомобил', on_delete=models.CASCADE)
+        Car, verbose_name='Автомобил', related_name='services', on_delete=models.CASCADE)
     service_type = models.ForeignKey(
-        ServiceType, verbose_name='Вид обслужване', null=True, on_delete=models.CASCADE)
+        ServiceType, verbose_name='Вид обслужване', related_name='services', null=True, on_delete=models.CASCADE)
     run = models.CharField('Пробег', max_length=20)
     date = models.DateField('Дата')
     additional_information = models.CharField(
@@ -329,14 +329,14 @@ class Description(models.Model):
 class Course(models.Model):
     number = models.IntegerField('№')
     driver = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор')
+        settings.AUTH_USER_MODEL, related_name='courses', verbose_name='Шофьор')
     car = models.ForeignKey(
-        Car, verbose_name='Автомобил', null=True, on_delete=models.SET_NULL)
+        Car, verbose_name='Автомобил', related_name='courses', null=True, on_delete=models.SET_NULL)
     company = models.ForeignKey(
-        Company, verbose_name='Фирма', null=True, on_delete=models.SET_NULL)
+        Company, verbose_name='Фирма', related_name='courses', null=True, on_delete=models.SET_NULL)
     contractor = models.ForeignKey(
         Contractor, verbose_name='Контрагент', null=True, on_delete=models.SET_NULL)
-    bank = models.ForeignKey(Bank, verbose_name='Банка',
+    bank = models.ForeignKey(Bank, verbose_name='Банка', related_name='courses',
                              null=True, on_delete=models.SET_NULL)
     request_number = models.ForeignKey(
         RequestNumber, verbose_name='Номер на заявка', null=True, blank=True, on_delete=models.SET_NULL)
@@ -439,9 +439,9 @@ class ExpenseType(models.Model):
 
 class Expense(models.Model):
     course = models.ForeignKey(
-        Course, verbose_name='Курс', on_delete=models.CASCADE)
+        Course, verbose_name='Курс', related_name='expenses', on_delete=models.CASCADE)
     expense_type = models.ForeignKey(
-        ExpenseType, verbose_name='Вид разход', on_delete=models.CASCADE)
+        ExpenseType, verbose_name='Вид разход', related_name='expenses', on_delete=models.CASCADE)
     price = models.FloatField('Цена')
     currency = models.CharField(
         'Валута', choices=CURRENCY_CHOICES, max_length=5)
@@ -461,11 +461,11 @@ class Expense(models.Model):
 class TripOrder(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='trip_order_creator', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='trip_orders_creator', null=True, on_delete=models.SET_NULL)
     driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='trip_order_driver', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='trip_orders_driver', null=True, on_delete=models.SET_NULL)
     course = models.ForeignKey(
-        Course, verbose_name='Курс за износ', related_name='trip_order_course', on_delete=models.CASCADE)
+        Course, verbose_name='Курс за износ', related_name='trip_orders', on_delete=models.CASCADE)
     destination = models.CharField('Дестинация', max_length=100)
     from_date = models.DateField('Начална дата', null=True, blank=True)
     to_date = models.DateField('Крайна дата', null=True, blank=True)
@@ -492,9 +492,9 @@ class TripOrder(models.Model):
 class ExpenseOrder(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='expense_orders', null=True, on_delete=models.SET_NULL)
     trip_order = models.ForeignKey(
-        TripOrder, verbose_name='Командировъчна заповед', related_name='expense_order', null=True, on_delete=models.CASCADE)
+        TripOrder, verbose_name='Командировъчна заповед', related_name='expense_orders', null=True, on_delete=models.CASCADE)
     BGN_amount = models.FloatField('Сума в лева', null=True, blank=True)
     EUR_amount = models.FloatField('Сума в евро', null=True, blank=True)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
@@ -520,9 +520,9 @@ class ExpenseOrder(models.Model):
 class CourseInvoice(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Създател', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='invoices', null=True, on_delete=models.SET_NULL)
     course = models.OneToOneField(
-        Course, verbose_name='Курс', null=True, on_delete=models.CASCADE)
+        Course, verbose_name='Курс', related_name='invoice', null=True, on_delete=models.CASCADE)
     payment_type = models.CharField(
         'Вид плащане', max_length=50, choices=PAYMENT_TYPE_CHOICES)
     invoice_type = models.CharField(
@@ -589,11 +589,11 @@ class CourseInvoice(models.Model):
 class Instruction(models.Model):
     number = models.IntegerField('№')
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='instruction_creator', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Създател', related_name='instructions_creator', null=True, on_delete=models.SET_NULL)
     driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='instruction_driver', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='instructions_driver', null=True, on_delete=models.SET_NULL)
     course = models.ForeignKey(Course, verbose_name='Курс',
-                               related_name='instruction_course', on_delete=models.CASCADE)
+                               related_name='instructions', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
 
     class Meta:
@@ -628,9 +628,9 @@ class TechnicalInspectionPerpetrator(models.Model):
 class CourseTechnicalInspection(models.Model):
     number = models.IntegerField('№')
     course = models.ForeignKey(
-        Course, verbose_name='Курс', related_name='technical_inspection', on_delete=models.CASCADE)
+        Course, verbose_name='Курс', related_name='technical_inspections', on_delete=models.CASCADE)
     driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='course_technical_inspection_driver', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='technical_inspections', null=True, on_delete=models.SET_NULL)
     perpetrator = models.ForeignKey(
         TechnicalInspectionPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
@@ -668,9 +668,9 @@ class MedicalExaminationPerpetrator(models.Model):
 class CourseMedicalExamination(models.Model):
     number = models.IntegerField('№')
     course = models.ForeignKey(
-        Course, verbose_name='Курс', related_name='medical_examination', on_delete=models.CASCADE)
+        Course, verbose_name='Курс', related_name='medical_examinations', on_delete=models.CASCADE)
     driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='course_medical_examination_driver', null=True, on_delete=models.SET_NULL)
+        settings.AUTH_USER_MODEL, verbose_name='Шофьор', related_name='medical_examinations', null=True, on_delete=models.SET_NULL)
     perpetrator = models.ForeignKey(
         MedicalExaminationPerpetrator, verbose_name='Извършител', on_delete=models.CASCADE)
     creation_date = models.DateField('Дата на създаване', auto_now_add=True)
