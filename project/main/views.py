@@ -402,8 +402,8 @@ def add_course(request, pk=None):
             initial_form['contact_person'] = initial_course.contact_person
             initial_form['other_conditions'] = initial_course.other_conditions
 
-            medical_examination = initial_course.medical_examination.all().first()
-            technical_inspection = initial_course.technical_inspection.all().first()
+            medical_examination = initial_course.medical_examinations.all().first()
+            technical_inspection = initial_course.technical_inspections.all().first()
 
             if medical_examination:
                 initial_form['medical_examination_perpetrator'] = medical_examination.perpetrator
@@ -546,10 +546,10 @@ def update_course(request, pk):
                     technical_inspection_perpetrator = form.cleaned_data[
                         'technical_inspection_perpetrator']
 
-                    trip_orders = form_instance.trip_order_course.all()
+                    trip_orders = form_instance.trip_orders.all()
                     instructions = form_instance.instruction_course.all()
-                    course_medical_examinations = form_instance.medical_examination.all()
-                    course_technical_inspections = form_instance.technical_inspection.all()
+                    course_medical_examinations = form_instance.medical_examinations.all()
+                    course_technical_inspections = form_instance.technical_inspections.all()
 
                     if not instructions:
                         for driver in form.cleaned_data['driver']:
@@ -618,7 +618,7 @@ def update_course(request, pk):
                                         break
 
                         if 'driver' in form.changed_data:
-                            while len(form.cleaned_data['driver']) > len(form_instance.trip_order_course.all()):
+                            while len(form.cleaned_data['driver']) > len(form_instance.trip_orders.all()):
                                 trip_order = trip_orders.first()
 
                                 if trip_order:
@@ -632,24 +632,24 @@ def update_course(request, pk):
                                     instruction.pk = None
                                     instruction.save()
 
-                            while len(form.cleaned_data['driver']) > len(form_instance.medical_examination.all()):
+                            while len(form.cleaned_data['driver']) > len(form_instance.medical_examinations.all()):
                                 medical_examination = course_medical_examinations.first()
 
                                 if medical_examination:
                                     medical_examination.pk = None
                                     medical_examination.save()
 
-                            while len(form.cleaned_data['driver']) > len(form_instance.technical_inspection.all()):
+                            while len(form.cleaned_data['driver']) > len(form_instance.technical_inspections.all()):
                                 technical_inspection = course_technical_inspections.first()
 
                                 if technical_inspection:
                                     technical_inspection.pk = None
                                     technical_inspection.save()
 
-                            trip_orders = form_instance.trip_order_course.all()
+                            trip_orders = form_instance.trip_orders.all()
                             instructions = form_instance.instruction_course.all()
-                            course_medical_examinations = form_instance.medical_examination.all()
-                            course_technical_inspections = form_instance.technical_inspection.all()
+                            course_medical_examinations = form_instance.medical_examinations.all()
+                            course_technical_inspections = form_instance.technical_inspections.all()
 
                             for i in range(0, len(form.cleaned_data['driver'])):
                                 trip_order = trip_orders[i]
@@ -1493,8 +1493,8 @@ def receipt_letter_xlsx(course):
 
 
 def official_notices_xlsx(course):
-    medical_examinations = course.medical_examination.all()
-    technical_inspections = course.technical_inspection.all()
+    medical_examinations = course.medical_examinations.all()
+    technical_inspections = course.technical_inspections.all()
 
     unique_token = secrets.token_hex(32)
 
