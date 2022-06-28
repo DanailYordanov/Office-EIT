@@ -547,7 +547,7 @@ def update_course(request, pk):
                         'technical_inspection_perpetrator']
 
                     trip_orders = form_instance.trip_orders.all()
-                    instructions = form_instance.instruction_course.all()
+                    instructions = form_instance.instructions.all()
                     course_medical_examinations = form_instance.medical_examinations.all()
                     course_technical_inspections = form_instance.technical_inspections.all()
 
@@ -625,7 +625,7 @@ def update_course(request, pk):
                                     trip_order.pk = None
                                     trip_order.save()
 
-                            while len(form.cleaned_data['driver']) > len(form_instance.instruction_course.all()):
+                            while len(form.cleaned_data['driver']) > len(form_instance.instructions.all()):
                                 instruction = instructions.first()
 
                                 if instruction:
@@ -647,7 +647,7 @@ def update_course(request, pk):
                                     technical_inspection.save()
 
                             trip_orders = form_instance.trip_orders.all()
-                            instructions = form_instance.instruction_course.all()
+                            instructions = form_instance.instructions.all()
                             course_medical_examinations = form_instance.medical_examinations.all()
                             course_technical_inspections = form_instance.technical_inspections.all()
 

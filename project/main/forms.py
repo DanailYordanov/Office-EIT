@@ -447,18 +447,24 @@ class CourseModelForm(forms.ModelForm):
 
         if self.instance.pk:
             if self.instance.export:
-                trip_order = self.instance.trip_order_course.all().first()
-                medical_examination = self.instance.medical_examination.all().first()
-                technical_inspection = self.instance.technical_inspection.all().first()
 
-                if medical_examination:
-                    self.fields['medical_examination_perpetrator'].initial = medical_examination.perpetrator.perpetrator
+                if hasattr(self.instance, 'trip_orders'):
+                    trip_order = self.instance.trip_orders.all().first()
 
-                if technical_inspection:
-                    self.fields['technical_inspection_perpetrator'].initial = technical_inspection.perpetrator.perpetrator
+                    if trip_order:
+                        self.fields['trip_order_to_date'].initial = trip_order.to_date
 
-                if trip_order:
-                    self.fields['trip_order_to_date'].initial = trip_order.to_date
+                if hasattr(self.instance, 'medical_examinations'):
+                    medical_examination = self.instance.medical_examinations.all().first()
+
+                    if medical_examination:
+                        self.fields['medical_examination_perpetrator'].initial = medical_examination.perpetrator.perpetrator
+
+                if hasattr(self.instance, 'technical_inspections'):
+                    technical_inspection = self.instance.technical_inspections.all().first()
+
+                    if technical_inspection:
+                        self.fields['technical_inspection_perpetrator'].initial = technical_inspection.perpetrator.perpetrator
 
             if hasattr(self.instance.request_number, 'request_number'):
                 self.initial['request_number'] = self.instance.request_number.request_number
@@ -802,7 +808,7 @@ class CourseDocumentsForm(forms.Form):
         course = form_data.get('course')
         document_type = form_data.get('document_type')
 
-        if document_type == 'Служебни бележки' and not course.export:
+        if document_type == 'official_notices' and not course.export:
             raise forms.ValidationError('Избраният курс е за внос!')
 
         return form_data
