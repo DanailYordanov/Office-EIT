@@ -1721,3 +1721,144 @@ class TagAutoResponseView(AutoResponseView):
             ],
             'more': context['page_obj'].has_next()
         })
+
+
+def all_course_documents_xlsx(request, pk):
+    if request.user.is_staff:
+        course = get_object_or_404(models.Course, id=pk)
+
+        if hasattr(course, 'invoice'):
+            course_invoice = course.invoice
+
+        if hasattr(course, 'trip_orders'):
+            trip_orders = course.trip_orders.all()
+
+        if hasattr(course, 'instructions'):
+            instructions = course.instructions.all()
+
+        if hasattr(course, 'medical_examinations'):
+            medical_examinations = course.medical_examinations.all()
+
+        if hasattr(course, 'technical_inspections'):
+            technical_inspections = course.technical_inspections.all()
+
+        unique_token = secrets.token_hex(32)
+
+        xlsx_path = os.path.join(
+            settings.BASE_DIR, 'main/xlsx_files/all_course_documents.xlsx')
+
+        unique_xlsx_path = os.path.join(
+            settings.BASE_DIR, f'main/xlsx_files/all_course_documents_{unique_token}.xlsx')
+
+        shutil.copy(xlsx_path, unique_xlsx_path)
+
+        wb = load_workbook(filename=unique_xlsx_path)
+
+        if course_invoice:
+            ws = wb['original']
+
+            xlsx_populate.course_invoice_xlsx_populate(ws, course_invoice)
+
+            if course_invoice.course.export:
+                ws = wb['translated']
+
+                xlsx_populate.course_invoice_translated_xlsx_populate(
+                    ws, course_invoice)
+
+        if trip_orders:
+            ws = wb['trip_order']
+
+            worksheets = 1
+
+            for trip_order in trip_orders:
+                xlsx_populate.trip_order_xlsx_populate(ws, trip_order)
+
+                if len(trip_orders) > worksheets:
+                    ws = wb.copy_worksheet(ws)
+                    worksheets += 1
+
+            ws = wb['expenses']
+
+            xlsx_populate.trip_order_expenses_xlsx_populate(ws, trip_orders[0])
+
+            worksheets = 1
+            expense_orders_sum = 0
+            blank_file_populated = False
+
+            ws = wb['expense_order']
+
+            for trip_order in trip_orders:
+                if hasattr(trip_order, 'expense_orders'):
+                    expense_orders = trip_order.expense_orders.all()
+                    expense_orders_sum += len(expense_orders)
+
+                    for expense_order in expense_orders:
+                        if not blank_file_populated:
+                            xlsx_populate.expense_order_xlsx_populate(
+                                ws, expense_order)
+
+                            if expense_orders_sum > worksheets:
+                                ws = wb.copy_worksheet(ws)
+                                worksheets += 1
+
+                            blank_file_populated = True
+                        else:
+                            if expense_orders_sum > worksheets:
+                                ws = wb.copy_worksheet(ws)
+                                worksheets += 1
+
+                            xlsx_populate.expense_order_xlsx_populate(
+                                ws, expense_order)
+
+        if instructions:
+            ws = wb['instruction']
+
+            worksheets = 1
+
+            for instruction in instructions:
+                xlsx_populate.instruction_xlsx_populate(ws, instruction)
+
+                if len(instructions) > worksheets:
+                    ws = wb.copy_worksheet(ws)
+                    worksheets += 1
+
+        if medical_examinations:
+            ws = wb['medical_examination']
+
+            worksheets = 1
+
+            for medical_examination in medical_examinations:
+                xlsx_populate.medical_examination_xlsx_populate(
+                    ws, medical_examination)
+
+                if len(medical_examinations) > worksheets:
+                    ws = wb.copy_worksheet(ws)
+                    worksheets += 1
+
+        if technical_inspections:
+            ws = wb['technical_inspection']
+
+            worksheets = 1
+
+            for technical_inspection in technical_inspections:
+                xlsx_populate.technical_inspection_xlsx_populate(
+                    ws, technical_inspection)
+
+                if len(technical_inspections) > worksheets:
+                    ws = wb.copy_worksheet(ws)
+                    worksheets += 1
+
+        ws = wb['receipt_letter']
+        xlsx_populate.receipt_letter_xlsx_populate(ws, course)
+
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename="All Course Documents.xlsx"'
+
+        wb.save(response)
+
+        os.remove(unique_xlsx_path)
+
+        return response
+
+    else:
+        raise PermissionDenied

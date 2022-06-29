@@ -42,6 +42,8 @@ urlpatterns = [
          views.update_expense, name='update-expense'),
     path('course/<int:course_pk>/delete-expense/<int:pk>/',
          views.ExpenseDeleteView.as_view(), name='delete-expense'),
+    path('download/all-course-documents/<int:pk>/',
+         views.all_course_documents_xlsx, name='all-course-documents-xlsx'),
     path('load/contractor-reminder/', views.load_contractor_reminder,
          name='load-contractor-reminder'),
     path('addresses/', views.addresses_list, name='addresses-list'),
